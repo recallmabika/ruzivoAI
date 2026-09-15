@@ -3,228 +3,953 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruzivo AI — Shona Conversational Testing Interface</title>
+  <title>Ruzivo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0B0F19;
-      --card: #151D2F;
-      --border: #222F49;
-      --accent: #10B981;
-      --accent-glow: rgba(16, 185, 129, 0.2);
-      --text: #F8FAFC;
-      --text-muted: #94A3B8;
-      --bot-bg: #1E293B;
-      --user-bg: #047857;
+      --bg-cream: #FAF9F5;
+      --bg-sidebar: #F3F1EB;
+      --bg-input: #FFFFFF;
+      --border-subtle: #E5E2DA;
+      --text-main: #1F1E1D;
+      --text-muted: #6B6864;
+      --text-subtle: #99948D;
+      --claude-accent: #C2410C;
+      --chat-max-width: 760px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    
-    header {
-      padding: 16px 24px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .logo { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #064E3B; font-size: 20px; }
-    .title h1 { font-size: 18px; font-weight: 700; }
-    .title p { font-size: 12px; color: var(--text-muted); }
-    .badge { font-size: 11px; background: var(--accent-glow); color: var(--accent); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--accent); }
 
-    main { flex: 1; display: flex; overflow: hidden; }
-    
-    /* Left Sidebar: Knowledge & Context */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-cream);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    /* Claude-style Sidebar */
     .sidebar {
-      width: 320px;
-      background: var(--card);
-      border-right: 1px solid var(--border);
+      width: 260px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
-      padding: 16px;
-      gap: 16px;
-      overflow-y: auto;
+      height: 100%;
+      user-select: none;
     }
-    .sidebar h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px; }
-    .quick-prompts { display: flex; flex-direction: column; gap: 8px; }
-    .btn-prompt {
-      background: #0F172A;
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 13px;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-prompt:hover { border-color: var(--accent); background: #1E293B; }
-    .rag-status { background: #0F172A; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; }
-    .rag-status span { color: var(--accent); font-weight: 600; }
 
-    /* Chat Area */
-    .chat-container { flex: 1; display: flex; flex-direction: column; background: var(--bg); }
-    .messages { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-    .msg { max-width: 75%; padding: 14px 18px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
-    .msg.user { align-self: flex-end; background: var(--user-bg); color: #fff; border-bottom-right-radius: 4px; }
-    .msg.bot { align-self: flex-start; background: var(--bot-bg); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-    .msg .retrieved-context { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #34D399; font-style: italic; }
-
-    .input-area {
-      padding: 16px 24px;
-      background: var(--card);
-      border-top: 1px solid var(--border);
+    .sidebar-top {
+      padding: 16px 14px 10px;
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      gap: 6px;
     }
-    input {
-      flex: 1;
-      background: #0F172A;
-      border: 1px solid var(--border);
-      padding: 14px 18px;
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
+
+    .brand-logo-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      padding: 0 4px 6px;
     }
-    input:focus { border-color: var(--accent); }
-    button.btn-send {
-      background: var(--accent);
-      color: #064E3B;
-      font-weight: 700;
-      border: none;
-      padding: 0 24px;
-      border-radius: 10px;
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      font-weight: 500;
+      text-decoration: none;
       cursor: pointer;
-      font-size: 14px;
-      transition: opacity 0.2s;
+      transition: background 0.15s, color 0.15s;
     }
-    button.btn-send:hover { opacity: 0.9; }
+
+    .nav-link:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-main);
+    }
+
+    .nav-link.new-chat {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 14px 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .section-header:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-main);
+    }
+
+    /* All Chats Dashboard Grid View */
+    .all-chats-view {
+      width: 100%;
+      max-width: var(--chat-max-width);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .all-chats-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+    }
+
+    .all-chats-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .all-chats-count {
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    .chats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .chat-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 120px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .chat-card:hover {
+      border-color: #B5B0A4;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    .chat-card-title {
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .chat-card-snippet {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .chat-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid #F3F1EB;
+      font-size: 11.5px;
+      color: var(--text-subtle);
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .history-item:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-main);
+    }
+
+    .history-item.active {
+      background: #EAE7DF;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .history-bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1px solid var(--text-subtle);
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-sidebar);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .user-profile:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .user-avatar-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #E2DDD3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: var(--text-main);
+    }
+
+    /* Main Claude-style Canvas */
+    .main-canvas {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-cream);
+      position: relative;
+    }
+
+    .top-bar {
+      height: 52px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid transparent;
+    }
+
+    .chat-headline {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .messages-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .conversation-thread {
+      width: 100%;
+      max-width: var(--chat-max-width);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .message-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-group.user {
+      align-items: flex-end;
+    }
+
+    .user-pill {
+      background: #EAE7DF;
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: 18px;
+      font-size: 14.5px;
+      line-height: 1.5;
+      max-width: 85%;
+      word-break: break-word;
+    }
+
+    .bot-editorial {
+      width: 100%;
+      color: var(--text-main);
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 18.5px;
+      line-height: 1.65;
+      font-weight: 400;
+      word-break: break-word;
+    }
+
+    .bot-editorial p {
+      margin-bottom: 14px;
+    }
+
+    .bot-editorial p:last-child {
+      margin-bottom: 0;
+    }
+
+    .claude-burst {
+      width: 22px;
+      height: 22px;
+      margin-bottom: 10px;
+      color: var(--claude-accent);
+    }
+
+    .retrieved-source-card {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #F1EEE6;
+      border: 1px solid var(--border-subtle);
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .retrieved-source-card strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Claude Input Dock */
+    .input-container {
+      width: 100%;
+      max-width: var(--chat-max-width);
+      margin: 0 auto;
+      padding: 0 24px 20px;
+    }
+
+    .claude-input-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .claude-input-card:focus-within {
+      border-color: #B5B0A4;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+    }
+
+    .claude-textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text-main);
+      resize: none;
+      background: transparent;
+      min-height: 24px;
+      max-height: 160px;
+    }
+
+    .claude-textarea::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .input-bar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 4px;
+    }
+
+    .input-left-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .tool-btn:hover {
+      background: var(--bg-sidebar);
+      color: var(--text-main);
+    }
+
+    .btn-send-claude {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: #C2410C;
+      color: #FFFFFF;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s;
+    }
+
+    .btn-send-claude:hover {
+      opacity: 0.9;
+    }
+
+    .sub-footer-text {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-subtle);
+      margin-top: 10px;
+    }
+
+    /* Settings Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(31, 30, 29, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      width: 440px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .settings-input {
+      width: 100%;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      outline: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .settings-input:focus {
+      border-color: var(--claude-accent);
+    }
+
+    .btn-modal-save {
+      background: var(--claude-accent);
+      color: #FFF;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand">
-      <div class="logo">R</div>
-      <div class="title">
-        <h1>Ruzivo AI</h1>
-        <p>Text-Based Conversational Shona AI System</p>
-      </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <input type="text" id="colabUrl" placeholder="Colab GPU URL (e.g. https://xxxx.loca.lt)" style="padding: 6px 12px; font-size: 12px; width: 280px; border-radius: 6px;" />
-      <div class="badge" id="statusBadge">● Ready</div>
-    </div>
-  </header>
+  <!-- Ruzivo Pure ChiShona Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="brand-logo-title">Ruzivo</div>
 
-  <main>
-    <div class="sidebar">
-      <div>
-        <h3>RAG Grounding Status</h3>
-        <div class="rag-status">
-          <p>Database: <span>14,201 Educational Chunks</span></p>
-          <p>Active Knowledge: <span>Mipanda, Nyaudzosingwi, Tsumo</span></p>
-          <p>Anti-Hallucination: <span>Enabled (Handizivi Refusal)</span></p>
-        </div>
-      </div>
-
-      <div>
-        <h3>Sample Prompts to Test</h3>
-        <div class="quick-prompts">
-          <button class="btn-prompt" onclick="setPrompt('Tsanangura tsumo iyi: Akuruma nzeve ndewako')">📜 Tsumo: Akuruma nzeve ndewako</button>
-          <button class="btn-prompt" onclick="setPrompt('Chii chinonzi nyaudzosingwi banga?')">⚡ Nyaudzosingwi: banga</button>
-          <button class="btn-prompt" onclick="setPrompt('MuChiShona mune mipanda yemazita mangani?')">📚 Mipanda: Inosvika mangani?</button>
-          <button class="btn-prompt" onclick="setPrompt('Ndipe mutemo wemupanda 99 muChiShona.')">🛡️ Hallucination Test: Mupanda 99</button>
-          <button class="btn-prompt" onclick="setPrompt('Ndiani akatanga kufamba pamwedzi muHarare muna 1800?')">🛡️ Hallucination Test: Mwedzi muHarare</button>
-        </div>
+      <div class="nav-link new-chat" onclick="startNewChat()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        <span>Hurukuro Itsva</span>
       </div>
     </div>
 
-    <div class="chat-container">
-      <div class="messages" id="messages">
-        <div class="msg bot">
-          Mhoro! Ini ndiri Ruzivo, mubatsiri wenyu wehungwaru wekunyora nekutaura muChiShona chete. Bvunzai mubvunzo upi zvawo maererano nemutauro weChiShona, tsumo, mipanda, kana nyaudzosingwi.
-        </div>
+    <div class="section-header">
+      <span>Hurukuro Dzichangobva Kuitwa</span>
+    </div>
+
+    <div class="history-list" id="historyList">
+      <!-- Real chats rendered dynamically -->
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-profile" onclick="openSettings()">
+        <div class="user-avatar-badge">RM</div>
+        <div class="user-name">Recall Tawanda</div>
+      </div>
+      <div class="footer-actions">
+        <button class="icon-btn" onclick="openSettings()" title="Zvirongwa">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Canvas -->
+  <main class="main-canvas">
+    <header class="top-bar">
+      <div class="chat-headline">
+        <span>Hurukuro yeMutauro</span>
+        <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; stroke-width:2.5;">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </div>
 
-      <div class="input-area">
-        <input type="text" id="userInput" placeholder="Nyora mubvunzo wenyu pano muChiShona..." onkeypress="handleKey(event)" />
-        <button class="btn-send" onclick="send()">Tumira</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="icon-btn" title="Goverana" onclick="alert('Ruzivo AI - Midlands State University')">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </button>
       </div>
+    </header>
+
+    <div class="messages-scroll" id="messagesScroll">
+      <div class="conversation-thread" id="conversationThread">
+        <div class="message-group bot">
+          <svg class="claude-burst" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.2 8.4L20.8 7.2L16.8 12.6L21.4 17.2L14.8 17.2L12 23L9.2 17.2L2.6 17.2L7.2 12.6L3.2 7.2L9.8 8.4L12 2Z" opacity="0.85"/>
+          </svg>
+          <div class="bot-editorial">
+            <p>Mhoro! Ini ndiri Ruzivo, mubatsiri wenyu wehungwaru hweChiShona akagadzirwa semushandirapamwe wezvidzidzo paMidlands State University.</p>
+            <p>Bvunzai mubvunzo upi zvawo maererano nemutauro weChiShona, tsika, tsumo, madimikira, kana zvinyorwa zvedzidzo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claude Input Dock -->
+    <div class="input-container">
+      <div class="claude-input-card">
+        <textarea 
+          id="chatTextarea" 
+          class="claude-textarea" 
+          rows="1" 
+          placeholder="Nyora shoko kana mubvunzo pano muChiShona..." 
+          onkeydown="handleTextareaKey(event)" 
+          oninput="autoResize(this)"
+        ></textarea>
+
+        <div class="input-bar-actions">
+          <div class="input-left-tools">
+            <button class="tool-btn" title="Wedzera gwaro" onclick="openSettings()">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+            </button>
+          </div>
+
+          <button class="btn-send-claude" onclick="sendMessage()" aria-label="Tumira">
+            <svg class="icon" viewBox="0 0 24 24" style="stroke: #FFFFFF; width: 14px; height: 14px;">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="sub-footer-text">Ruzivo AI rwakasimbiswa nezvidimbu 14,201 zvemabhuku edzidzo yeChiShona.</div>
     </div>
   </main>
 
+  <!-- Settings Modal -->
+  <div class="modal-backdrop" id="settingsModal" onclick="closeSettings(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">Zvirongwa zveSisitemu</div>
+        <button class="icon-btn" onclick="closeSettings()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 13px; color: var(--text-muted);">Kiyi yeKupinda (API Key):</label>
+        <input type="password" id="secretKeyInput" class="settings-input" placeholder="Isa kiyi pano..." />
+      </div>
+
+      <button class="btn-modal-save" onclick="saveSettings()">Chengetedza</button>
+    </div>
+  </div>
+
   <script>
-    function setPrompt(txt) {
-      document.getElementById('userInput').value = txt;
+    let conversations = [];
+    let currentChatId = null;
+
+    window.onload = function() {
+      const savedKey = localStorage.getItem('ruzivo_engine_key') || localStorage.getItem('ruzivo_gemini_key');
+      if (savedKey) {
+        document.getElementById('secretKeyInput').value = savedKey;
+      }
+      loadConversations();
+    };
+
+    function loadConversations() {
+      const stored = localStorage.getItem('ruzivo_conversations');
+      if (stored) {
+        try {
+          conversations = JSON.parse(stored);
+        } catch(e) {
+          conversations = [];
+        }
+      }
+      if (conversations.length > 0) {
+        renderHistoryList();
+        loadChat(conversations[0].id);
+      } else {
+        startNewChat();
+      }
     }
 
-    function handleKey(e) {
-      if (e.key === 'Enter') send();
+    function saveConversations() {
+      localStorage.setItem('ruzivo_conversations', JSON.stringify(conversations));
+      renderHistoryList();
     }
 
-    async function send() {
-      const input = document.getElementById('userInput');
-      const text = input.value.trim();
+    function renderHistoryList() {
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      conversations.forEach(chat => {
+        const item = document.createElement('div');
+        item.className = 'history-item' + (chat.id === currentChatId ? ' active' : '');
+        item.onclick = () => loadChat(chat.id);
+        item.innerHTML = `
+          <div class="history-bullet"></div>
+          <span>${escapeHtml(chat.title || 'Hurukuro')}</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function startNewChat() {
+      const newId = 'chat_' + Date.now();
+      const newChat = {
+        id: newId,
+        title: 'Hurukuro Itsva',
+        messages: [
+          {
+            role: 'bot',
+            text: 'Mhoro! Ini ndiri Ruzivo, mubatsiri wenyu wehungwaru hweChiShona akagadzirwa semushandirapamwe wezvidzidzo paMidlands State University.\n\nBvunzai mubvunzo upi zvawo maererano nemutauro weChiShona, tsika, tsumo, madimikira, kana zvinyorwa zvedzidzo.',
+            context: null
+          }
+        ]
+      };
+      conversations.unshift(newChat);
+      currentChatId = newId;
+      saveConversations();
+      renderCurrentMessages();
+      
+      const txt = document.getElementById('chatTextarea');
+      txt.value = '';
+      txt.style.height = 'auto';
+      txt.focus();
+    }
+
+    function loadChat(id) {
+      currentChatId = id;
+      renderHistoryList();
+      renderCurrentMessages();
+    }
+
+    function getCurrentChat() {
+      return conversations.find(c => c.id === currentChatId);
+    }
+
+    function renderCurrentMessages() {
+      const chat = getCurrentChat();
+      if (!chat) return;
+
+      document.querySelector('.chat-headline span').innerText = chat.title || 'Hurukuro';
+
+      const thread = document.getElementById('conversationThread');
+      thread.innerHTML = '';
+
+      chat.messages.forEach(msg => {
+        if (msg.role === 'user') {
+          const userGroup = document.createElement('div');
+          userGroup.className = 'message-group user';
+          userGroup.innerHTML = `<div class="user-pill">${escapeHtml(msg.text)}</div>`;
+          thread.appendChild(userGroup);
+        } else {
+          const botGroup = document.createElement('div');
+          botGroup.className = 'message-group bot';
+          botGroup.innerHTML = `
+            <svg class="claude-burst" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L14.2 8.4L20.8 7.2L16.8 12.6L21.4 17.2L14.8 17.2L12 23L9.2 17.2L2.6 17.2L7.2 12.6L3.2 7.2L9.8 8.4L12 2Z" opacity="0.85"/>
+            </svg>
+            <div class="bot-editorial">
+              ${formatEditorialMarkdown(msg.text)}
+            </div>
+          `;
+          if (msg.context) {
+            const sourceCard = document.createElement('div');
+            sourceCard.className = 'retrieved-source-card';
+            sourceCard.innerHTML = `
+              <svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; margin-top:2px; color: var(--claude-accent);">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <div><strong>Zvinyorwa Zvechokwadi Zvawanikwa:</strong> ${escapeHtml(msg.context)}</div>
+            `;
+            botGroup.querySelector('.bot-editorial').appendChild(sourceCard);
+          }
+          thread.appendChild(botGroup);
+        }
+      });
+
+      const scrollArea = document.getElementById('messagesScroll');
+      scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 160) + 'px';
+    }
+
+    function handleTextareaKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function openSettings() {
+      document.getElementById('settingsModal').style.display = 'flex';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function saveSettings() {
+      const val = document.getElementById('secretKeyInput').value.trim();
+      if (val) {
+        localStorage.setItem('ruzivo_engine_key', val);
+        localStorage.setItem('ruzivo_gemini_key', val);
+      }
+      closeSettings();
+    }
+
+    async function sendMessage() {
+      const textarea = document.getElementById('chatTextarea');
+      const text = textarea.value.trim();
       if (!text) return;
 
-      const msgs = document.getElementById('messages');
+      let chat = getCurrentChat();
+      if (!chat) {
+        startNewChat();
+        chat = getCurrentChat();
+      }
 
-      // Add user message
-      const userDiv = document.createElement('div');
-      userDiv.className = 'msg user';
-      userDiv.innerText = text;
-      msgs.appendChild(userDiv);
-      input.value = '';
-      msgs.scrollTop = msgs.scrollHeight;
+      // Add user message to state
+      chat.messages.push({ role: 'user', text: text });
+      if (chat.title === 'Hurukuro Itsva') {
+        chat.title = text.slice(0, 24) + (text.length > 24 ? '...' : '');
+      }
+      saveConversations();
+      renderCurrentMessages();
 
-      // Loading bubble
-      const botDiv = document.createElement('div');
-      botDiv.className = 'msg bot';
-      botDiv.innerText = 'Ruzivo ruri kufunga...';
-      msgs.appendChild(botDiv);
-      msgs.scrollTop = msgs.scrollHeight;
+      textarea.value = '';
+      textarea.style.height = 'auto';
+
+      // Temporary Thinking bubble
+      const thread = document.getElementById('conversationThread');
+      const scrollArea = document.getElementById('messagesScroll');
+      const botGroup = document.createElement('div');
+      botGroup.className = 'message-group bot';
+      botGroup.innerHTML = `
+        <svg class="claude-burst" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.2 8.4L20.8 7.2L16.8 12.6L21.4 17.2L14.8 17.2L12 23L9.2 17.2L2.6 17.2L7.2 12.6L3.2 7.2L9.8 8.4L12 2Z" opacity="0.85"/>
+        </svg>
+        <div class="bot-editorial">
+          <p style="color: var(--text-subtle); font-style: italic;">Ruzivo ruri kuronga mhinduro...</p>
+        </div>
+      `;
+      thread.appendChild(botGroup);
+      scrollArea.scrollTop = scrollArea.scrollHeight;
 
       try {
-        let endpoint = '/api/chat';
-        const customUrl = document.getElementById('colabUrl').value.trim();
-        if (customUrl) {
-          endpoint = customUrl.replace(/\/$/, '') + '/api/chat';
-        }
+        const apiKey = localStorage.getItem('ruzivo_engine_key') || localStorage.getItem('ruzivo_gemini_key') || '';
 
-        const response = await fetch(endpoint, {
+        const response = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Bypass-Tunnel-Reminder': 'true'
-          },
-          body: JSON.stringify({ message: text })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, api_key: apiKey })
         });
         const data = await response.json();
+        const replyText = data.response || "Handizivi mhinduro yacho.";
+        const contextText = data.context || null;
 
-        let cleanReply = data.response || "";
-        // Strip special tokens and repetition artifacts if the model emitted them
-        cleanReply = cleanReply.replace(/<\|im_end\|>.*$/s, '');
-        cleanReply = cleanReply.replace(/<\|im_start\|>.*$/s, '');
-        cleanReply = cleanReply.replace(/(\b[A-Za-z\u00C0-\u024F]+\b)(?:\s+\1){3,}/gi, '$1');
-        cleanReply = cleanReply.replace(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/g, '');
-        cleanReply = cleanReply.trim();
-
-        botDiv.innerText = cleanReply || "Handizivi mhinduro yacho.";
-        if (data.context) {
-          const ctxSpan = document.createElement('div');
-          ctxSpan.className = 'retrieved-context';
-          ctxSpan.innerText = '🔍 Retrieved Context: ' + data.context;
-          botDiv.appendChild(ctxSpan);
-        }
+        // Save bot reply to session state
+        chat.messages.push({
+          role: 'bot',
+          text: replyText,
+          context: contextText
+        });
+        saveConversations();
+        renderCurrentMessages();
       } catch (err) {
-        botDiv.innerText = 'Tine hurombo, paita dambudziko rekubatanidza neServer: ' + err.message;
+        const editorial = botGroup.querySelector('.bot-editorial');
+        editorial.innerHTML = `<p style="color: #DC2626;">Paita dambudziko rekubatanidza: ${escapeHtml(err.message)}</p>`;
       }
-      msgs.scrollTop = msgs.scrollHeight;
+      scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+
+    function formatEditorialMarkdown(text) {
+      const paragraphs = text.split(/\n\s*\n/);
+      return paragraphs.map(p => {
+        let formatted = escapeHtml(p.trim());
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        formatted = formatted.replace(/\n/g, '<br/>');
+        return `<p>${formatted}</p>`;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
   </script>
 </body>
