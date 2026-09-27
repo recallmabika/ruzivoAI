@@ -9,6 +9,7 @@ import MainApp from './src/navigation/MainApp';
 export default function App() {
   const { isAuthenticated, loading, handleLogin, handleRegister, handleLogout } = useAuth();
   const [showRegister, setShowRegister] = React.useState(false);
+  const [guestUser, setGuestUser] = React.useState(null);
 
   if (loading) {
     return (
@@ -18,7 +19,7 @@ export default function App() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !guestUser) {
     if (showRegister) {
       return (
         <>
@@ -26,6 +27,7 @@ export default function App() {
           <RegisterScreen
             onRegister={handleRegister}
             onNavigateLogin={() => setShowRegister(false)}
+            onGuestLogin={() => setGuestUser('Recall')}
           />
         </>
       );
@@ -36,6 +38,7 @@ export default function App() {
         <LoginScreen
           onLogin={handleLogin}
           onNavigateRegister={() => setShowRegister(true)}
+          onGuestLogin={() => setGuestUser('Recall')}
         />
       </>
     );
@@ -44,7 +47,13 @@ export default function App() {
   return (
     <>
       <StatusBar style="light" />
-      <MainApp onLogout={handleLogout} />
+      <MainApp
+        username={guestUser || 'Recall'}
+        onLogout={() => {
+          setGuestUser(null);
+          handleLogout();
+        }}
+      />
     </>
   );
 }

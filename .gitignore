@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 .venv/
@@ -25,13 +25,31 @@ data/processed/
 !data/instruction_corpus/
 !data/rag_knowledge_base/
 
-# Model binaries (weights belong on Hugging Face Hub, not GitHub)
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+
+# Model weights & binaries (belong on Hugging Face Hub, not GitHub)
 *.bin
 *.pt
 *.safetensors
 models/
 backend/models/
+backend/app/models/
+frontend/ruzivo-llm-check/
 notebooks/checkpoints/
+
+# Documentation heavy images / screenshots
+docs/screenshots_training/
+docs/diagrams/
+*.png
+*.jpg
+*.jpeg
+
+# Batch / temp scripts
+start_server.bat
 
 # Node / Expo
 node_modules/
