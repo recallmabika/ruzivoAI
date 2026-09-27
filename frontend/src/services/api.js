@@ -1,7 +1,19 @@
 import axios from 'axios';
-import { getToken } from '../utils/storage';
+import { Platform } from 'react-native';
+import { getToken, getSystemKey } from '../utils/storage';
 
-const BASE_URL = 'http://172.17.106.75:5000';
+// Local IP of development machine on WiFi and server port
+const DEV_HOST = '192.168.1.120';
+const DEV_PORT = '8080';
+
+const getBaseUrl = () => {
+  if (Platform.OS === 'web') {
+    return `http://localhost:${DEV_PORT}`;
+  }
+  return `http://${DEV_HOST}:${DEV_PORT}`;
+};
+
+const BASE_URL = getBaseUrl();
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -16,8 +28,15 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-export const chatAPI = async (message, conversationId = null, context = null) => {
-  const res = await api.post('/chat/', { message, conversation_id: conversationId, context });
+export const chatAPI = async (message, conversationId = null, context = null, customKey = null, conversationHistory = '') => {
+  const key = customKey || await getSystemKey();
+  const res = await api.post('/chat/', {
+    message,
+    conversation_id: conversationId,
+    context,
+    conversation_history: conversationHistory,
+    api_key: key || ''
+  });
   return res.data;
 };
 

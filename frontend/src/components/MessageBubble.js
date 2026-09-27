@@ -26,7 +26,7 @@ const MessageBubble = ({ message, darkMode }) => {
           <Text style={styles.avatarText}>R</Text>
         </View>
       )}
-      <View style={{ maxWidth: '72%' }}>
+      <View style={{ maxWidth: '84%' }}>
         <View style={[styles.bubble,
           isUser ? styles.userBubble :
           darkMode ? styles.assistantDark : styles.assistantLight]}>
