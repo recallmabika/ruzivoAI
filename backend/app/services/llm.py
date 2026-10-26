@@ -5,8 +5,6 @@ import torch
 
 BASE_MODEL = "Qwen/Qwen2.5-1.5B"
 ADAPTER_PATH = Path(__file__).resolve().parent.parent.parent / "models" / "ruzivo-llm-v6"
-
-
 class LLMService:
     def __init__(self):
         self._tokenizer = None
@@ -21,11 +19,8 @@ class LLMService:
         )
         self._model = PeftModel.from_pretrained(base_model, str(ADAPTER_PATH))
         self._model.eval()
-
     def load(self):
-        # public entry point called by lifespan in main.py
         self._load()
-
     def generate(self, instruction: str, context: str = "", max_new_tokens: int = 120) -> str:
         self._load()
 
@@ -35,17 +30,14 @@ class LLMService:
             "Kana paine mashoko akapihwa (Context), shandisa mashoko iwayo chete kupindura. "
             "Kana usingazivi mhinduro yacho, kana mashoko asipo muContext, taura pachena kuti 'Handizivi mhinduro yacho' pane kuedza kufungidzira."
         )
-
         if context:
             user_content = f"Tsanangudzo (Context):\n{context}\n\nMubvunzo:\n{instruction}"
         else:
             user_content = instruction
-
         messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_content}
         ]
-
         if hasattr(self._tokenizer, "apply_chat_template") and self._tokenizer.chat_template:
             prompt = self._tokenizer.apply_chat_template(
                 messages,
@@ -66,15 +58,11 @@ class LLMService:
                 top_p=0.85,
                 pad_token_id=self._tokenizer.eos_token_id,
             )
-
-        # Slice generated output beyond input prompt tokens
         generated_tokens = outputs[0][inputs["input_ids"].shape[-1]:]
         response = self._tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
-
         if "<|im_end|>" in response:
             response = response.split("<|im_end|>")[0].strip()
 
         return response
-
 
 llm_service = LLMService()

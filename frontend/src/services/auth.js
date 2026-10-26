@@ -1,11 +1,16 @@
 import api from './api';
 import { Platform } from 'react-native';
 
-import { saveToken, getToken, removeToken } from '../utils/storage';
+import { saveToken, getToken, removeToken, saveUsername, removeUsername } from '../utils/storage';
 
 export const register = async (username, email, password) => {
   const res = await api.post('/auth/register', { username, email, password });
-  await saveToken(res.data.access_token);
+  if (res.data.access_token) {
+    await saveToken(res.data.access_token);
+  }
+  if (res.data.username || username) {
+    await saveUsername(res.data.username || username);
+  }
   return res.data;
 };
 
@@ -16,10 +21,16 @@ export const login = async (username, password) => {
   const res = await api.post('/auth/login', form.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
-  await saveToken(res.data.access_token);
+  if (res.data.access_token) {
+    await saveToken(res.data.access_token);
+  }
+  if (res.data.username || username) {
+    await saveUsername(res.data.username || username);
+  }
   return res.data;
 };
 
 export const logout = async () => {
   await removeToken();
+  await removeUsername();
 };

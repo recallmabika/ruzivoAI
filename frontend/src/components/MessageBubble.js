@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Clipboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Clipboard, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const formatTime = (timestamp) => {
@@ -22,9 +22,11 @@ const MessageBubble = ({ message, darkMode }) => {
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}>
       {!isUser && (
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>R</Text>
-        </View>
+        <Image
+          source={require('../../assets/logo.png')}
+          style={styles.avatar}
+          resizeMode="contain"
+        />
       )}
       <View style={{ maxWidth: '84%' }}>
         <View style={[styles.bubble,
@@ -54,8 +56,7 @@ const styles = StyleSheet.create({
   container: { marginVertical: 4, flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   userContainer: { justifyContent: 'flex-end' },
   assistantContainer: { justifyContent: 'flex-start' },
-  avatar: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#2E7D32', justifyContent: 'center', alignItems: 'center', marginBottom: 18 },
-  avatarText: { color: '#fff', fontWeight: 'bold', fontSize: 11 },
+  avatar: { width: 26, height: 26, borderRadius: 13, marginBottom: 18 },
   bubble: { padding: 11, borderRadius: 16 },
   userBubble: { backgroundColor: '#2E7D32', borderBottomRightRadius: 4 },
   assistantLight: { backgroundColor: '#f0f4f0', borderBottomLeftRadius: 4 },

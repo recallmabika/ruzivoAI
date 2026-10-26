@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getToken, saveToken, removeToken } from '../utils/storage';
-import { login, register } from '../services/auth';
+import { getToken, removeToken, getUsername } from '../utils/storage';
+import { login, register, logout } from '../services/auth';
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,10 +14,17 @@ export const useAuth = () => {
   const checkAuth = async () => {
     try {
       const token = await getToken();
-      console.log('checkAuth token:', token);
-      setIsAuthenticated(!!token);
+      const storedName = await getUsername();
+      if (token) {
+        setIsAuthenticated(true);
+        setCurrentUser(storedName || 'Recall');
+      } else {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+      }
     } catch {
       setIsAuthenticated(false);
+      setCurrentUser(null);
     } finally {
       setLoading(false);
     }
@@ -24,22 +32,23 @@ export const useAuth = () => {
 
   const handleLogin = useCallback(async (username, password) => {
     const result = await login(username, password);
-    console.log('login result:', result);
-    const token = await getToken();
-    console.log('token after login:', token);
+    const resolvedName = result?.username || username;
+    setCurrentUser(resolvedName);
     setIsAuthenticated(true);
-    console.log('setIsAuthenticated called with true');
   }, []);
 
   const handleRegister = useCallback(async (username, email, password) => {
-    await register(username, email, password);
+    const result = await register(username, email, password);
+    const resolvedName = result?.username || username;
+    setCurrentUser(resolvedName);
     setIsAuthenticated(true);
   }, []);
 
   const handleLogout = useCallback(async () => {
-    await removeToken();
+    await logout();
+    setCurrentUser(null);
     setIsAuthenticated(false);
   }, []);
 
-  return { isAuthenticated, loading, handleLogin, handleRegister, handleLogout };
+  return { isAuthenticated, currentUser, loading, handleLogin, handleRegister, handleLogout };
 };

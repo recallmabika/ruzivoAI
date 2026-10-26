@@ -23,7 +23,6 @@ KB_DIR = PROJECT_ROOT / "data" / "rag_knowledge_base"
 SENTENCES_FILE = KB_DIR / "sentences.json"
 INDEX_OUT = KB_DIR / "shona_labse.index"
 
-
 def build_index():
     try:
         import faiss
@@ -64,9 +63,8 @@ def build_index():
     index.add(embeddings)
 
     faiss.write_index(index, str(INDEX_OUT))
-    print(f"✅ Successfully saved FAISS index to: {INDEX_OUT} ({INDEX_OUT.stat().st_size / (1024 * 1024):.2f} MB)")
+    print(f"Successfully saved FAISS index to: {INDEX_OUT} ({INDEX_OUT.stat().st_size / (1024 * 1024):.2f} MB)")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     build_index()

@@ -1,0 +1,20 @@
+databases:
+  - name: ruzivo-postgres
+    databaseName: ruzivo_db
+    user: ruzivo_user
+    plan: free
+
+services:
+  - type: web
+    name: ruzivo-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/run_server.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ruzivo-postgres
+          property: connectionString
+      - key: MODEL_SECURITY_KEY
+        sync: false

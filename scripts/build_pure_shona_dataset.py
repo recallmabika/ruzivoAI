@@ -32,7 +32,6 @@ SYSTEM_PROMPT = (
     "Kana usingazivi mhinduro, taura pachena kuti 'Handizivi'."
 )
 
-
 def extract_pure_nyaudzosingwi():
     path = BOOKS_DIR / "648101854-Nyaudzosingwi.txt"
     if not path.exists():
@@ -71,7 +70,7 @@ def extract_pure_nyaudzosingwi():
                 if len(shona_part.split()) >= 3:
                     shona_example = shona_part
 
-            # Remove English words like 'the nail was gripped by the pincers'
+            # Remove English words 
             shona_example = re.sub(r'[a-zA-Z\s]+:[a-zA-Z\s]+', '', shona_example)
 
             if len(word) >= 2 and len(word.split()) <= 4:
@@ -91,7 +90,6 @@ def extract_pure_nyaudzosingwi():
                 })
 
     return pairs
-
 
 def extract_pure_tsumo():
     paths = [BOOKS_DIR / "431120508-TSUMO.txt", BOOKS_DIR / "576008136-Tsumo.txt"]
@@ -120,7 +118,6 @@ def extract_pure_tsumo():
                     })
 
     return pairs
-
 
 def extract_pure_mipanda():
     path = BOOKS_DIR / "649864977-MIPANDA-YEMAZITA-1.txt"
@@ -155,7 +152,6 @@ def extract_pure_mipanda():
         })
 
     return pairs
-
 
 def build_pure_datasets():
     print("=" * 60)
@@ -208,11 +204,10 @@ def build_pure_datasets():
             f.write(json.dumps({"id": i, "text": item["raw_text"]}, ensure_ascii=False) + "\n")
 
     print("=" * 60)
-    print(f"✅ Total 100% Pure Shona Training Pairs: {len(all_data):,}")
-    print(f"📁 Output Training: {INSTRUCT_OUT}")
-    print(f"📁 Output RAG KB:   {KB_OUT}")
+    print(f"Total 100% Pure Shona Training Pairs: {len(all_data):,}")
+    print(f"Output Training: {INSTRUCT_OUT}")
+    print(f"Output RAG KB:   {KB_OUT}")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     build_pure_datasets()

@@ -4,13 +4,13 @@ import {
   StyleSheet, Animated, KeyboardAvoidingView,
   Platform, Alert, Image, Modal, StatusBar, Dimensions, ScrollView
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import MessageBubble from '../components/MessageBubble';
 import { useChat } from '../hooks/useChat';
-import { getSystemKey, saveSystemKey } from '../utils/storage';
+import { getSystemKey, saveSystemKey, getCustomServerUrl, saveCustomServerUrl } from '../utils/storage';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 320);
@@ -69,7 +69,8 @@ const TypingIndicator = ({ darkMode }) => {
   );
 };
 
-const ChatScreen = ({ username = 'Recall', onLogout }) => {
+const ChatScreen = ({ username = 'Muenzi', onLogout }) => {
+  const insets = useSafeAreaInsets();
   const [input, setInput] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -81,6 +82,7 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
   const [filesModalOpen, setFilesModalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [systemKey, setSystemKey] = useState('');
+  const [serverUrl, setServerUrl] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
 
   const drawerAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
@@ -100,11 +102,13 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
 
   const flatListRef = useRef(null);
 
-  // Load saved system key
+  // Load saved system key and server URL
   useEffect(() => {
     (async () => {
       const key = await getSystemKey();
       if (key) setSystemKey(key);
+      const url = await getCustomServerUrl();
+      if (url) setServerUrl(url);
     })();
   }, []);
 
@@ -177,6 +181,9 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
     if (systemKey.trim()) {
       await saveSystemKey(systemKey.trim());
     }
+    if (serverUrl.trim()) {
+      await saveCustomServerUrl(serverUrl.trim());
+    }
     setSaveStatus('Zvirongwa zvakachengetedzwa!');
     setTimeout(() => {
       setSaveStatus('');
@@ -225,11 +232,19 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
   ];
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: t.bg }]}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.root, { backgroundColor: t.bg }]}>
       <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
 
       {/* Top Mobile Header Bar */}
-      <View style={[styles.topHeader, { backgroundColor: t.card, borderBottomColor: t.border }]}>
+      <View
+        style={[
+          styles.topHeader,
+          {
+            backgroundColor: t.card,
+            borderBottomColor: t.border,
+          },
+        ]}
+      >
         <TouchableOpacity onPress={openDrawer} style={styles.headerBtn}>
           <Ionicons name="menu-outline" size={24} color={t.text} />
         </TouchableOpacity>
@@ -238,7 +253,7 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
           <Text style={[styles.headerTitle, { color: t.text }]} numberOfLines={1}>
             {activeChat && activeChat.title !== 'Hurukuro Itsva' ? activeChat.title : 'Ruzivo AI'}
           </Text>
-          <Text style={[styles.headerSubtitle, { color: t.sub }]}>Mubatsiri weChiShona • MSU</Text>
+          <Text style={[styles.headerSubtitle, { color: t.sub }]}>Mubatsiri weChiShona</Text>
         </View>
 
         <View style={styles.headerRightActions}>
@@ -251,13 +266,19 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
         </View>
       </View>
 
-      {/* Main Full-Width Chat Screen */}
-      <View style={styles.chatContainer}>
+      {/* Main Full-Width Chat Screen wrapped in KeyboardAvoidingView */}
+      <KeyboardAvoidingView
+        style={styles.chatContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
         {messages.length === 0 ? (
           <View style={styles.greetingContainer}>
-            <View style={[styles.bigLogo, { backgroundColor: t.accent }]}>
-              <Text style={styles.bigLogoText}>R</Text>
-            </View>
+            <Image
+              source={require('../../assets/logo.png')}
+              style={styles.bigLogoImage}
+              resizeMode="contain"
+            />
             <Text style={[styles.greetingText, { color: t.text }]}>{getGreeting(username)}</Text>
             <Text style={[styles.greetingSub, { color: t.sub }]}>
               Bvunza mubvunzo maererano nemutauro weChiShona, tsika, tsumo, kana zvidzidzo.
@@ -290,6 +311,7 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             style={styles.messageList}
             contentContainerStyle={styles.messageListContent}
+            keyboardShouldPersistTaps="handled"
           />
         )}
 
@@ -306,7 +328,7 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
         )}
 
         {/* Bottom Full-Width Mobile Input Dock */}
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.inputWrapper}>
+        <View style={[styles.inputWrapper, { paddingBottom: Math.max(insets.bottom, 10) }]}>
           <View style={[styles.inputCard, { backgroundColor: t.card, borderColor: t.border }]}>
             <TextInput
               style={[styles.textInput, { color: t.text }]}
@@ -351,10 +373,10 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
             </View>
           </View>
           <Text style={[styles.disclaimer, { color: t.sub }]}>
-            Ruzivo AI • Dzidzo yeChiShona yakasimbiswa paMidlands State University
+            Ruzivo AI • Dzidzo yeChiShona nemabhuku akasimbiswa
           </Text>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
 
       {/* Slide-Over Drawer Overlay */}
       {drawerOpen && (
@@ -363,9 +385,11 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
           <Animated.View style={[styles.drawer, { width: DRAWER_WIDTH, transform: [{ translateX: drawerAnim }], backgroundColor: t.sidebar }]}>
             <View style={styles.drawerHeader}>
               <View style={styles.drawerBrand}>
-                <View style={[styles.logoBadge, { backgroundColor: t.accent }]}>
-                  <Text style={styles.logoBadgeText}>R</Text>
-                </View>
+                <Image
+                  source={require('../../assets/logo.png')}
+                  style={styles.drawerLogoImage}
+                  resizeMode="contain"
+                />
                 <View>
                   <Text style={[styles.drawerTitle, { color: t.text }]}>Ruzivo AI</Text>
                   <Text style={[styles.drawerSub, { color: t.sub }]}>ChiShona Core</Text>
@@ -581,6 +605,20 @@ const ChatScreen = ({ username = 'Recall', onLogout }) => {
               autoCorrect={false}
             />
 
+            <Text style={[styles.modalLabel, { color: t.text, marginTop: 12 }]}>Server Address (IP / URL)</Text>
+            <Text style={[styles.modalDesc, { color: t.sub }]}>
+              Ip yePC yako paWiFi (e.g. http://192.168.1.120:8080)
+            </Text>
+            <TextInput
+              style={[styles.modalInput, { color: t.text, borderColor: t.border, backgroundColor: t.bg }]}
+              placeholder="http://192.168.1.120:8080"
+              placeholderTextColor={t.sub}
+              value={serverUrl}
+              onChangeText={setServerUrl}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
             {saveStatus ? (
               <Text style={{ color: '#16A34A', fontSize: 13, marginBottom: 10, fontWeight: '600', textAlign: 'center' }}>
                 {saveStatus}
@@ -625,6 +663,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+  },
+  bigLogoImage: {
+    width: 64,
+    height: 64,
+    marginBottom: 16,
   },
   bigLogo: {
     width: 56,
@@ -720,6 +763,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   drawerBrand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  drawerLogoImage: { width: 34, height: 34 },
   logoBadge: { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
   logoBadgeText: { color: '#FFFFFF', fontWeight: 'bold', fontSize: 16 },
   drawerTitle: { fontSize: 18, fontWeight: 'bold' },

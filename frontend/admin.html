@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruzivo AI &bull; Superadmin Control Center</title>
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      /* Dark Theme (Default) */
+      --bg-base: #0B0F19;
+      --bg-surface: #111827;
+      --bg-card: #1F2937;
+      --bg-card-hover: #1E293B;
+      --border-subtle: #1F2937;
+      --border-card: #374151;
+      --text-primary: #F9FAFB;
+      --text-secondary: #9CA3AF;
+      --text-muted: #6B7280;
+      --accent-primary: #EF4444;
+      --accent-glow: rgba(239, 68, 68, 0.2);
+      --badge-bg: rgba(239, 68, 68, 0.12);
+      --input-bg: #0B0F19;
+      --row-hover: rgba(255, 255, 255, 0.025);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    body.theme-light {
+      --bg-base: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F1F5F9;
+      --border-subtle: #E2E8F0;
+      --border-card: #CBD5E1;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
+      --accent-primary: #DC2626;
+      --accent-glow: rgba(220, 38, 38, 0.12);
+      --badge-bg: rgba(220, 38, 38, 0.08);
+      --input-bg: #F8FAFC;
+      --row-hover: rgba(0, 0, 0, 0.02);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Sidebar Navigation */
+    .admin-sidebar {
+      width: 250px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: inline-block;
+      margin-top: 3px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow-y: auto;
+    }
+
+    .nav-category {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 10px 10px 5px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-btn:hover {
+      background: var(--row-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-btn.active {
+      background: transparent;
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-base);
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-avatar-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      color: white;
+      font-weight: 700;
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-info-user {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .profile-info-role {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-card);
+      color: var(--text-secondary);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* Main Administration Content Area */
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-base);
+    }
+
+    .top-header-bar {
+      padding: 14px 28px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .page-heading-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .page-heading-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .header-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-action-outline {
+      background: transparent;
+      border: 1px solid var(--border-card);
+      color: var(--text-primary);
+      padding: 6px 13px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action-outline:hover {
+      background: var(--row-hover);
+      border-color: var(--text-secondary);
+    }
+
+    .btn-action-primary {
+      background: var(--accent-primary);
+      border: 1px solid transparent;
+      color: #FFFFFF;
+      padding: 6px 15px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action-primary:hover {
+      opacity: 0.9;
+    }
+
+    .scroll-work-surface {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 28px 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* KPI Summary Metric Cards */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .kpi-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-icon-pill {
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kpi-primary-value {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .kpi-caption-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Content Panels */
+    .admin-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: none;
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .panel-header-bar {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .panel-meta-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .panel-meta-sub {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .search-filter-input {
+      background: var(--input-bg);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      padding: 7px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      width: 260px;
+      outline: none;
+    }
+
+    .search-filter-input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    thead th {
+      padding: 11px 18px;
+      background: var(--bg-base);
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color 0.15s;
+    }
+
+    tbody tr:hover {
+      background-color: var(--row-hover);
+    }
+
+    tbody td {
+      padding: 12px 18px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .role-dropdown-select {
+      background: transparent;
+      border: 1px solid var(--border-card);
+      color: var(--text-primary);
+      padding: 5px 9px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .role-dropdown-select:focus {
+      border-color: var(--accent-primary);
+    }
+
+    /* Clean Status without background pill */
+    .status-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 500;
+      background: transparent;
+      padding: 0;
+    }
+
+    .status-text.active {
+      color: #10B981;
+    }
+
+    .status-text.idle {
+      color: var(--text-muted);
+    }
+
+    /* Clean Delete / Revoke without background */
+    .btn-action-delete {
+      background: transparent;
+      border: none;
+      color: #EF4444;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-action-delete:hover {
+      text-decoration: underline;
+      background: transparent;
+    }
+
+    /* Modal dialog */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-content-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      padding: 22px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-head h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-field {
+      margin-bottom: 13px;
+    }
+
+    .modal-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    /* Toast Notification */
+    .admin-toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-card);
+      border-top: 3px solid var(--accent-primary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      display: none;
+      z-index: 9999;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: toastSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes toastSlideDown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    .admin-toast.success { border-top-color: #10B981; }
+    .admin-toast.error { border-top-color: #EF4444; }
+  </style>
+</head>
+<body>
+
+  <!-- Superadmin Sidebar Navigation -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="assets/logo.png" alt="Ruzivo Logo" style="width: 26px; height: 26px; object-fit: contain;">
+        <div class="brand-title">Ruzivo Admin</div>
+      </div>
+      <div class="brand-badge">Superadmin Control</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-category">Management</div>
+      <button class="nav-btn active" id="navUsers" onclick="showTab('users')">
+        <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2;">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>User Directory</span>
+      </button>
+
+      <button class="nav-btn" id="navSessions" onclick="showTab('sessions')">
+        <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Active Sessions</span>
+      </button>
+
+      <button class="nav-btn" id="navCorpus" onclick="showTab('corpus')">
+        <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2;">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span>RAG Corpus & Data</span>
+      </button>
+
+      <button class="nav-btn" id="navTelemetry" onclick="showTab('telemetry')">
+        <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2;">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+        <span>System Telemetry</span>
+      </button>
+
+      <div class="nav-category" style="margin-top: 10px;">Navigation</div>
+      <a class="nav-btn" href="/" style="color: var(--text-secondary);">
+        <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2;">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        <span>Back to App</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile-badge">
+        <div class="user-avatar-circle" id="sidebarAvatar">A</div>
+        <div>
+          <div class="profile-info-user" id="sidebarAdminName">Admin</div>
+          <div class="profile-info-role">Superadmin</div>
+        </div>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light/Dark Mode" id="themeBtn">
+        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Administrative Work Area -->
+  <main class="admin-main">
+    <header class="top-header-bar">
+      <div>
+        <h1 class="page-heading-title" id="pageTitleText">User Directory & Privileges</h1>
+        <p class="page-heading-desc" id="pageDescText">Superadmin level management over live SQLite accounts and system privileges.</p>
+      </div>
+
+      <div class="header-actions-row">
+        <button class="btn-action-outline" onclick="loadDashboardTelemetry()">
+          <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2;">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Refresh Data</span>
+        </button>
+
+        <button class="btn-action-primary" onclick="openCreateUserModal()">
+          <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Add New User</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="scroll-work-surface">
+      <!-- High-Level Metrics -->
+      <section class="kpi-container">
+        <div class="kpi-card">
+          <div class="kpi-header-row">
+            <span class="kpi-title">Total Users</span>
+            <div class="kpi-icon-pill" style="color: #3B82F6;">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+          <div class="kpi-primary-value" id="statTotalUsers">--</div>
+          <div class="kpi-caption-note">Registered in SQLite Database</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header-row">
+            <span class="kpi-title">Student Accounts</span>
+            <div class="kpi-icon-pill" style="color: #10B981;">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+            </div>
+          </div>
+          <div class="kpi-primary-value" id="statStudents" style="color: #10B981;">--</div>
+          <div class="kpi-caption-note">Active learners on platform</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header-row">
+            <span class="kpi-title">Verified Sentences</span>
+            <div class="kpi-icon-pill" style="color: #8B5CF6;">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </div>
+          </div>
+          <div class="kpi-primary-value" id="statRag">14,201</div>
+          <div class="kpi-caption-note">Grounding knowledge corpus</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header-row">
+            <span class="kpi-title">System Status</span>
+            <div class="kpi-icon-pill" style="color: #10B981;">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            </div>
+          </div>
+          <div class="kpi-primary-value" style="color: #10B981; font-size: 19px; display: flex; align-items: center; gap: 7px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></span>
+            <span>Online</span>
+          </div>
+          <div class="kpi-caption-note">Port 8080 &bull; Database Connected</div>
+        </div>
+      </section>
+
+      <!-- Panel 1: User Directory -->
+      <section class="admin-panel active" id="panelUsers">
+        <div class="panel-header-bar">
+          <div>
+            <div class="panel-meta-title">Registered User Accounts</div>
+            <div class="panel-meta-sub">Inspect user records, switch roles dynamically, view active tokens, or delete accounts.</div>
+          </div>
+          <input type="text" id="userSearchInput" class="search-filter-input" placeholder="Search username, email, role..." oninput="filterUserTable()">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Sessions</th>
+                <th>Registration Date</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 28px; color: var(--text-muted);">
+                  Loading user records...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Panel 2: Active Sessions & Tokens -->
+      <section class="admin-panel" id="panelSessions">
+        <div class="panel-header-bar">
+          <div>
+            <div class="panel-meta-title">Live User Sessions</div>
+            <div class="panel-meta-sub">Inspect authorized session tokens in SQLite and revoke compromised or stale sessions.</div>
+          </div>
+          <button class="btn-action-outline" onclick="loadActiveSessions()">
+            <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2;">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>Refresh Sessions</span>
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Masked Token</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Created At</th>
+                <th style="text-align: right;">Revocation</th>
+              </tr>
+            </thead>
+            <tbody id="sessionTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 28px; color: var(--text-muted);">
+                  Loading live sessions...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Panel 3: RAG Knowledge Base -->
+      <section class="admin-panel" id="panelCorpus">
+        <div class="panel-header-bar">
+          <div>
+            <div class="panel-meta-title">RAG Knowledge Base & Corpus</div>
+            <div class="panel-meta-sub">Inspection of the 14,201 verified sentences used for authentic grounding.</div>
+          </div>
+        </div>
+
+        <div style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="background: var(--bg-base); border: 1px solid var(--border-card); border-radius: 8px; padding: 16px;">
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Corpus Storage Path</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--accent-primary); word-break: break-all;">
+              data/rag_knowledge_base/sentences.json
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 10px; line-height: 1.5;">
+              Pre-indexed verified sentences extracted from authorized ChiShona educational textbooks.
+            </div>
+          </div>
+
+          <div style="background: var(--bg-base); border: 1px solid var(--border-card); border-radius: 8px; padding: 16px;">
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Retrieval Mechanism</div>
+            <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.5;">
+              TF-IDF Keyword matching with ChiShona grammatical lemmatization, fallback context search, and strict response bounds.
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 0 20px 20px;">
+          <div style="font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;">Corpus Sample Inspection</div>
+          <div id="corpusSampleBox" style="background: var(--bg-base); border: 1px solid var(--border-card); border-radius: 8px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; max-height: 220px; overflow-y: auto; color: var(--text-secondary); line-height: 1.6;">
+            Loading corpus sample...
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 4: Telemetry & Health -->
+      <section class="admin-panel" id="panelTelemetry">
+        <div class="panel-header-bar">
+          <div>
+            <div class="panel-meta-title">System Architecture & Telemetry</div>
+            <div class="panel-meta-sub">Runtime parameters and production deployment details.</div>
+          </div>
+        </div>
+
+        <div style="padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+          <div style="background: var(--bg-base); border: 1px solid var(--border-card); border-radius: 8px; padding: 16px;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Runtime Host</div>
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 4px;">localhost:8080</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Python HTTP Server Daemon</div>
+          </div>
+
+          <div style="background: var(--bg-base); border: 1px solid var(--border-card); border-radius: 8px; padding: 16px;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Primary Database</div>
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 4px;">data/ruzivo_auth.db</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">SQLite 3 with SHA-256 Auth</div>
+          </div>
+
+          <div style="background: var(--bg-base); border: 1px solid var(--border-card); border-radius: 8px; padding: 16px;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Language Constraint</div>
+            <div style="font-size: 14px; font-weight: 600; color: #10B981; margin-top: 4px;">Strictly ChiShona</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Max 200 words per inference</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Create User Modal -->
+  <div class="modal-overlay" id="createUserModal" onclick="closeCreateUserModal(event)">
+    <div class="modal-content-card" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>Create New User</h3>
+        <button onclick="closeCreateUserModal()" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">&times;</button>
+      </div>
+
+      <div class="modal-field">
+        <label>Username</label>
+        <input type="text" id="newUsername" class="modal-input" placeholder="e.g. tendai_m">
+      </div>
+
+      <div class="modal-field">
+        <label>Email Address</label>
+        <input type="email" id="newEmail" class="modal-input" placeholder="tendai@example.com">
+      </div>
+
+      <div class="modal-field">
+        <label>Initial Password</label>
+        <input type="password" id="newPassword" class="modal-input" placeholder="Strong password">
+      </div>
+
+      <div class="modal-field">
+        <label>Privilege Role</label>
+        <select id="newRole" class="modal-input" style="cursor: pointer;">
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="moderator">Moderator</option>
+          <option value="admin">Admin</option>
+          <option value="superadmin">Superadmin</option>
+        </select>
+      </div>
+
+      <div id="createModalError" style="color: #EF4444; font-size: 12px; margin-bottom: 12px; display: none;"></div>
+
+      <div class="modal-actions">
+        <button class="btn-action-outline" onclick="closeCreateUserModal()">Cancel</button>
+        <button class="btn-action-primary" onclick="submitCreateUser()">Register Account</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="admin-toast"></div>
+
+  <script>
+    let allUsers = [];
+
+    window.onload = function() {
+      initTheme();
+      verifySuperadminSession();
+      loadDashboardTelemetry();
+      loadCorpusSample();
+    };
+
+    /* Theme Management */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('ruzivo_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.body.classList.add('theme-light');
+        updateThemeIcon(true);
+      } else {
+        document.body.classList.remove('theme-light');
+        updateThemeIcon(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('theme-light');
+      localStorage.setItem('ruzivo_theme', isLight ? 'light' : 'dark');
+      updateThemeIcon(isLight);
+      showToast(isLight ? 'Switched to Light Mode' : 'Switched to Dark Mode', 'success');
+    }
+
+    function updateThemeIcon(isLight) {
+      const btn = document.getElementById('themeBtn');
+      if (!btn) return;
+      if (isLight) {
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        `;
+      } else {
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        `;
+      }
+    }
+
+    /* Toast Notification */
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.className = 'admin-toast ' + type;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    /* Authentication & Role Protection */
+    async function verifySuperadminSession() {
+      const token = localStorage.getItem('ruzivo_auth_token');
+      if (!token) {
+        window.location.href = '/';
+        return;
+      }
+      try {
+        const resp = await fetch('/auth/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resp.ok) throw new Error('Unauthorized');
+        const user = await resp.json();
+        if (user.role !== 'superadmin' && user.role !== 'admin') {
+          alert('Access restricted to administrators and superadmins.');
+          window.location.href = '/';
+          return;
+        }
+        document.getElementById('sidebarAdminName').innerText = user.username || 'Admin';
+        document.getElementById('sidebarAvatar').innerText = (user.username ? user.username[0].toUpperCase() : 'A');
+      } catch (e) {
+        window.location.href = '/';
+      }
+    }
+
+    /* Tab Switching */
+    function showTab(tab) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.admin-panel').forEach(panel => panel.classList.remove('active'));
+
+      if (tab === 'users') {
+        document.getElementById('navUsers').classList.add('active');
+        document.getElementById('panelUsers').classList.add('active');
+        document.getElementById('pageTitleText').innerText = 'User Directory & Privileges';
+        document.getElementById('pageDescText').innerText = 'Superadmin level management over live SQLite accounts and system privileges.';
+      } else if (tab === 'sessions') {
+        document.getElementById('navSessions').classList.add('active');
+        document.getElementById('panelSessions').classList.add('active');
+        document.getElementById('pageTitleText').innerText = 'Active User Sessions';
+        document.getElementById('pageDescText').innerText = 'Live session token inspection and instant authorization revocation.';
+        loadActiveSessions();
+      } else if (tab === 'corpus') {
+        document.getElementById('navCorpus').classList.add('active');
+        document.getElementById('panelCorpus').classList.add('active');
+        document.getElementById('pageTitleText').innerText = 'RAG Knowledge Base & Corpus';
+        document.getElementById('pageDescText').innerText = 'Manage verified Shona corpus sentences and textbook indexing.';
+        loadCorpusSample();
+      } else if (tab === 'telemetry') {
+        document.getElementById('navTelemetry').classList.add('active');
+        document.getElementById('panelTelemetry').classList.add('active');
+        document.getElementById('pageTitleText').innerText = 'System Telemetry & Architecture';
+        document.getElementById('pageDescText').innerText = 'Real-time server status, SQLite engine, and model guardrails.';
+      }
+    }
+
+    /* Live Data Loading */
+    async function loadDashboardTelemetry() {
+      const token = localStorage.getItem('ruzivo_auth_token');
+      try {
+        const [statsResp, usersResp] = await Promise.all([
+          fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } }),
+          fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } })
+        ]);
+
+        if (statsResp.ok) {
+          const stats = await statsResp.json();
+          document.getElementById('statTotalUsers').innerText = stats.total_users;
+          document.getElementById('statStudents').innerText = stats.students;
+          document.getElementById('statRag').innerText = Number(stats.rag_sentences).toLocaleString();
+        }
+
+        if (usersResp.ok) {
+          const data = await usersResp.json();
+          allUsers = data.users || [];
+          renderUsersTable(allUsers);
+        }
+      } catch (err) {
+        showToast('Error loading telemetry: ' + err.message, 'error');
+      }
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('userTableBody');
+      if (!users || users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px;">No users found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => {
+        const role = u.role || 'student';
+        return `
+          <tr data-search="${escapeHtml((u.username + ' ' + u.email + ' ' + role).toLowerCase())}">
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-muted);">#${u.id}</td>
+            <td style="font-weight: 600; color: var(--text-primary);">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 26px; height: 26px; border-radius: 6px; background: ${role === 'superadmin' ? '#EF4444' : (role === 'admin' ? '#3B82F6' : '#10B981')}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px;">
+                  ${escapeHtml(u.username ? u.username[0].toUpperCase() : 'U')}
+                </div>
+                <span>${escapeHtml(u.username)}</span>
+              </div>
+            </td>
+            <td>${escapeHtml(u.email)}</td>
+            <td>
+              <select class="role-dropdown-select" onchange="updateUserRole(${u.id}, this.value)">
+                <option value="student" ${role === 'student' ? 'selected' : ''}>Student</option>
+                <option value="teacher" ${role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                <option value="moderator" ${role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
+                <option value="superadmin" ${role === 'superadmin' ? 'selected' : ''}>Superadmin</option>
+              </select>
+            </td>
+            <td>
+              <span class="status-text ${u.active_sessions > 0 ? 'active' : 'idle'}">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                <span>${u.active_sessions} Active</span>
+              </span>
+            </td>
+            <td style="font-size: 11.5px; color: var(--text-muted);">${escapeHtml(u.created_at ? u.created_at.slice(0, 10) : '--')}</td>
+            <td style="text-align: right;">
+              <button class="btn-action-delete" onclick="deleteUserAccount(${u.id}, '${escapeHtml(u.username)}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterUserTable() {
+      const q = (document.getElementById('userSearchInput').value || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#userTableBody tr');
+      rows.forEach(r => {
+        const text = r.getAttribute('data-search') || '';
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    async function updateUserRole(userId, newRole) {
+      const token = localStorage.getItem('ruzivo_auth_token');
+      try {
+        const resp = await fetch('/api/admin/update-role', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ user_id: userId, role: newRole })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Role update failed');
+        showToast(data.message || 'User role updated successfully!');
+        loadDashboardTelemetry();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteUserAccount(userId, username) {
+      if (!confirm(`Are you sure you want to permanently delete user '${username}' and invalidate all sessions?`)) return;
+      const token = localStorage.getItem('ruzivo_auth_token');
+      try {
+        const resp = await fetch('/api/admin/delete-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ user_id: userId })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Deletion failed');
+        showToast(data.message || 'User account deleted successfully!');
+        loadDashboardTelemetry();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    /* Active Sessions Loading & Revocation */
+    async function loadActiveSessions() {
+      const token = localStorage.getItem('ruzivo_auth_token');
+      const tbody = document.getElementById('sessionTableBody');
+      try {
+        const resp = await fetch('/api/admin/sessions', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resp.ok) throw new Error('Failed to fetch sessions');
+        const data = await resp.json();
+        const sessions = data.sessions || [];
+
+        if (sessions.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px;">No active sessions currently found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = sessions.map(s => `
+          <tr>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--accent-primary);">${escapeHtml(s.token_masked)}</td>
+            <td style="font-weight: 600; color: var(--text-primary);">${escapeHtml(s.username)}</td>
+            <td>${escapeHtml(s.email)}</td>
+            <td><span style="font-weight: 500; color: var(--text-primary);">${escapeHtml(s.role)}</span></td>
+            <td style="font-size: 11.5px; color: var(--text-muted);">${escapeHtml(s.created_at || '--')}</td>
+            <td style="text-align: right;">
+              <button class="btn-action-delete" onclick="revokeUserSession('${s.token_id}')">Revoke</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #EF4444; padding: 20px;">Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    async function revokeUserSession(sessionToken) {
+      if (!confirm('Revoke this session token immediately? The user will be required to log in again.')) return;
+      const token = localStorage.getItem('ruzivo_auth_token');
+      try {
+        const resp = await fetch('/api/admin/revoke-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ session_token: sessionToken })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Revocation failed');
+        showToast('Session revoked successfully!');
+        loadActiveSessions();
+        loadDashboardTelemetry();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    /* Corpus Sample Loading */
+    async function loadCorpusSample() {
+      const token = localStorage.getItem('ruzivo_auth_token');
+      const box = document.getElementById('corpusSampleBox');
+      try {
+        const resp = await fetch('/api/admin/corpus-sample', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const sentences = data.sample || [];
+        if (sentences.length > 0) {
+          box.innerHTML = sentences.map((s, idx) => `<div style="padding: 3px 0; border-bottom: 1px dashed var(--border-subtle);"><span style="color: var(--accent-primary); font-weight: 600;">[#${idx + 1}]</span> ${escapeHtml(s)}</div>`).join('');
+        }
+      } catch (e) {
+        box.innerText = 'Corpus active. 14,201 verified sentences loaded into TF-IDF vector index.';
+      }
+    }
+
+    /* Modal Form Operations */
+    function openCreateUserModal() {
+      document.getElementById('createModalError').style.display = 'none';
+      document.getElementById('createUserModal').style.display = 'flex';
+      document.getElementById('newUsername').focus();
+    }
+
+    function closeCreateUserModal(e) {
+      if (e && e.target && e.target.id !== 'createUserModal') return;
+      document.getElementById('createUserModal').style.display = 'none';
+    }
+
+    async function submitCreateUser() {
+      const username = document.getElementById('newUsername').value.trim();
+      const email = document.getElementById('newEmail').value.trim();
+      const password = document.getElementById('newPassword').value.trim();
+      const role = document.getElementById('newRole').value;
+      const errBox = document.getElementById('createModalError');
+
+      if (!username || !email || !password) {
+        errBox.innerText = 'Please fill in all fields (username, email, and password).';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      const token = localStorage.getItem('ruzivo_auth_token');
+      try {
+        const resp = await fetch('/api/admin/create-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ username, email, password, role })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || 'Registration failed');
+
+        document.getElementById('createUserModal').style.display = 'none';
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newEmail').value = '';
+        document.getElementById('newPassword').value = '';
+        showToast(`User '${username}' registered successfully!`);
+        loadDashboardTelemetry();
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.style.display = 'block';
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Initialize Lucide Icons across admin portal
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

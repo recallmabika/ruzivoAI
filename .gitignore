@@ -30,6 +30,8 @@ data/processed/
 *.sqlite
 *.sqlite3
 data/*.db
+data/pgdata/
+data/postgresql_server.log
 
 # Model weights & binaries (belong on Hugging Face Hub, not GitHub)
 *.bin
@@ -47,6 +49,8 @@ docs/diagrams/
 *.png
 *.jpg
 *.jpeg
+!frontend/assets/*.png
+!frontend/assets/*.ico
 
 # Batch / temp scripts
 start_server.bat

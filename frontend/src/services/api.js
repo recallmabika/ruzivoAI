@@ -1,26 +1,30 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
-import { getToken, getSystemKey } from '../utils/storage';
+import { getToken, getSystemKey, getCustomServerUrl } from '../utils/storage';
 
 // Local IP of development machine on WiFi and server port
-const DEV_HOST = '192.168.1.120';
-const DEV_PORT = '8080';
+export const DEFAULT_HOST = '192.168.1.120';
+export const DEFAULT_PORT = '8080';
 
-const getBaseUrl = () => {
-  if (Platform.OS === 'web') {
-    return `http://localhost:${DEV_PORT}`;
+export const getBaseUrl = async () => {
+  const custom = await getCustomServerUrl();
+  if (custom && custom.trim()) {
+    return custom.trim().replace(/\/+$/, '');
   }
-  return `http://${DEV_HOST}:${DEV_PORT}`;
+  if (Platform.OS === 'web') {
+    return `http://localhost:${DEFAULT_PORT}`;
+  }
+  return `http://${DEFAULT_HOST}:${DEFAULT_PORT}`;
 };
 
-const BASE_URL = getBaseUrl();
-
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: `http://${DEFAULT_HOST}:${DEFAULT_PORT}`,
   timeout: 30000,
 });
 
 api.interceptors.request.use(async (config) => {
+  const dynamicBase = await getBaseUrl();
+  config.baseURL = dynamicBase;
   const token = await getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

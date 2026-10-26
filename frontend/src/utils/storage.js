@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 const TOKEN_KEY = 'ruzivo_auth_token';
+const USERNAME_KEY = 'ruzivo_username';
 
 export const saveToken = async (token) => {
   if (Platform.OS === 'web') return localStorage.setItem(TOKEN_KEY, token);
@@ -18,8 +19,34 @@ export const removeToken = async () => {
   return SecureStore.deleteItemAsync(TOKEN_KEY);
 };
 
+export const saveUsername = async (name) => {
+  if (Platform.OS === 'web') return localStorage.setItem(USERNAME_KEY, name);
+  return SecureStore.setItemAsync(USERNAME_KEY, name);
+};
+
+export const getUsername = async () => {
+  if (Platform.OS === 'web') return localStorage.getItem(USERNAME_KEY);
+  return SecureStore.getItemAsync(USERNAME_KEY);
+};
+
+export const removeUsername = async () => {
+  if (Platform.OS === 'web') return localStorage.removeItem(USERNAME_KEY);
+  return SecureStore.deleteItemAsync(USERNAME_KEY);
+};
+
 const SYSTEM_KEY = 'ruzivo_system_key';
+const SERVER_URL_KEY = 'ruzivo_server_url';
 const CHATS_KEY = 'ruzivo_mobile_chats';
+
+export const saveCustomServerUrl = async (url) => {
+  if (Platform.OS === 'web') return localStorage.setItem(SERVER_URL_KEY, url);
+  return SecureStore.setItemAsync(SERVER_URL_KEY, url);
+};
+
+export const getCustomServerUrl = async () => {
+  if (Platform.OS === 'web') return localStorage.getItem(SERVER_URL_KEY);
+  return SecureStore.getItemAsync(SERVER_URL_KEY);
+};
 
 export const saveSystemKey = async (key) => {
   if (Platform.OS === 'web') return localStorage.setItem(SYSTEM_KEY, key);

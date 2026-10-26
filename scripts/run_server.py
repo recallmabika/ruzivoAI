@@ -3,10 +3,12 @@ import json
 import os
 import re
 import sys
+import subprocess
 import sqlite3
+import psycopg2
 import hashlib
 import secrets
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, quote_plus
 from pathlib import Path
 from google import genai
 from google.genai import types
@@ -15,9 +17,10 @@ if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-PROJECT_ROOT = Path(r"c:\Users\recal\Desktop\Level 2.2 Project\ruzivo")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SENTENCES_FILE = PROJECT_ROOT / "data" / "rag_knowledge_base" / "sentences.json"
 HTML_FILE = PROJECT_ROOT / "frontend" / "test_ui.html"
+ADMIN_HTML_FILE = PROJECT_ROOT / "frontend" / "admin.html"
 
 # Load knowledge base sentences & configuration
 def load_dotenv():
@@ -58,72 +61,565 @@ def load_dotenv():
 
 load_dotenv()
 
-# Real SQLite Authentication Database for Users & Sessions
+# Real PostgreSQL Authentication Database for Users & Sessions
 AUTH_DB_FILE = PROJECT_ROOT / "data" / "ruzivo_auth.db"
+PGDATA_DIR = PROJECT_ROOT / "data" / "pgdata"
+PG_CTL_BIN = Path(r"C:\Program Files\PostgreSQL\17\bin\pg_ctl.exe")
+
+
+def ensure_local_postgres_running():
+    """Checks if local PostgreSQL 17 is listening on port 5432, and starts it cleanly if needed."""
+    import socket
+    import time
+
+    def is_port_open():
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.5)
+            return s.connect_ex(("127.0.0.1", 5432)) == 0
+
+    if not is_port_open() and PG_CTL_BIN.exists() and PGDATA_DIR.exists():
+        try:
+            log_file = PROJECT_ROOT / "data" / "postgresql_server.log"
+            DETACHED_PROCESS = 0x00000008
+            CREATE_NEW_PROCESS_GROUP = 0x00000200
+            subprocess.Popen(
+                [str(PG_CTL_BIN), "-D", str(PGDATA_DIR), "-l", str(log_file), "start"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+            )
+            for _ in range(20):
+                if is_port_open():
+                    break
+                time.sleep(0.5)
+        except Exception as e:
+            print(f"[POSTGRES STARTUP WARNING] {e}")
+
+
+def get_pg_connection():
+    """Returns a live psycopg2 connection to the PostgreSQL database (cloud DATABASE_URL or local ruzivo_db)."""
+    import time
+    database_url = os.environ.get("DATABASE_URL", "").strip()
+    db_host = os.environ.get("POSTGRES_HOST", "localhost")
+    db_port = int(os.environ.get("POSTGRES_PORT", 5432))
+    db_name = os.environ.get("POSTGRES_DB", "ruzivo_db")
+    db_user = os.environ.get("POSTGRES_USER", "ruzivo_user")
+    db_pass = os.environ.get("POSTGRES_PASSWORD", "Ruzivo@323")
+    last_err = None
+    for _ in range(15):
+        try:
+            if database_url and ("localhost" not in database_url and "127.0.0.1" not in database_url):
+                return psycopg2.connect(database_url)
+            return psycopg2.connect(
+                host=db_host,
+                port=db_port,
+                dbname=db_name,
+                user=db_user,
+                password=db_pass,
+            )
+        except psycopg2.OperationalError as e:
+            last_err = e
+            if "starting up" in str(e).lower():
+                time.sleep(1.0)
+                continue
+            raise e
+    raise last_err
+
 
 def init_auth_db():
-    AUTH_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(AUTH_DB_FILE) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS sessions (
-                token TEXT PRIMARY KEY,
-                user_id INTEGER,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            )
-        """)
-        conn.commit()
+    ensure_local_postgres_running()
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id SERIAL PRIMARY KEY,
+                        username TEXT UNIQUE NOT NULL,
+                        email TEXT UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        role TEXT DEFAULT 'student',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS sessions (
+                        token TEXT PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS feedback (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                        query TEXT NOT NULL,
+                        response TEXT NOT NULL,
+                        rating TEXT NOT NULL,
+                        notes TEXT DEFAULT '',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS verification_codes (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        code TEXT NOT NULL,
+                        purpose TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+
+                # One-time migration from legacy SQLite file if PostgreSQL users table is empty
+                cursor.execute("SELECT COUNT(*) FROM users")
+                user_count = cursor.fetchone()[0]
+                if user_count == 0 and AUTH_DB_FILE.exists():
+                    try:
+                        with sqlite3.connect(AUTH_DB_FILE) as sq_conn:
+                            sq_cur = sq_conn.cursor()
+                            sq_cur.execute("SELECT id, username, email, password_hash, role, created_at FROM users")
+                            valid_user_ids = set()
+                            for u_row in sq_cur.fetchall():
+                                valid_user_ids.add(u_row[0])
+                                cursor.execute("""
+                                    INSERT INTO users (id, username, email, password_hash, role, created_at)
+                                    VALUES (%s, %s, %s, %s, %s, %s)
+                                    ON CONFLICT (id) DO NOTHING
+                                """, u_row)
+                            cursor.execute("SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users), 1), true)")
+
+                            sq_cur.execute("SELECT token, user_id, created_at FROM sessions")
+                            for s_row in sq_cur.fetchall():
+                                if s_row[1] in valid_user_ids:
+                                    cursor.execute("""
+                                        INSERT INTO sessions (token, user_id, created_at)
+                                        VALUES (%s, %s, %s)
+                                        ON CONFLICT (token) DO NOTHING
+                                    """, s_row)
+
+                            sq_cur.execute("SELECT id, user_id, query, response, rating, notes, created_at FROM feedback")
+                            for f_row in sq_cur.fetchall():
+                                f_uid = f_row[1] if f_row[1] in valid_user_ids else None
+                                cursor.execute("""
+                                    INSERT INTO feedback (id, user_id, query, response, rating, notes, created_at)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                    ON CONFLICT (id) DO NOTHING
+                                """, (f_row[0], f_uid, f_row[2], f_row[3], f_row[4], f_row[5], f_row[6]))
+                            cursor.execute("SELECT setval(pg_get_serial_sequence('feedback', 'id'), COALESCE((SELECT MAX(id) FROM feedback), 1), true)")
+                        print("[POSTGRESQL] Successfully migrated existing users, sessions, and feedback from SQLite to PostgreSQL!")
+                    except Exception as mig_err:
+                        conn.rollback()
+                        print(f"[POSTGRESQL MIGRATION NOTE] {mig_err}")
+
+                # Create default superadmin if not exists
+                cursor.execute("SELECT id FROM users WHERE LOWER(username) = 'admin' OR LOWER(email) = 'admin@ruzivo.org'")
+                if not cursor.fetchone():
+                    admin_pw_h = hashlib.sha256("Admin@Ruzivo2026".encode("utf-8")).hexdigest()
+                    cursor.execute("""
+                        INSERT INTO users (username, email, password_hash, role)
+                        VALUES ('admin', 'admin@ruzivo.org', %s, 'superadmin')
+                    """, (admin_pw_h,))
+                else:
+                    cursor.execute("UPDATE users SET role = 'superadmin' WHERE LOWER(username) = 'admin' OR LOWER(email) = 'admin@ruzivo.org'")
+        print("Connected to PostgreSQL (ruzivo_db on port 5432) successfully!")
+    finally:
+        conn.close()
 
 init_auth_db()
+
+def save_message_feedback(user_id, query: str, response: str, rating: str, notes: str = ""):
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO feedback (user_id, query, response, rating, notes)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (user_id, query.strip(), response.strip(), rating.strip().lower(), notes.strip()))
+        return True
+    finally:
+        conn.close()
+
+def get_feedback_learning_summary(limit: int = 5) -> str:
+    """Retrieves recent high-rated and low-rated interactions to guide continuous RLHF/few-shot in-context learning."""
+    try:
+        conn = get_pg_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT query, response FROM feedback 
+                    WHERE rating = 'good' 
+                    ORDER BY id DESC LIMIT %s
+                """, (limit,))
+                good_rows = cursor.fetchall()
+
+                cursor.execute("""
+                    SELECT query, response FROM feedback 
+                    WHERE rating = 'bad' 
+                    ORDER BY id DESC LIMIT %s
+                """, (limit,))
+                bad_rows = cursor.fetchall()
+        finally:
+            conn.close()
+
+        if not good_rows and not bad_rows:
+            return ""
+
+        summary_parts = []
+        if good_rows:
+            summary_parts.append("Mienzaniso yeMhinduro Dzakagashirwa Zvakanaka Nevashandisi (Reinforced Good Responses):")
+            for q, r in good_rows:
+                summary_parts.append(f"- Mubvunzo: '{q}' -> Mhinduro Yakachena: '{r[:120]}...'")
+        if bad_rows:
+            summary_parts.append("Mienzaniso yeZvakakanganiswa Kare Kuti Zvirege Kudzokororwa (Avoid Past Flaws / Negative Feedback):")
+            for q, r in bad_rows:
+                summary_parts.append(f"- Mubvunzo: '{q}' -> Mhinduro Yaisarurama: '{r[:120]}...' (Usadzokorore kukanganisa uku)")
+
+        return "\n".join(summary_parts)
+    except Exception as e:
+        print(f"[FEEDBACK ERROR] {e}")
+        return ""
 
 def hash_pw(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
-def register_user(username: str, email: str, password: str):
+def register_user(username: str, email: str, password: str, role: str = "student"):
     username = username.strip()
     email = email.strip()
-    with sqlite3.connect(AUTH_DB_FILE) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", (username,))
-        if cursor.fetchone():
-            return False, "Zita iri riri kutoshandiswa (Username already taken)."
-        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", (email,))
-        if cursor.fetchone():
-            return False, "Email iyi yakatonyoreswa kare (Email already registered)."
-        
-        pw_h = hash_pw(password)
-        cursor.execute("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", (username, email, pw_h))
-        user_id = cursor.lastrowid
-        token = secrets.token_hex(24)
-        cursor.execute("INSERT INTO sessions (token, user_id) VALUES (?, ?)", (token, user_id))
-        conn.commit()
-        return True, token
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(%s)", (username,))
+                if cursor.fetchone():
+                    return False, "Zita iri riri kutoshandiswa (Username already taken)."
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(%s)", (email,))
+                if cursor.fetchone():
+                    return False, "Email iyi yakatonyoreswa kare (Email already registered)."
+                
+                pw_h = hash_pw(password)
+                cursor.execute(
+                    "INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s) RETURNING id",
+                    (username, email, pw_h, role)
+                )
+                user_id = cursor.fetchone()[0]
+                token = secrets.token_hex(24)
+                cursor.execute("INSERT INTO sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
+                return True, token
+    finally:
+        conn.close()
 
 def authenticate_user(username: str, password: str):
     username = username.strip()
-    with sqlite3.connect(AUTH_DB_FILE) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, password_hash, username FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)", (username, username))
-        row = cursor.fetchone()
-        if not row:
-            return False, "Zita kana pasiwadhi haina kururama (Invalid credentials)."
-        user_id, pw_h, actual_username = row
-        if hash_pw(password) != pw_h:
-            return False, "Zita kana pasiwadhi haina kururama (Invalid credentials)."
-        
-        token = secrets.token_hex(24)
-        cursor.execute("INSERT INTO sessions (token, user_id) VALUES (?, ?)", (token, user_id))
-        conn.commit()
-        return True, (token, actual_username)
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT id, password_hash, username, role FROM users WHERE LOWER(username) = LOWER(%s) OR LOWER(email) = LOWER(%s)",
+                    (username, username)
+                )
+                row = cursor.fetchone()
+                if not row:
+                    return False, "Zita kana pasiwedhi haina kururama (Invalid credentials)."
+                user_id, pw_h, actual_username, role = row
+                if hash_pw(password) != pw_h:
+                    return False, "Zita kana pasiwedhi haina kururama (Invalid credentials)."
+                
+                token = secrets.token_hex(24)
+                cursor.execute("INSERT INTO sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
+                return True, (token, actual_username, role or "student")
+    finally:
+        conn.close()
+
+def authenticate_or_register_oauth(email: str, name: str, provider: str = "google"):
+    email = email.strip()
+    name = name.strip() or email.split("@")[0]
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, username, role FROM users WHERE LOWER(email) = LOWER(%s)", (email,))
+                row = cursor.fetchone()
+                if row:
+                    user_id, actual_username, role = row
+                else:
+                    base_username = re.sub(r'[^a-zA-Z0-9_]', '', name.replace(' ', '_')) or "user"
+                    username = base_username
+                    idx = 1
+                    while True:
+                        cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(%s)", (username.lower(),))
+                        if not cursor.fetchone():
+                            break
+                        username = f"{base_username}_{idx}"
+                        idx += 1
+                    pw_h = hash_pw(secrets.token_hex(32))
+                    role = "student"
+                    cursor.execute(
+                        "INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s) RETURNING id",
+                        (username, email, pw_h, role)
+                    )
+                    user_id = cursor.fetchone()[0]
+                    actual_username = username
+
+                token = secrets.token_hex(24)
+                cursor.execute("INSERT INTO sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
+                return token, actual_username, role or "student"
+    finally:
+        conn.close()
+
+def get_user_by_token(token: str):
+    if not token:
+        return None
+    conn = get_pg_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT u.id, u.username, u.email, u.role, u.created_at 
+                FROM sessions s 
+                JOIN users u ON s.user_id = u.id 
+                WHERE s.token = %s
+            """, (token.strip(),))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return {
+                "id": row[0],
+                "username": row[1],
+                "email": row[2],
+                "role": row[3] or "student",
+                "created_at": str(row[4])
+            }
+    finally:
+        conn.close()
+
+def verify_user_password(token: str, password: str):
+    if not token or not password:
+        return False, "Token nepasiwedhi zvinodiwa (Token and password required)."
+    conn = get_pg_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT u.password_hash 
+                FROM sessions s 
+                JOIN users u ON s.user_id = u.id 
+                WHERE s.token = %s
+            """, (token.strip(),))
+            row = cursor.fetchone()
+            if not row:
+                return False, "Akaundi haina kuwanikwa (Account not found)."
+            pw_hash = row[0]
+            if not pw_hash:
+                return False, "Akaundi ino haina pasiwedhi (Account has no password set)."
+            if hash_pw(password.strip()) != pw_hash:
+                return False, "Pasiwedhi yamaisa haina kururama (Incorrect password)."
+            return True, "Pasiwedhi yakarurama (Password verified)."
+    finally:
+        conn.close()
+
+def create_2fa_delete_code(token: str):
+    if not token:
+        return False, "Token inodiwa (Authorization required)."
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT u.id, u.email 
+                    FROM sessions s 
+                    JOIN users u ON s.user_id = u.id 
+                    WHERE s.token = %s
+                """, (token.strip(),))
+                row = cursor.fetchone()
+                if not row:
+                    return False, "Akaundi haina kuwanikwa (Account not found)."
+                user_id, email = row
+
+                code = str(secrets.randbelow(900000) + 100000)
+                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s AND purpose = 'account_deletion'", (user_id,))
+                cursor.execute("""
+                    INSERT INTO verification_codes (user_id, code, purpose)
+                    VALUES (%s, %s, 'account_deletion')
+                """, (user_id, code))
+    finally:
+        conn.close()
+
+    smtp_server = os.environ.get("SMTP_SERVER", "")
+    smtp_user = os.environ.get("SMTP_USER", "")
+    smtp_pass = os.environ.get("SMTP_PASS", "")
+    smtp_port = int(os.environ.get("SMTP_PORT", 587))
+    email_sent = False
+    if smtp_server and smtp_user and smtp_pass and email:
+        try:
+            import smtplib
+            from email.message import EmailMessage
+            msg = EmailMessage()
+            msg.set_content(f"Mhoro,\n\nKodhi yako ye 2FA yekudzima akaundi paRuzivo AI ndeiyi:\n\n{code}\n\nKana usiriwe wakakumbira kudzima uku, chiramba usina kuisa kodhi iyi.")
+            msg['Subject'] = 'Ruzivo AI - Kodhi ye 2FA yeKudzima Akaundi'
+            msg['From'] = smtp_user
+            msg['To'] = email
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+            email_sent = True
+        except Exception as e:
+            print(f"[SMTP ERROR] Kutadza kutumira email: {e}")
+
+    masked_email = email
+    if email and "@" in email:
+        parts = email.split("@")
+        masked_name = parts[0][0] + "***" + (parts[0][-1] if len(parts[0]) > 1 else "")
+        masked_email = f"{masked_name}@{parts[1]}"
+
+    print(f"[SECURITY 2FA DISPATCH] Akaundi: {email} | 2FA Code: {code}")
+    return True, {
+        "email": masked_email,
+        "code": code,
+        "email_sent": email_sent
+    }
+
+def delete_user_by_token(token: str, password: str = "", code_2fa: str = ""):
+    if not token:
+        return False, "Token inodiwa (Authorization required)."
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT u.id, u.username, u.email, u.password_hash 
+                    FROM sessions s 
+                    JOIN users u ON s.user_id = u.id 
+                    WHERE s.token = %s
+                """, (token.strip(),))
+                row = cursor.fetchone()
+                if not row:
+                    return False, "Akaundi haina kuwanikwa kana kuti session yapera (Account not found)."
+                user_id, username, email, pw_hash = row
+                
+                if pw_hash and password:
+                    if hash_pw(password) != pw_hash:
+                        return False, "Pasiwedhi yamaisa haina kururama (Incorrect password)."
+                elif pw_hash and not password:
+                    return False, "Pasiwedhi inodiwa kuti musimbise kudzima akaundi (Password is required)."
+
+                if not code_2fa:
+                    return False, "Kodhi ye 2FA inodiwa (2FA code is required)."
+                    
+                cursor.execute("""
+                    SELECT code FROM verification_codes 
+                    WHERE user_id = %s AND purpose = 'account_deletion' 
+                    ORDER BY id DESC LIMIT 1
+                """, (user_id,))
+                code_row = cursor.fetchone()
+                if not code_row or code_row[0].strip() != code_2fa.strip():
+                    return False, "Kodhi ye 2FA yamaisa haina kururama (Invalid 2FA code)."
+                    
+                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s", (user_id,))
+                cursor.execute("DELETE FROM sessions WHERE user_id = %s", (user_id,))
+                cursor.execute("DELETE FROM feedback WHERE user_id = %s", (user_id,))
+                cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+                return True, "Akaundi yadzimwa zvachose zvakachengeteka."
+    finally:
+        conn.close()
+
+def admin_get_all_users():
+    conn = get_pg_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT u.id, u.username, u.email, u.role, u.created_at,
+                       (SELECT COUNT(*) FROM sessions s WHERE s.user_id = u.id) as active_sessions
+                FROM users u
+                ORDER BY u.id DESC
+            """)
+            users = []
+            for r in cursor.fetchall():
+                users.append({
+                    "id": r[0],
+                    "username": r[1],
+                    "email": r[2],
+                    "role": r[3] or "student",
+                    "created_at": str(r[4]),
+                    "active_sessions": r[5]
+                })
+            return users
+    finally:
+        conn.close()
+
+def admin_delete_user(user_id: int):
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username, role FROM users WHERE id = %s", (user_id,))
+                row = cursor.fetchone()
+                if not row:
+                    return False, "Mushandisi haana kuwanikwa (User not found)."
+                if row[1] == "superadmin":
+                    cursor.execute("SELECT COUNT(*) FROM users WHERE role = 'superadmin'")
+                    if cursor.fetchone()[0] <= 1:
+                        return False, "Cannot delete the sole remaining superadmin."
+                cursor.execute("DELETE FROM sessions WHERE user_id = %s", (user_id,))
+                cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+                return True, f"User '{row[0]}' permanently deleted."
+    finally:
+        conn.close()
+
+def admin_get_all_sessions():
+    conn = get_pg_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT s.token, s.user_id, u.username, u.email, u.role, s.created_at
+                FROM sessions s
+                JOIN users u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+            """)
+            sessions = []
+            for r in cursor.fetchall():
+                token_display = r[0][:8] + "..." + r[0][-6:] if len(r[0]) > 14 else r[0]
+                sessions.append({
+                    "token_id": r[0],
+                    "token_masked": token_display,
+                    "user_id": r[1],
+                    "username": r[2],
+                    "email": r[3],
+                    "role": r[4] or "student",
+                    "created_at": str(r[5])
+                })
+            return sessions
+    finally:
+        conn.close()
+
+def admin_revoke_session(token: str):
+    if not token:
+        return False, "Token is required."
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM sessions WHERE token = %s", (token.strip(),))
+                return True, "Session revoked successfully."
+    finally:
+        conn.close()
+
+def admin_update_user_role(user_id: int, new_role: str):
+    new_role = new_role.strip().lower()
+    if new_role not in ("student", "teacher", "moderator", "admin", "superadmin"):
+        return False, "Invalid role specified."
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT username, role FROM users WHERE id = %s", (user_id,))
+                row = cursor.fetchone()
+                if not row:
+                    return False, "User not found."
+                cursor.execute("UPDATE users SET role = %s WHERE id = %s", (new_role, user_id))
+                return True, f"Role for '{row[0]}' changed to {new_role}."
+    finally:
+        conn.close()
 
 print("Loading RAG Knowledge Base...")
 if SENTENCES_FILE.exists():
@@ -176,21 +672,89 @@ def is_strictly_non_shona(text: str) -> bool:
         return True
     return False
 
+def check_complex_math(query: str):
+    """
+    Checks if query contains complex mathematics that should not be solved.
+    The system only solves simple primary school level arithmetic (basic addition, subtraction,
+    multiplication, and division with small numbers).
+    If it is complex mathematics (calculus, algebra, trigonometry, matrices, logarithms, roots,
+    complex equations, geometry, statistics, polynomials, etc.), it returns (True, refusal_message).
+    Otherwise returns (False, None).
+    """
+    cleaned = query.strip().lower()
+
+    # 1. Complex math terms & keywords
+    complex_math_keywords = [
+        r'\balgebra\b', r'\bcalculus\b', r'\bderivative\b', r'\bderivatives\b', r'\bintegral\b',
+        r'\bintegrals\b', r'\bintegration\b', r'\bdifferentiate\b', r'\btrigonometry\b',
+        r'\bsin\b', r'\bcos\b', r'\btan\b', r'\bcosine\b', r'\btangent\b', r'\blog\b',
+        r'\blogarithm\b', r'\bln\b', r'\bmatrix\b', r'\bmatrices\b', r'\bvector\b',
+        r'\bvectors\b', r'\bquadratic\b', r'\bpolynomial\b', r'\bequation\b', r'\bequations\b',
+        r'\bsolve for\b', r'\bhypotenuse\b', r'\bpythagoras\b', r'\bgeometry\b', r'\btheorem\b',
+        r'\bvariance\b', r'\bstandard deviation\b', r'\bprobability\b', r'\bpermutations\b',
+        r'\bcombinations\b', r'\bfactorial\b', r'\blimit\b', r'\blimits\b', r'\basymptote\b',
+        r'\bsqrt\b', r'\bsquare root\b', r'\bcube root\b', r'\bmidzimu yenhamba\b',
+        r'\bmasvomhu akaomarara\b', r'\bmasvomhu ekusekondari\b', r'\bmasvomhu epamusoro\b'
+    ]
+
+    for pat in complex_math_keywords:
+        if re.search(pat, cleaned):
+            return True, "Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Harikwanisi kugadzirisa masvomhu akaomarara kana epamusoro (complex mathematics)."
+
+    # 2. Mathematical symbols indicative of complex math: ^ (powers), √, ∫, ∑, ∂, dy/dx, etc.
+    if re.search(r'[\^√∫∑∂πθλ]|\bdy/dx\b|\bdx\b', cleaned):
+        return True, "Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Harikwanisi kugadzirisa masvomhu akaomarara kana epamusoro (complex mathematics)."
+
+    # 3. Algebraic equations with variables like 2x + 5 = 15 or 3y - 4 = 8
+    if re.search(r'[0-9]*\s*[a-zA-Z]\s*[\+\-\*\/]\s*[0-9a-zA-Z\s]*=', cleaned) or re.search(r'=\s*[0-9]*\s*[a-zA-Z]', cleaned):
+        return True, "Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Harikwanisi kugadzirisa masvomhu akaomarara kana epamusoro (complex mathematics)."
+
+    # 4. Check for nested/complex math expressions with multiple operations, brackets, or huge numbers
+    math_expr = re.findall(r'(\d+(?:\.\d+)?)\s*([\+\-\*\/xX÷])\s*(\d+(?:\.\d+)?)', cleaned)
+    operators_count = len(re.findall(r'[\+\-\*\/÷]', cleaned))
+    
+    # If expression has multiple chained operations or parentheses like (4 + 5) * (6 - 2) / 3
+    if '(' in cleaned and ')' in cleaned and operators_count >= 2:
+        return True, "Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Harikwanisi kugadzirisa masvomhu akaomarara kana epamusoro (complex mathematics)."
+
+    if operators_count > 2:
+        return True, "Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Harikwanisi kugadzirisa masvomhu akaomarara kana epamusoro (complex mathematics)."
+
+    # If numbers involved are exceedingly large (e.g. > 10,000 in multiplication or multi-digit powers)
+    numbers = [float(n) for n in re.findall(r'\b\d+(?:\.\d+)?\b', cleaned)]
+    if len(numbers) >= 2:
+        if any(n > 50000 for n in numbers) and ('*' in cleaned or 'x' in cleaned or '/' in cleaned or '÷' in cleaned):
+            return True, "Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Harikwanisi kugadzirisa masvomhu akaomarara kana epamusoro (complex mathematics)."
+
+    return False, None
+
 def generate_shona_response(query: str, context: str, api_key: str, custom_memory: str = "", conversation_history: str = "") -> str:
     client = genai.Client(api_key=api_key)
     
     system_instruction = (
         "You are RuzivoAI, an expert ChiShona language assistant dedicated to promoting and preserving ChiShona.\n\n"
         "STRICT OPERATING RULES:\n"
-        "1. CONCISE & PROPORTIONATE RESPONSES: Match the length of your answer to the user's query. If the user gives a simple greeting (e.g., 'Mangwanani', 'Masikati', 'Mhoro'), reply with a natural, concise, warm greeting (1 to 2 sentences max). Do NOT write long essays, paragraphs, or unsolicited background explanations for casual remarks.\n"
-        "2. DO NOT REPEAT WHO MADE YOU: NEVER introduce yourself, mention who created you, or cite Midlands State University (MSU) unless the user EXPLICITLY asks 'Wakasikwa naani?', 'Wakaitwa naani?', or 'Uri ani?'. For everyday questions and greetings, answer directly without reciting your origin story.\n"
-        "3. EXCLUSIVELY CHISHONA: You are strictly ChiShona-only. Every word of your output must be natural, authentic ChiShona. If input is in English or non-Shona, refuse briefly in 1 polite ChiShona sentence.\n"
-        "4. NATURAL & AUTHENTIC TONE: Use Shona proverbs (tsumo) or idioms (madimikira) only when naturally fitting, not redundantly forced into every single turn.\n"
-        "5. TEXTBOOK GROUNDING: If educational context is provided for a topic, ground your explanation strictly in that verified knowledge.\n"
-        "6. NO HALLUCINATION: If asked about a false or non-existent concept, concisely refuse or say 'Handizivi'."
+        "1. STRICT WORD LIMIT: You MUST keep your responses under 200 words. Never exceed 200 words under any circumstance.\n"
+        "2. CONCISE, PROPORTIONATE & DIRECT RESPONSES: Strictly follow the user's prompt without volunteering long, unrequested explanations or unrelated essays. Match the depth and length of your answer to what was asked. If given a simple greeting, reply with a simple, warm greeting (1 to 2 sentences). If asked a direct question, answer it directly and simply.\n"
+        "3. IDENTITY, NAME & CREATOR REASONING (CRITICAL DISTINCTION):\n"
+        "   - NAME INQUIRY: Being asked your name ('Zita rako ndiani?', 'Unonzi ani?', 'Uri ani?') and being asked who created you are TWO ENTIRELY DIFFERENT QUESTIONS. When asked for your name, answer simply and directly without lecturing about who created you: 'Ndinonzi Ruzivo AI. Ndingakubatsirai nei nhasi?' (or similar concise, helpful greeting).\n"
+        "   - CREATOR INQUIRY: ONLY when specifically asked who created you, who made you, or who the developer is ('Ndiani akakugadzira?', 'Wakagadzirwa naani?', 'Zita remunhu akakugadzira ndiani?'), state directly that you were developed by Recall Tawanda Mabika (Recall T. Mabika) sechikamu chechirongwa chezvidzidzo cheDanho rechipiri (Danho 2.2 / Level 2.2) paYunivhesiti yeMidlands State (MSU), pamwe chete neChikwata cheRuzivo.\n"
+        "   - SHONA VOCABULARY ENFORCEMENT: Never borrow the English words 'Level', 'Project', or 'Team' when speaking in ChiShona. Use authentic ChiShona words: 'danho' (for level), 'chirongwa' (for project), and 'chikwata' (for team).\n"
+        "   - Never conflate the two: do not dump the creator's backstory when the user only asked for your name!\n"
+        "4. LANGUAGE POLICY: Your primary language of communication is ChiShona. You fully comprehend inputs in either ChiShona or English. Always respond helpfully in authentic, high-quality ChiShona. If the user explicitly asks you to explain something in English or asks technical/help questions in English, you can provide a polite, natural explanation while maintaining your core identity as Ruzivo AI.\n"
+        "5. MATHEMATICS POLICY: You ONLY solve very simple primary school level arithmetic (basic addition, subtraction, multiplication, and division with small numbers, e.g., '5 + 3', '10 - 4', '6 * 2', '20 / 5'). If asked to solve ANY complex mathematics (algebra, calculus, trigonometry, quadratic equations, matrices, roots, logarithms, statistics, geometry, or multi-step formulas), you MUST REFUSE politely in 1 short ChiShona sentence: 'Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Handikwanisi kugadzirisa masvomhu akaomarara.'\n"
+        "6. NATURAL & AUTHENTIC TONE: Use Shona proverbs (tsumo) or idioms (madimikira) only when naturally fitting, not redundantly forced into every single turn.\n"
+        "7. TEXTBOOK GROUNDING: If educational context is provided for a topic, ground your explanation strictly in that verified knowledge.\n"
+        "8. NO HALLUCINATION: If asked about a false or non-existent concept, concisely refuse or say 'Handizivi'."
     )
 
     prompt_parts = []
+    
+    # Continuous learning from rated responses (RLHF / In-Context Learning)
+    feedback_learning = get_feedback_learning_summary(limit=4)
+    if feedback_learning:
+        prompt_parts.append(f"Zvakadzidzwa kubva paongororo dzeVashandisi (Continuous Alignment & RLHF Guidelines):\n{feedback_learning}")
+
     if custom_memory:
         prompt_parts.append(f"Zvinodiwa / Ndangariro dzemushandisi (User Preferences):\n{custom_memory}")
     if conversation_history:
@@ -198,22 +762,24 @@ def generate_shona_response(query: str, context: str, api_key: str, custom_memor
     if context:
         prompt_parts.append(f"Mashoko eContext anobva muzvinyorwa zveChiShona:\n{context}")
     
-    prompt_parts.append(f"Mubvunzo wemushandisi:\n{query}")
+    prompt_parts.append(f"Mubvunzo wemushandisi:\n{query}\n\n(Cherechedzo: Mhinduro haifaniri kudarika mazwi mazana maviri / Max 200 words).")
     user_prompt = "\n\n---\n\n".join(prompt_parts)
 
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
         temperature=0.3,
-        max_output_tokens=1000,
+        max_output_tokens=350,
     )
 
-    # Core neural tiers for automatic failover
+    # Ultra-responsive models with priority ordering (fastest first)
     _engine_prefix = "".join(["g", "e", "m", "i", "n", "i"])
     candidate_models = [
-        f"{_engine_prefix}-flash-latest",
+        f"{_engine_prefix}-3.5-flash-lite",
+        f"{_engine_prefix}-3.1-flash-lite",
         f"{_engine_prefix}-flash-lite-latest",
-        f"{_engine_prefix}-2.5-flash-lite",
-        f"{_engine_prefix}-2.5-flash",
+        f"{_engine_prefix}-3.5-flash",
+        f"{_engine_prefix}-3.8-flash",
+        f"{_engine_prefix}-flash-latest",
     ]
     last_error = None
 
@@ -227,7 +793,11 @@ def generate_shona_response(query: str, context: str, api_key: str, custom_memor
             )
             if response and response.text:
                 print(f"Success with Core Tier {model_name}!")
-                return response.text.strip()
+                text = response.text.strip()
+                words = text.split()
+                if len(words) > 200:
+                    text = " ".join(words[:200]) + "..."
+                return text
         except Exception as e:
             last_error = e
             err_str = str(e).lower()
@@ -254,21 +824,286 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(HTML_FILE.read_bytes())
-        else:
-            super().do_GET()
+            return
+
+        if self.path in ("/admin", "/admin.html"):
+            self.send_response(200)
+            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(ADMIN_HTML_FILE.read_bytes())
+            return
+
+        if self.path in ("/favicon.ico", "/favicon.png"):
+            fname = "favicon.ico" if self.path == "/favicon.ico" else "favicon.png"
+            fav_path = PROJECT_ROOT / "frontend" / "assets" / fname
+            if fav_path.exists():
+                self.send_response(200)
+                self.send_header("Content-type", "image/x-icon" if fname.endswith(".ico") else "image/png")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                self.wfile.write(fav_path.read_bytes())
+                return
+
+        if self.path.startswith("/assets/"):
+            asset_rel = self.path.lstrip("/").split("?")[0]
+            asset_path = (PROJECT_ROOT / "frontend" / asset_rel).resolve()
+            if asset_path.exists() and asset_path.is_file():
+                self.send_response(200)
+                content_type = "image/png"
+                if asset_path.suffix.lower() == ".svg":
+                    content_type = "image/svg+xml"
+                elif asset_path.suffix.lower() in (".jpg", ".jpeg"):
+                    content_type = "image/jpeg"
+                elif asset_path.suffix.lower() == ".ico":
+                    content_type = "image/x-icon"
+                self.send_header("Content-type", content_type)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                self.wfile.write(asset_path.read_bytes())
+                return
+            else:
+                self.send_response(404)
+                self.end_headers()
+                return
+
+        if self.path.startswith("/auth/me"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            if not token:
+                query_params = parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
+                token = query_params.get("token", [""])[0]
+
+            user_data = get_user_by_token(token)
+            if not user_data:
+                self.send_json_response(401, {"detail": "Hapana mushandisi anozivikanwa (Unauthorized)."})
+                return
+
+            self.send_json_response(200, user_data)
+            return
+
+        if self.path.startswith("/api/admin/users"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Unofanira kuve Superadmin kuti upinde pano."})
+                return
+            users = admin_get_all_users()
+            self.send_json_response(200, {"users": users, "total": len(users)})
+            return
+
+        if self.path.startswith("/api/admin/stats"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Unofanira kuve Superadmin kuti upinde pano."})
+                return
+            users = admin_get_all_users()
+            rag_count = len(knowledge_sentences) if 'knowledge_sentences' in globals() else 14201
+            stats = {
+                "total_users": len(users),
+                "superadmins": sum(1 for u in users if u.get("role") == "superadmin"),
+                "students": sum(1 for u in users if u.get("role") == "student"),
+                "rag_sentences": rag_count,
+                "server_status": "Mhenyo (Online)"
+            }
+            self.send_json_response(200, stats)
+            return
+
+        if self.path.startswith("/api/admin/sessions"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Superadmin privilege required."})
+                return
+            sessions = admin_get_all_sessions()
+            self.send_json_response(200, {"sessions": sessions, "total": len(sessions)})
+            return
+
+        if self.path.startswith("/api/admin/corpus-sample"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Superadmin privilege required."})
+                return
+            sample = knowledge_sentences[:20] if 'knowledge_sentences' in globals() else []
+            self.send_json_response(200, {
+                "total_sentences": len(knowledge_sentences) if 'knowledge_sentences' in globals() else 14201,
+                "sample": sample
+            })
+            return
+
+        super().do_GET()
 
     def send_json_response(self, code: int, payload: dict):
-        self.send_response(code)
-        self.send_header("Content-type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "*")
-        self.end_headers()
-        self.wfile.write(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+        try:
+            self.send_response(code)
+            self.send_header("Content-type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
 
     def do_POST(self):
         content_len = int(self.headers.get("Content-Length", 0))
         post_body = self.rfile.read(content_len) if content_len > 0 else b""
+
+        # Superadmin Actions
+        if self.path in ("/api/admin/delete-user", "/api/admin/delete-user/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Unofanira kuve Superadmin."})
+                return
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+            except Exception:
+                data = {}
+            target_user_id = data.get("user_id")
+            if not target_user_id:
+                self.send_json_response(400, {"detail": "User ID inodiwa."})
+                return
+            success, msg = admin_delete_user(int(target_user_id))
+            if not success:
+                self.send_json_response(400, {"detail": msg})
+                return
+            self.send_json_response(200, {"message": msg})
+            return
+
+        if self.path in ("/api/admin/update-role", "/api/admin/update-role/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Superadmin privilege required."})
+                return
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+            except Exception:
+                data = {}
+            target_user_id = data.get("user_id")
+            new_role = data.get("role", "student")
+            if not target_user_id:
+                self.send_json_response(400, {"detail": "User ID is required."})
+                return
+            success, msg = admin_update_user_role(int(target_user_id), new_role)
+            if not success:
+                self.send_json_response(400, {"detail": msg})
+                return
+            self.send_json_response(200, {"message": msg})
+            return
+
+        if self.path in ("/api/admin/create-user", "/api/admin/create-user/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Superadmin privilege required."})
+                return
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+            except Exception:
+                data = {}
+            u_name = data.get("username", "").strip()
+            u_email = data.get("email", "").strip()
+            u_pass = data.get("password", "").strip()
+            u_role = data.get("role", "student").strip()
+            if not u_name or not u_email or not u_pass:
+                self.send_json_response(400, {"detail": "Zadza zita, email, nepasiwedhi."})
+                return
+            success, result = register_user(u_name, u_email, u_pass, role=u_role)
+            if not success:
+                self.send_json_response(400, {"detail": result})
+                return
+            self.send_json_response(200, {"message": f"User '{u_name}' registered successfully.", "role": u_role})
+            return
+
+        if self.path in ("/api/admin/revoke-session", "/api/admin/revoke-session/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token)
+            if not user_data or user_data.get("role") not in ("admin", "superadmin"):
+                self.send_json_response(403, {"detail": "Superadmin privilege required."})
+                return
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+            except Exception:
+                data = {}
+            target_token = data.get("session_token", "").strip()
+            if not target_token:
+                self.send_json_response(400, {"detail": "session_token is required."})
+                return
+            success, msg = admin_revoke_session(target_token)
+            if not success:
+                self.send_json_response(400, {"detail": msg})
+                return
+            self.send_json_response(200, {"message": msg})
+        # Verify password endpoint before advancing to 2FA
+        if self.path in ("/auth/delete/verify-password", "/auth/delete/verify-password/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            password = ""
+            try:
+                data = json.loads(post_body.decode("utf-8")) if post_body else {}
+                if not token:
+                    token = data.get("token", "").strip()
+                password = data.get("password", "").strip()
+            except Exception:
+                pass
+            success, msg = verify_user_password(token, password)
+            if not success:
+                self.send_json_response(400, {"detail": msg})
+                return
+            self.send_json_response(200, {"message": msg})
+            return
+
+        # Request 2FA code for account deletion
+        if self.path in ("/auth/delete/request-2fa", "/auth/delete/request-2fa/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            if not token:
+                try:
+                    data = json.loads(post_body.decode("utf-8")) if post_body else {}
+                    token = data.get("token", "").strip()
+                except Exception:
+                    pass
+            success, res = create_2fa_delete_code(token)
+            if not success:
+                self.send_json_response(400, {"detail": res})
+                return
+            self.send_json_response(200, res)
+            return
+
+        # 0. Delete user account endpoint
+        if self.path in ("/auth/delete", "/auth/delete/"):
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            password = ""
+            code_2fa = ""
+            try:
+                data = json.loads(post_body.decode("utf-8")) if post_body else {}
+                if not token:
+                    token = data.get("token", "").strip()
+                password = data.get("password", "").strip()
+                code_2fa = data.get("code_2fa", "").strip()
+            except Exception:
+                pass
+            success, msg = delete_user_by_token(token, password=password, code_2fa=code_2fa)
+            if not success:
+                self.send_json_response(400, {"detail": msg})
+                return
+            self.send_json_response(200, {"message": msg})
+            return
 
         # 1. Registration endpoint
         if self.path in ("/auth/register", "/auth/register/"):
@@ -281,7 +1116,47 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             password = data.get("password", "").strip()
 
             if not username or not email or not password:
-                self.send_json_response(400, {"detail": "Zadza mabhokisi ese (All fields required)."})
+                self.send_json_response(400, {"detail": "Zadzai mabhokisi ose anodiwa."})
+                return
+
+            if re.search(r'[0-9]', username):
+                self.send_json_response(400, {"detail": "Zita harifaniri kuve nenhamba (No numbers allowed in names)."})
+                return
+
+            if re.search(r"[^a-zA-Z\s'-]", username):
+                self.send_json_response(400, {"detail": "Zita harifaniri kuve nezviratidzo zvakasiyana (No special characters allowed in names)."})
+                return
+
+            if re.search(r"([a-zA-Z])\1\1", username, re.IGNORECASE):
+                self.send_json_response(400, {"detail": "Zita harigoni kuve nemabhii akafanana akatevedzana katatu (No name has 3 consecutive same letters)."})
+                return
+
+            if len(username.strip()) < 2 or len(username.strip()) > 40:
+                self.send_json_response(400, {"detail": "Zita rinofanira kuve nemabhii ari pakati pe 2 ne 40."})
+                return
+
+            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+                self.send_json_response(400, {"detail": "Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com)."})
+                return
+
+            if len(password) < 8 or len(password) > 24:
+                self.send_json_response(400, {"detail": "Pasiwedhi inofanira kuve nemabhii ari pakati pe 8 ne 24."})
+                return
+
+            if not re.search(r'[A-Z]', password):
+                self.send_json_response(400, {"detail": "Pasiwedhi inoda bhii guru (A-Z)."})
+                return
+
+            if not re.search(r'[a-z]', password):
+                self.send_json_response(400, {"detail": "Pasiwedhi inoda bhii diki (a-z)."})
+                return
+
+            if not re.search(r'[0-9]', password):
+                self.send_json_response(400, {"detail": "Pasiwedhi inoda nhamba (0-9)."})
+                return
+
+            if not re.search(r'[^a-zA-Z0-9]', password):
+                self.send_json_response(400, {"detail": "Pasiwedhi inoda chiratidzo chakasiyana (special character e.g. !@#$%^&*)."})
                 return
 
             success, result = register_user(username, email, password)
@@ -314,23 +1189,81 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                     pass
 
             if not username or not password:
-                self.send_json_response(400, {"detail": "Nyora zita rako nepasiwadhi."})
+                self.send_json_response(400, {"detail": "Ndapota nyorai email yenyu pamwe ne pasiwedhi."})
                 return
 
+            # Sign-in requires valid email only
+            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', username):
+                self.send_json_response(400, {"detail": "Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com)."})
+                return
+
+            # Note: Do not leak password length or rules on sign-in
             success, result = authenticate_user(username, password)
             if not success:
                 self.send_json_response(401, {"detail": result})
                 return
 
-            token, actual_username = result
+            token, actual_username, role = result
             self.send_json_response(200, {
                 "access_token": token,
                 "token_type": "bearer",
-                "username": actual_username
+                "username": actual_username,
+                "role": role
             })
             return
 
-        # 3. Chat endpoint
+        # 3. OAuth (Google / Apple) endpoint
+        if self.path in ("/auth/oauth", "/auth/oauth/"):
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+            except Exception:
+                data = {}
+            email = data.get("email", "").strip()
+            name = data.get("name", "").strip()
+            provider = data.get("provider", "google").strip()
+            if not email:
+                self.send_json_response(400, {"detail": "Email inodiwa (Email required for authentication)."})
+                return
+
+            token, actual_username, role = authenticate_or_register_oauth(email, name, provider)
+            self.send_json_response(200, {
+                "access_token": token,
+                "token_type": "bearer",
+                "username": actual_username,
+                "role": role
+            })
+            return
+
+        # 3b. Feedback / Rating Endpoint (Good/Bad rating for continuous learning)
+        if self.path in ("/api/feedback", "/api/feedback/"):
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+            except Exception:
+                data = {}
+            
+            auth_header = self.headers.get("Authorization", "")
+            token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
+            user_data = get_user_by_token(token) if token else None
+            user_id = user_data["id"] if user_data else None
+
+            query = data.get("query", "").strip()
+            response_text = data.get("response", "").strip()
+            rating = data.get("rating", "").strip().lower()
+            notes = data.get("notes", "").strip()
+
+            if not query or not response_text or rating not in ("good", "bad"):
+                self.send_json_response(400, {"detail": "Query, response, uye rating ('good' kana 'bad') zvinodiwa."})
+                return
+
+            save_message_feedback(user_id, query, response_text, rating, notes)
+            print(f"[FEEDBACK RECEIVED] rating={rating} | query='{query[:40]}...'")
+            self.send_json_response(200, {
+                "success": True, 
+                "detail": f"Ongororo ({rating}) yakachengetwa. Modhero ichadzidza kubva pane izvi."
+            })
+            return
+
+        # 4. Chat endpoint
         if self.path in ("/api/chat", "/chat", "/chat/"):
             try:
                 data = json.loads(post_body.decode("utf-8"))
@@ -354,18 +1287,18 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                     "response": "Ndapota isa Kiyi yeSisitemu (System Key) muZvirongwa (Settings) kuti Ruzivo AI rukwanise kupindura.",
                     "context": None
                 }
-            elif is_strictly_non_shona(query):
-                print(f"[NON-SHONA REJECTED] query: '{query}'")
-                response_payload = {
-                    "response": "Tine hurombo, Ruzivo AI yakagadzirirwa kushanda neMutauro weChiShona chete. Hurukuro ino haikwanisi kupindura kana kugadzirisa mibvunzo yakanyorwa neChirungu kana mimwe mitauro. Ndapota nyorai mubvunzo wenyu muChiShona chete kuti mukwanise kubatsirwa.",
-                    "context": None
-                }
             else:
-                # 1. RAG retrieval from 14,201 Shona book sentences
-                retrieved = search_knowledge_base(query)
+                q_lower = query.lower()
+                is_meta_query = any(k in q_lower for k in (
+                    "akakugadzira", "wakagadzirwa", "ani akaku", "wakasikwa", "muridzi wako", 
+                    "akakuita", "vakakugadzira", "zita rako", "uri ani", "unonzi ani", "ndinonzi ani"
+                ))
+                
+                # 1. RAG retrieval from 14,201 Shona book sentences (skip if identity/name/greeting to avoid irrelevant textbook quotes)
+                retrieved = search_knowledge_base(query) if not is_meta_query else []
                 context_str = "\n".join(retrieved) if retrieved else ""
 
-                # 2. Call core language engine
+                # 2. Call core language engine dynamically
                 try:
                     bot_reply = generate_shona_response(
                         query=query,
@@ -396,12 +1329,16 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
         self.send_json_response(404, {"detail": "Endpoint not found"})
 
+class ThreadedHTTPServer(http.server.ThreadingHTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
 if __name__ == "__main__":
-    PORT = 8080
+    PORT = int(os.environ.get("PORT", 8080))
     print("\n" + "=" * 60)
     print("    RUZIVO AI SERVER RUNNING AT:")
     print(f"   http://localhost:{PORT}")
     print(f"   http://0.0.0.0:{PORT} (accessible from mobile devices on WiFi)")
     print("=" * 60 + "\n")
-    server = http.server.HTTPServer(("0.0.0.0", PORT), RuzivoServerHandler)
+    server = ThreadedHTTPServer(("0.0.0.0", PORT), RuzivoServerHandler)
     server.serve_forever()

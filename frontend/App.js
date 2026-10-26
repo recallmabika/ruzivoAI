@@ -1,13 +1,14 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from './src/hooks/useAuth';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import MainApp from './src/navigation/MainApp';
 
 export default function App() {
-  const { isAuthenticated, loading, handleLogin, handleRegister, handleLogout } = useAuth();
+  const { isAuthenticated, currentUser, loading, handleLogin, handleRegister, handleLogout } = useAuth();
   const [showRegister, setShowRegister] = React.useState(false);
   const [guestUser, setGuestUser] = React.useState(null);
 
@@ -22,38 +23,38 @@ export default function App() {
   if (!isAuthenticated && !guestUser) {
     if (showRegister) {
       return (
-        <>
-          <StatusBar style="light" />
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
           <RegisterScreen
             onRegister={handleRegister}
             onNavigateLogin={() => setShowRegister(false)}
-            onGuestLogin={() => setGuestUser('Recall')}
+            onGuestLogin={() => setGuestUser('Muenzi')}
           />
-        </>
+        </SafeAreaProvider>
       );
     }
     return (
-      <>
-        <StatusBar style="light" />
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
         <LoginScreen
           onLogin={handleLogin}
           onNavigateRegister={() => setShowRegister(true)}
-          onGuestLogin={() => setGuestUser('Recall')}
+          onGuestLogin={() => setGuestUser('Muenzi')}
         />
-      </>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar style="light" />
       <MainApp
-        username={guestUser || 'Recall'}
+        username={guestUser || currentUser || 'Muenzi'}
         onLogout={() => {
           setGuestUser(null);
           handleLogout();
         }}
       />
-    </>
+    </SafeAreaProvider>
   );
 }
