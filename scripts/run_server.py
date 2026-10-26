@@ -3,12 +3,16 @@ import json
 import os
 import re
 import sys
+import time
+import html
+import hmac
+import threading
 import subprocess
 import sqlite3
 import psycopg2
 import hashlib
 import secrets
-from urllib.parse import parse_qs, quote_plus
+from urllib.parse import parse_qs, quote_plus, urlparse
 from pathlib import Path
 from google import genai
 from google.genai import types
@@ -281,7 +285,160 @@ def get_feedback_learning_summary(limit: int = 5) -> str:
         return ""
 
 def hash_pw(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    """Hashes a password using PBKDF2-HMAC-SHA256 with a random 16-byte cryptographic salt (150,000 iterations)."""
+    salt = secrets.token_hex(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 150000)
+    return f"pbkdf2_sha256$150000${salt}${dk.hex()}"
+
+
+def verify_pw(password: str, stored_hash: str) -> tuple[bool, bool]:
+    """
+    Constant-time password verification (`hmac.compare_digest`).
+    Returns (is_valid, needs_rehash_to_pbkdf2).
+    """
+    if not password or not stored_hash:
+        return False, False
+    if stored_hash.startswith("pbkdf2_sha256$"):
+        try:
+            parts = stored_hash.split("$")
+            iterations = int(parts[1])
+            salt = parts[2]
+            expected_hex = parts[3]
+            dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), iterations)
+            return hmac.compare_digest(dk.hex(), expected_hex), False
+        except Exception:
+            return False, False
+    # Legacy unsalted SHA-256 support with automatic upgrade flag
+    legacy_hex = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    is_match = hmac.compare_digest(legacy_hex, stored_hash)
+    return is_match, is_match
+
+
+# ==============================================================================
+# SECURITY MIDDLEWARE: BRUTE-FORCE LOCKOUT, CSRF, XSS & FORM TAMPERING DEFENSE
+# ==============================================================================
+SECURITY_LOCK = threading.Lock()
+CSRF_SECRET = os.environ.get("SECRET_KEY", "ruzivo-csrf-hmac-key-2026") + "-" + secrets.token_hex(16)
+
+# Track failed logins by IP and by account email: { key: {"count": int, "locked_until": float, "first_attempt": float} }
+BRUTE_FORCE_TRACKER = {}
+MAX_FAILED_LOGIN_ATTEMPTS = 5
+LOCKOUT_DURATION_SECONDS = 300  # 5-minute lockout after 5 failed attempts
+
+# General endpoint rate limiting per IP: { ip_bucket: [timestamps] }
+RATE_LIMIT_TRACKER = {}
+
+DANGEROUS_XSS_PATTERNS = re.compile(
+    r"(<script\b[^>]*>|javascript\s*:|onerror\s*=|onload\s*=|onmouseover\s*=|onclick\s*=|onfocus\s*=|<iframe\b|<object\b|<embed\b|<svg\b[^>]*on\w+\s*=|document\.cookie|eval\s*\()",
+    re.IGNORECASE,
+)
+
+
+def generate_csrf_token() -> str:
+    """Generates a cryptographically signed, timestamped CSRF token."""
+    nonce = secrets.token_hex(16)
+    ts = str(int(time.time()))
+    payload = f"{nonce}.{ts}"
+    sig = hmac.new(CSRF_SECRET.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"{payload}.{sig}"
+
+
+def verify_csrf_token(token: str, max_age: int = 86400) -> bool:
+    """Verifies the HMAC signature and expiration of a CSRF token in constant time."""
+    if not token or token.count(".") != 2:
+        return False
+    try:
+        nonce, ts_str, sig = token.split(".")
+        ts = int(ts_str)
+        if abs(time.time() - ts) > max_age:
+            return False
+        payload = f"{nonce}.{ts_str}"
+        expected_sig = hmac.new(CSRF_SECRET.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(sig, expected_sig)
+    except Exception:
+        return False
+
+
+def check_rate_limit(ip: str, bucket: str, max_requests: int = 20, window_seconds: int = 60) -> tuple[bool, int]:
+    """Sliding-window rate limiter per IP and action bucket. Returns (allowed, retry_after_sec)."""
+    now = time.time()
+    key = f"{ip}:{bucket}"
+    with SECURITY_LOCK:
+        timestamps = [t for t in RATE_LIMIT_TRACKER.get(key, []) if now - t < window_seconds]
+        if len(timestamps) >= max_requests:
+            retry_after = max(1, int(window_seconds - (now - timestamps[0])))
+            RATE_LIMIT_TRACKER[key] = timestamps
+            return False, retry_after
+        timestamps.append(now)
+        RATE_LIMIT_TRACKER[key] = timestamps
+        return True, 0
+
+
+def check_brute_force_lockout(ip: str, identifier: str = "") -> tuple[bool, int]:
+    """Checks if either the client IP or target account is currently locked out due to brute-force attempts."""
+    now = time.time()
+    keys = [f"ip:{ip}"]
+    if identifier:
+        keys.append(f"acct:{identifier.strip().lower()}")
+    with SECURITY_LOCK:
+        for k in keys:
+            entry = BRUTE_FORCE_TRACKER.get(k)
+            if entry:
+                if entry.get("locked_until", 0) > now:
+                    remaining = max(1, int(entry["locked_until"] - now))
+                    return False, remaining
+                elif entry.get("locked_until", 0) > 0 and now >= entry["locked_until"]:
+                    # Lockout expired, reset counter
+                    del BRUTE_FORCE_TRACKER[k]
+    return True, 0
+
+
+def record_failed_login(ip: str, identifier: str = "") -> tuple[int, int]:
+    """Records a failed login attempt for both IP and account. Returns (attempts_remaining, locked_seconds)."""
+    now = time.time()
+    keys = [f"ip:{ip}"]
+    if identifier:
+        keys.append(f"acct:{identifier.strip().lower()}")
+    locked_for = 0
+    remaining = MAX_FAILED_LOGIN_ATTEMPTS
+    with SECURITY_LOCK:
+        for k in keys:
+            entry = BRUTE_FORCE_TRACKER.get(k, {"count": 0, "locked_until": 0, "first_attempt": now})
+            if now - entry.get("first_attempt", now) > 900:
+                entry = {"count": 0, "locked_until": 0, "first_attempt": now}
+            entry["count"] += 1
+            if entry["count"] >= MAX_FAILED_LOGIN_ATTEMPTS:
+                entry["locked_until"] = now + LOCKOUT_DURATION_SECONDS
+                locked_for = max(locked_for, LOCKOUT_DURATION_SECONDS)
+            rem = max(0, MAX_FAILED_LOGIN_ATTEMPTS - entry["count"])
+            remaining = min(remaining, rem)
+            BRUTE_FORCE_TRACKER[k] = entry
+    return remaining, locked_for
+
+
+def reset_failed_login(ip: str, identifier: str = ""):
+    """Clears failed login counters upon successful authentication."""
+    with SECURITY_LOCK:
+        BRUTE_FORCE_TRACKER.pop(f"ip:{ip}", None)
+        if identifier:
+            BRUTE_FORCE_TRACKER.pop(f"acct:{identifier.strip().lower()}", None)
+
+
+def contains_xss_or_injection(value: str) -> bool:
+    """Detects XSS vectors (<script>, javascript:, event handlers) or null-byte injection in form fields."""
+    if not value:
+        return False
+    if "\x00" in value:
+        return True
+    return bool(DANGEROUS_XSS_PATTERNS.search(value))
+
+
+def sanitize_text_field(value: str, max_len: int = 500) -> str:
+    """Strips control characters, null bytes, and enforces length bounds."""
+    if not isinstance(value, str):
+        return ""
+    cleaned = value.replace("\x00", "").strip()
+    return cleaned[:max_len]
 
 def register_user(username: str, email: str, password: str, role: str = "student"):
     username = username.strip()
@@ -323,8 +480,11 @@ def authenticate_user(username: str, password: str):
                 if not row:
                     return False, "Zita kana pasiwedhi haina kururama (Invalid credentials)."
                 user_id, pw_h, actual_username, role = row
-                if hash_pw(password) != pw_h:
+                is_valid, needs_rehash = verify_pw(password, pw_h)
+                if not is_valid:
                     return False, "Zita kana pasiwedhi haina kururama (Invalid credentials)."
+                if needs_rehash:
+                    cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hash_pw(password), user_id))
                 
                 token = secrets.token_hex(24)
                 cursor.execute("INSERT INTO sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
@@ -411,7 +571,8 @@ def verify_user_password(token: str, password: str):
             pw_hash = row[0]
             if not pw_hash:
                 return False, "Akaundi ino haina pasiwedhi (Account has no password set)."
-            if hash_pw(password.strip()) != pw_hash:
+            is_valid, _ = verify_pw(password.strip(), pw_hash)
+            if not is_valid:
                 return False, "Pasiwedhi yamaisa haina kururama (Incorrect password)."
             return True, "Pasiwedhi yakarurama (Password verified)."
     finally:
@@ -498,7 +659,8 @@ def delete_user_by_token(token: str, password: str = "", code_2fa: str = ""):
                 user_id, username, email, pw_hash = row
                 
                 if pw_hash and password:
-                    if hash_pw(password) != pw_hash:
+                    is_valid, _ = verify_pw(password, pw_hash)
+                    if not is_valid:
                         return False, "Pasiwedhi yamaisa haina kururama (Incorrect password)."
                 elif pw_hash and not password:
                     return False, "Pasiwedhi inodiwa kuti musimbise kudzima akaundi (Password is required)."
@@ -810,26 +972,113 @@ def generate_shona_response(query: str, context: str, api_key: str, custom_memor
     raise last_error
 
 class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
+    def get_client_ip(self) -> str:
+        forwarded = self.headers.get("X-Forwarded-For", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return self.client_address[0] if self.client_address else "0.0.0.0"
+
+    def send_security_headers(self):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-XSS-Protection", "1; mode=block")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        self.send_header("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self' https: data: blob:; "
+            "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://appleid.cdn-apple.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "img-src 'self' data: https: blob:; "
+            "connect-src 'self' https:; "
+            "frame-src https://accounts.google.com https://appleid.apple.com; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self';"
+        )
+
+    def verify_csrf_and_origin(self, data: dict = None) -> tuple[bool, str]:
+        """
+        Verifies CSRF protection via:
+        1. Same-Origin verification on Origin / Sec-Fetch-Site headers when present.
+        2. Cryptographic HMAC-SHA256 CSRF token validation (X-CSRF-Token header or csrf_token field).
+        """
+        sec_fetch_site = self.headers.get("Sec-Fetch-Site", "").lower()
+        if sec_fetch_site == "cross-site":
+            return False, "Chikumbiro charambwa nekuda kwekuchengetedza (Cross-Site Request Forgery / CSRF blocked)."
+
+        origin = self.headers.get("Origin", "").strip()
+        host = self.headers.get("Host", "").strip()
+        if origin and origin != "null" and host:
+            try:
+                parsed_origin = urlparse(origin)
+                origin_host = parsed_origin.netloc.lower()
+                target_host = host.lower()
+                if origin_host and origin_host != target_host:
+                    # Allow localhost <-> 127.0.0.1 equivalence in local development
+                    local_hosts = {"localhost", "127.0.0.1"}
+                    o_name = origin_host.split(":")[0]
+                    t_name = target_host.split(":")[0]
+                    if not (o_name in local_hosts and t_name in local_hosts):
+                        return False, "Chikumbiro charambwa nekuda kwekuchengetedza (CSRF Origin mismatch)."
+            except Exception:
+                return False, "Chikumbiro charambwa (Invalid Origin header)."
+
+        csrf_token = self.headers.get("X-CSRF-Token", "").strip()
+        if not csrf_token and isinstance(data, dict):
+            csrf_token = str(data.get("csrf_token", "")).strip()
+
+        if csrf_token:
+            if not verify_csrf_token(csrf_token):
+                return False, "Chitupa chekuchengetedza fomu chapera nguva kana kuti hachisi icho (Invalid/Expired CSRF Token). Ndapota tangidzai peji (Refresh)."
+            return True, ""
+
+        # If a browser sends a cookie or Sec-Fetch-Site without X-CSRF-Token on protected form endpoints, check cookie fallback or reject
+        cookie_header = self.headers.get("Cookie", "")
+        if "ruzivo_csrf=" in cookie_header or sec_fetch_site in ("same-origin", "same-site"):
+            # Require explicit X-CSRF-Token header when the page has a CSRF cookie issued
+            if "ruzivo_csrf=" in cookie_header:
+                return False, "Chikumbiro chisina chitupa cheCSRF charambwa (Missing X-CSRF-Token header)."
+
+        return True, ""
+
     def do_OPTIONS(self):
         self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_security_headers()
+        self.send_header("Access-Control-Allow-Origin", self.headers.get("Origin", "*"))
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token")
         self.end_headers()
 
     def do_GET(self):
-        if self.path in ("/", "/index.html"):
+        if self.path.startswith("/auth/csrf"):
+            token = generate_csrf_token()
             self.send_response(200)
+            self.send_security_headers()
+            self.send_header("Content-type", "application/json; charset=utf-8")
+            self.send_header("Set-Cookie", f"ruzivo_csrf={token}; Path=/; SameSite=Strict")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(json.dumps({"csrf_token": token}).encode("utf-8"))
+            return
+
+        if self.path in ("/", "/index.html"):
+            csrf_token = generate_csrf_token()
+            self.send_response(200)
+            self.send_security_headers()
             self.send_header("Content-type", "text/html; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Set-Cookie", f"ruzivo_csrf={csrf_token}; Path=/; SameSite=Strict")
             self.end_headers()
             self.wfile.write(HTML_FILE.read_bytes())
             return
 
         if self.path in ("/admin", "/admin.html"):
+            csrf_token = generate_csrf_token()
             self.send_response(200)
+            self.send_security_headers()
             self.send_header("Content-type", "text/html; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Set-Cookie", f"ruzivo_csrf={csrf_token}; Path=/; SameSite=Strict")
             self.end_headers()
             self.wfile.write(ADMIN_HTML_FILE.read_bytes())
             return
@@ -839,8 +1088,8 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             fav_path = PROJECT_ROOT / "frontend" / "assets" / fname
             if fav_path.exists():
                 self.send_response(200)
+                self.send_security_headers()
                 self.send_header("Content-type", "image/x-icon" if fname.endswith(".ico") else "image/png")
-                self.send_header("Access-Control-Allow-Origin", "*")
                 self.send_header("Cache-Control", "public, max-age=86400")
                 self.end_headers()
                 self.wfile.write(fav_path.read_bytes())
@@ -849,8 +1098,11 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
         if self.path.startswith("/assets/"):
             asset_rel = self.path.lstrip("/").split("?")[0]
             asset_path = (PROJECT_ROOT / "frontend" / asset_rel).resolve()
-            if asset_path.exists() and asset_path.is_file():
+            # Prevent directory traversal outside frontend/assets
+            allowed_root = (PROJECT_ROOT / "frontend" / "assets").resolve()
+            if str(asset_path).startswith(str(allowed_root)) and asset_path.exists() and asset_path.is_file():
                 self.send_response(200)
+                self.send_security_headers()
                 content_type = "image/png"
                 if asset_path.suffix.lower() == ".svg":
                     content_type = "image/svg+xml"
@@ -859,13 +1111,13 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 elif asset_path.suffix.lower() == ".ico":
                     content_type = "image/x-icon"
                 self.send_header("Content-type", content_type)
-                self.send_header("Access-Control-Allow-Origin", "*")
                 self.send_header("Cache-Control", "public, max-age=86400")
                 self.end_headers()
                 self.wfile.write(asset_path.read_bytes())
                 return
             else:
                 self.send_response(404)
+                self.send_security_headers()
                 self.end_headers()
                 return
 
@@ -939,23 +1191,50 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
-        super().do_GET()
+        self.send_json_response(404, {"detail": "Peji harisati rawanikwa (Not Found)."})
 
-    def send_json_response(self, code: int, payload: dict):
+    def send_json_response(self, code: int, payload: dict, extra_headers: dict = None):
         try:
             self.send_response(code)
+            self.send_security_headers()
             self.send_header("Content-type", "application/json; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Origin", self.headers.get("Origin", "*"))
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "*")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token")
+            if extra_headers:
+                for hk, hv in extra_headers.items():
+                    self.send_header(hk, str(hv))
             self.end_headers()
             self.wfile.write(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
         except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
             pass
 
     def do_POST(self):
+        client_ip = self.get_client_ip()
         content_len = int(self.headers.get("Content-Length", 0))
+        # Reject oversized payloads (> 64 KB) to prevent memory exhaustion / DoS
+        if content_len > 65536:
+            self.send_json_response(413, {"detail": "Chikumbiro chakakura zvakanyanya (Payload Too Large)."})
+            return
         post_body = self.rfile.read(content_len) if content_len > 0 else b""
+
+        # Parse JSON body upfront when applicable for CSRF & Honeypot checks
+        parsed_json = {}
+        content_type = self.headers.get("Content-Type", "")
+        if post_body and "application/x-www-form-urlencoded" not in content_type:
+            try:
+                parsed_json = json.loads(post_body.decode("utf-8"))
+                if not isinstance(parsed_json, dict):
+                    parsed_json = {}
+            except Exception:
+                parsed_json = {}
+
+        # Verify CSRF & Same-Origin on all state-mutating authentication and admin endpoints
+        if self.path.startswith(("/auth/", "/api/admin/", "/api/feedback")):
+            csrf_ok, csrf_err = self.verify_csrf_and_origin(parsed_json)
+            if not csrf_ok:
+                self.send_json_response(403, {"detail": csrf_err})
+                return
 
         # Superadmin Actions
         if self.path in ("/api/admin/delete-user", "/api/admin/delete-user/"):
@@ -965,10 +1244,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             if not user_data or user_data.get("role") not in ("admin", "superadmin"):
                 self.send_json_response(403, {"detail": "Unofanira kuve Superadmin."})
                 return
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
+            data = parsed_json
             target_user_id = data.get("user_id")
             if not target_user_id:
                 self.send_json_response(400, {"detail": "User ID inodiwa."})
@@ -987,10 +1263,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             if not user_data or user_data.get("role") not in ("admin", "superadmin"):
                 self.send_json_response(403, {"detail": "Superadmin privilege required."})
                 return
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
+            data = parsed_json
             target_user_id = data.get("user_id")
             new_role = data.get("role", "student")
             if not target_user_id:
@@ -1010,14 +1283,14 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             if not user_data or user_data.get("role") not in ("admin", "superadmin"):
                 self.send_json_response(403, {"detail": "Superadmin privilege required."})
                 return
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
+            data = parsed_json
             u_name = data.get("username", "").strip()
             u_email = data.get("email", "").strip()
             u_pass = data.get("password", "").strip()
             u_role = data.get("role", "student").strip()
+            if contains_xss_or_injection(u_name) or contains_xss_or_injection(u_email):
+                self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
+                return
             if not u_name or not u_email or not u_pass:
                 self.send_json_response(400, {"detail": "Zadza zita, email, nepasiwedhi."})
                 return
@@ -1035,10 +1308,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             if not user_data or user_data.get("role") not in ("admin", "superadmin"):
                 self.send_json_response(403, {"detail": "Superadmin privilege required."})
                 return
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
+            data = parsed_json
             target_token = data.get("session_token", "").strip()
             if not target_token:
                 self.send_json_response(400, {"detail": "session_token is required."})
@@ -1048,35 +1318,58 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response(400, {"detail": msg})
                 return
             self.send_json_response(200, {"message": msg})
+            return
+
         # Verify password endpoint before advancing to 2FA
         if self.path in ("/auth/delete/verify-password", "/auth/delete/verify-password/"):
             auth_header = self.headers.get("Authorization", "")
             token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
-            password = ""
-            try:
-                data = json.loads(post_body.decode("utf-8")) if post_body else {}
-                if not token:
-                    token = data.get("token", "").strip()
-                password = data.get("password", "").strip()
-            except Exception:
-                pass
+            data = parsed_json
+            if not token:
+                token = str(data.get("token", "")).strip()
+            password = str(data.get("password", "")).strip()
+
+            lock_key = f"del:{token[:12]}" if token else "del:anon"
+            allowed, retry_sec = check_brute_force_lockout(client_ip, lock_key)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Makaedza pasiwedhi kakawandisa. Imbomirai kwemasekondi {retry_sec} ({retry_sec}s lockout)."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+
             success, msg = verify_user_password(token, password)
             if not success:
-                self.send_json_response(400, {"detail": msg})
+                rem, locked_for = record_failed_login(client_ip, lock_key)
+                if locked_for > 0:
+                    self.send_json_response(
+                        429,
+                        {"detail": f"{msg} Makaedza kakawandisa — imbomirai kwemaminitsi mashanu ({locked_for}s)."},
+                        extra_headers={"Retry-After": locked_for}
+                    )
+                else:
+                    self.send_json_response(400, {"detail": f"{msg} (Mune mikana {rem} yasara)."})
                 return
+
+            reset_failed_login(client_ip, lock_key)
             self.send_json_response(200, {"message": msg})
             return
 
         # Request 2FA code for account deletion
         if self.path in ("/auth/delete/request-2fa", "/auth/delete/request-2fa/"):
+            allowed, retry_sec = check_rate_limit(client_ip, "delete_2fa_req", max_requests=5, window_seconds=300)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Muri kukumbira kodhi ye2FA kakawandisa. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
             auth_header = self.headers.get("Authorization", "")
             token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
             if not token:
-                try:
-                    data = json.loads(post_body.decode("utf-8")) if post_body else {}
-                    token = data.get("token", "").strip()
-                except Exception:
-                    pass
+                token = str(parsed_json.get("token", "")).strip()
             success, res = create_2fa_delete_code(token)
             if not success:
                 self.send_json_response(400, {"detail": res})
@@ -1088,32 +1381,66 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
         if self.path in ("/auth/delete", "/auth/delete/"):
             auth_header = self.headers.get("Authorization", "")
             token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
-            password = ""
-            code_2fa = ""
-            try:
-                data = json.loads(post_body.decode("utf-8")) if post_body else {}
-                if not token:
-                    token = data.get("token", "").strip()
-                password = data.get("password", "").strip()
-                code_2fa = data.get("code_2fa", "").strip()
-            except Exception:
-                pass
+            data = parsed_json
+            if not token:
+                token = str(data.get("token", "")).strip()
+            password = str(data.get("password", "")).strip()
+            code_2fa = str(data.get("code_2fa", "")).strip()
+
+            lock_key = f"del2fa:{token[:12]}" if token else "del2fa:anon"
+            allowed, retry_sec = check_brute_force_lockout(client_ip, lock_key)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Makaedza kodhi ye2FA kakawandisa. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+
             success, msg = delete_user_by_token(token, password=password, code_2fa=code_2fa)
             if not success:
-                self.send_json_response(400, {"detail": msg})
+                rem, locked_for = record_failed_login(client_ip, lock_key)
+                if locked_for > 0:
+                    self.send_json_response(
+                        429,
+                        {"detail": f"{msg} Makaedza kakawandisa — imbomirai kwemasekondi {locked_for}."},
+                        extra_headers={"Retry-After": locked_for}
+                    )
+                else:
+                    self.send_json_response(400, {"detail": f"{msg} (Mikana {rem} yasara)."})
                 return
+
+            reset_failed_login(client_ip, lock_key)
             self.send_json_response(200, {"message": msg})
             return
 
         # 1. Registration endpoint
         if self.path in ("/auth/register", "/auth/register/"):
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
-            username = data.get("username", "").strip()
-            email = data.get("email", "").strip()
-            password = data.get("password", "").strip()
+            data = parsed_json
+            # Anti-bot Honeypot check
+            honeypot = str(data.get("website_url", "") or data.get("hp_field", "")).strip()
+            if honeypot:
+                print(f"[SECURITY] Blocked automated bot registration via honeypot from IP {client_ip}")
+                self.send_json_response(400, {"detail": "Chikumbiro charambwa nekuti charatidza senge robhoti (Bot / Honeypot detected)."})
+                return
+
+            allowed, retry_sec = check_rate_limit(client_ip, "register", max_requests=8, window_seconds=300)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Makaedza kuvhura maakaundi akawandisa panguva pfupi. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+
+            username = str(data.get("username", "")).strip()
+            email = str(data.get("email", "")).strip()
+            password = str(data.get("password", "")).strip()
+
+            if contains_xss_or_injection(username) or contains_xss_or_injection(email):
+                print(f"[SECURITY] Blocked XSS/Injection payload in /auth/register from IP {client_ip}")
+                self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
+                return
 
             if not username or not email or not password:
                 self.send_json_response(400, {"detail": "Zadzai mabhokisi ose anodiwa."})
@@ -1173,20 +1500,43 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
         # 2. Login endpoint
         if self.path in ("/auth/login", "/auth/login/"):
-            content_type = self.headers.get("Content-Type", "")
             username = ""
             password = ""
+            honeypot = ""
             if "application/x-www-form-urlencoded" in content_type:
                 parsed = parse_qs(post_body.decode("utf-8", errors="replace"))
                 username = parsed.get("username", [""])[0].strip()
                 password = parsed.get("password", [""])[0].strip()
+                honeypot = parsed.get("website_url", [""])[0].strip()
             else:
-                try:
-                    data = json.loads(post_body.decode("utf-8"))
-                    username = data.get("username", "").strip()
-                    password = data.get("password", "").strip()
-                except Exception:
-                    pass
+                username = str(parsed_json.get("username", "")).strip()
+                password = str(parsed_json.get("password", "")).strip()
+                honeypot = str(parsed_json.get("website_url", "") or parsed_json.get("hp_field", "")).strip()
+
+            # Anti-bot Honeypot check
+            if honeypot:
+                print(f"[SECURITY] Blocked automated bot login via honeypot from IP {client_ip}")
+                self.send_json_response(400, {"detail": "Chikumbiro charambwa nekuti charatidza senge robhoti (Bot / Honeypot detected)."})
+                return
+
+            # XSS & Injection check before touching database or regex
+            if contains_xss_or_injection(username):
+                print(f"[SECURITY] Blocked XSS/Injection payload in /auth/login from IP {client_ip}")
+                self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
+                return
+
+            # Brute-force lockout check (by IP and target email)
+            allowed, retry_sec = check_brute_force_lockout(client_ip, username)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {
+                        "detail": f"Makaedza kupinda kakawandisa. Akaundi yambovharwa kwemasekondi {retry_sec} kudzivirira matsotsi (Brute-force protection). Ndapota imbomirai.",
+                        "retry_after": retry_sec
+                    },
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
 
             if not username or not password:
                 self.send_json_response(400, {"detail": "Ndapota nyorai email yenyu pamwe ne pasiwedhi."})
@@ -1200,9 +1550,27 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             # Note: Do not leak password length or rules on sign-in
             success, result = authenticate_user(username, password)
             if not success:
-                self.send_json_response(401, {"detail": result})
+                rem, locked_for = record_failed_login(client_ip, username)
+                if locked_for > 0:
+                    self.send_json_response(
+                        429,
+                        {
+                            "detail": f"Makaedza kupinda kakawandisa (5/5). Akaundi yambovharwa kwemaminitsi mashanu ({locked_for}s) kudzivirira matsotsi.",
+                            "retry_after": locked_for
+                        },
+                        extra_headers={"Retry-After": locked_for}
+                    )
+                else:
+                    self.send_json_response(
+                        401,
+                        {
+                            "detail": f"{result} (Mune mikana {rem} yasara akaundi isati yambovharwa).",
+                            "attempts_remaining": rem
+                        }
+                    )
                 return
 
+            reset_failed_login(client_ip, username)
             token, actual_username, role = result
             self.send_json_response(200, {
                 "access_token": token,
@@ -1214,17 +1582,29 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
         # 3. OAuth (Google / Apple) endpoint
         if self.path in ("/auth/oauth", "/auth/oauth/"):
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
-            email = data.get("email", "").strip()
-            name = data.get("name", "").strip()
-            provider = data.get("provider", "google").strip()
-            if not email:
-                self.send_json_response(400, {"detail": "Email inodiwa (Email required for authentication)."})
+            allowed, retry_sec = check_rate_limit(client_ip, "oauth", max_requests=15, window_seconds=300)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Makaedza kupinda kakawandisa. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
                 return
 
+            data = parsed_json
+            email = str(data.get("email", "")).strip()
+            name = str(data.get("name", "")).strip()
+            provider = str(data.get("provider", "google")).strip()
+
+            if contains_xss_or_injection(email) or contains_xss_or_injection(name):
+                self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
+                return
+
+            if not email or not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+                self.send_json_response(400, {"detail": "Email inodiwa (Valid email required for authentication)."})
+                return
+
+            name = sanitize_text_field(name, max_len=60)
             token, actual_username, role = authenticate_or_register_oauth(email, name, provider)
             self.send_json_response(200, {
                 "access_token": token,
@@ -1236,20 +1616,29 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
         # 3b. Feedback / Rating Endpoint (Good/Bad rating for continuous learning)
         if self.path in ("/api/feedback", "/api/feedback/"):
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
-            
+            allowed, retry_sec = check_rate_limit(client_ip, "feedback", max_requests=20, window_seconds=60)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Muri kutumira ongororo kakawandisa. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+
+            data = parsed_json
             auth_header = self.headers.get("Authorization", "")
             token = auth_header.replace("Bearer ", "").strip() if auth_header else ""
             user_data = get_user_by_token(token) if token else None
             user_id = user_data["id"] if user_data else None
 
-            query = data.get("query", "").strip()
-            response_text = data.get("response", "").strip()
-            rating = data.get("rating", "").strip().lower()
-            notes = data.get("notes", "").strip()
+            query = sanitize_text_field(str(data.get("query", "")), max_len=1000)
+            response_text = sanitize_text_field(str(data.get("response", "")), max_len=4000)
+            rating = str(data.get("rating", "")).strip().lower()
+            notes = sanitize_text_field(str(data.get("notes", "")), max_len=500)
+
+            if contains_xss_or_injection(notes):
+                self.send_json_response(400, {"detail": "Ongororo ine zviratidzo zvisingabvumidzwe (XSS blocked)."})
+                return
 
             if not query or not response_text or rating not in ("good", "bad"):
                 self.send_json_response(400, {"detail": "Query, response, uye rating ('good' kana 'bad') zvinodiwa."})
@@ -1265,21 +1654,30 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
         # 4. Chat endpoint
         if self.path in ("/api/chat", "/chat", "/chat/"):
-            try:
-                data = json.loads(post_body.decode("utf-8"))
-            except Exception:
-                data = {}
-            query = data.get("message", "").strip()
+            allowed, retry_sec = check_rate_limit(client_ip, "chat", max_requests=30, window_seconds=60)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {
+                        "response": f"Tine hurombo, mibvunzo yawandisa panguva ino. Ndapota imbomirai sekondi {retry_sec} mozobvunza zvakare.",
+                        "context": None
+                    },
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+
+            data = parsed_json
+            query = sanitize_text_field(str(data.get("message", "")), max_len=2000)
             legacy_key = "".join(["G", "E", "M", "I", "N", "I", "_", "A", "P", "I", "_", "K", "E", "Y"])
             api_key = (
-                data.get("api_key", "").strip()
+                str(data.get("api_key", "")).strip()
                 or os.environ.get("MODEL_SECURITY_KEY", "").strip()
                 or os.environ.get("RUZIVO_API_KEY", "").strip()
                 or os.environ.get("SYSTEM_API_KEY", "").strip()
                 or os.environ.get(legacy_key, "").strip()
             )
-            custom_memory = data.get("custom_memory", "").strip()
-            conversation_history = data.get("conversation_history", "").strip()
+            custom_memory = sanitize_text_field(str(data.get("custom_memory", "")), max_len=2000)
+            conversation_history = sanitize_text_field(str(data.get("conversation_history", "")), max_len=8000)
 
             print(f"\n[INCOMING CHAT] query: '{query}' | api_key provided in payload: {bool(data.get('api_key'))} | resolved_key: {bool(api_key)}")
             if not api_key:

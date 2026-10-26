@@ -4591,6 +4591,12 @@
 
               <div class="oauth-divider"><span>KANA NE EMAIL</span></div>
 
+              <!-- Anti-Bot Honeypot Field (Invisible to real humans) -->
+              <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;" aria-hidden="true">
+                <label for="loginHoneypot">Website URL (Leave blank)</label>
+                <input type="text" id="loginHoneypot" name="website_url" tabindex="-1" autocomplete="off">
+              </div>
+
               <div class="auth-field">
                 <label class="auth-label">Email Yako</label>
                 <div class="auth-input-wrap">
@@ -4637,6 +4643,12 @@
               </button>
 
               <div class="oauth-divider"><span>KANA NE EMAIL</span></div>
+
+              <!-- Anti-Bot Honeypot Field (Invisible to real humans) -->
+              <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;" aria-hidden="true">
+                <label for="registerHoneypot">Website URL (Leave blank)</label>
+                <input type="text" id="registerHoneypot" name="website_url" tabindex="-1" autocomplete="off">
+              </div>
 
               <div class="auth-field">
                 <label class="auth-label">Zita rako</label>
@@ -5998,7 +6010,99 @@
       localStorage.setItem('ruzivo_sidebar_collapsed', isCollapsed);
     }
 
+    // =========================================================================
+    // CLIENT-SIDE SECURITY: CSRF TOKEN MANAGEMENT, XSS & FORM ATTACK PROTECTION
+    // =========================================================================
+    window.ruzivoCsrfToken = '';
+
+    function getCookieValue(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : '';
+    }
+
+    function getCsrfToken() {
+      const cookieToken = getCookieValue('ruzivo_csrf');
+      if (cookieToken) {
+        window.ruzivoCsrfToken = cookieToken;
+        return cookieToken;
+      }
+      return window.ruzivoCsrfToken || '';
+    }
+
+    async function ensureCsrfToken() {
+      let token = getCsrfToken();
+      if (token) return token;
+      try {
+        const resp = await window._nativeFetch('/auth/csrf', { method: 'GET', cache: 'no-store' });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && data.csrf_token) {
+            window.ruzivoCsrfToken = data.csrf_token;
+            return data.csrf_token;
+          }
+        }
+      } catch (e) {}
+      return getCsrfToken();
+    }
+
+    // Wrap window.fetch so every state-mutating POST request automatically attaches X-CSRF-Token
+    if (!window._nativeFetch) {
+      window._nativeFetch = window.fetch.bind(window);
+      window.fetch = async function(resource, config = {}) {
+        const method = (config.method || 'GET').toUpperCase();
+        if (method === 'POST') {
+          let csrf = getCsrfToken();
+          if (!csrf) {
+            csrf = await ensureCsrfToken();
+          }
+          const headers = new Headers(config.headers || {});
+          if (csrf && !headers.has('X-CSRF-Token')) {
+            headers.set('X-CSRF-Token', csrf);
+          }
+          const headersObj = {};
+          headers.forEach((v, k) => { headersObj[k] = v; });
+          config = Object.assign({}, config, { headers: headersObj });
+        }
+        return window._nativeFetch(resource, config);
+      };
+    }
+
+    function hasXssOrInjectionPayload(value) {
+      if (!value) return false;
+      const xssRegex = /(<script\b[^>]*>|javascript\s*:|onerror\s*=|onload\s*=|onmouseover\s*=|onclick\s*=|onfocus\s*=|<iframe\b|<object\b|<embed\b|<svg\b|document\.cookie|eval\s*\()/i;
+      return xssRegex.test(value);
+    }
+
+    let loginLockoutInterval = null;
+
+    function startLoginLockoutCountdown(seconds) {
+      const loginBtn = document.getElementById('webLoginBtn');
+      if (!loginBtn) return;
+      if (loginLockoutInterval) {
+        clearInterval(loginLockoutInterval);
+        loginLockoutInterval = null;
+      }
+      let rem = Math.max(1, parseInt(seconds, 10) || 60);
+      loginBtn.disabled = true;
+      const updateBtn = () => {
+        loginBtn.innerHTML = `<span>Yambovharwa (${rem}s)</span>`;
+      };
+      updateBtn();
+      loginLockoutInterval = setInterval(() => {
+        rem -= 1;
+        if (rem <= 0) {
+          clearInterval(loginLockoutInterval);
+          loginLockoutInterval = null;
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = `<span>Pinda</span>`;
+        } else {
+          updateBtn();
+        }
+      }, 1000);
+    }
+
     function initWebAuth() {
+      ensureCsrfToken();
       const token = localStorage.getItem('ruzivo_auth_token');
       const savedUser = localStorage.getItem('ruzivo_username');
       const overlay = document.getElementById('authOverlay');
@@ -6016,7 +6120,7 @@
       }
     }
 
-        // In-line Real-Time Input Validation Helpers for Authentication
+    // In-line Real-Time Input Validation Helpers for Authentication
     function setFieldValidationError(inputId, errorId, message) {
       const inputEl = document.getElementById(inputId);
       const errEl = document.getElementById(errorId);
@@ -6059,6 +6163,9 @@
       const trimmed = (name || '').trim();
       if (!trimmed) {
         return { isValid: false, message: 'Ndapota nyorai zita renyu.' };
+      }
+      if (hasXssOrInjectionPayload(name)) {
+        return { isValid: false, message: 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS / Script tags hadzibvumidzwe).' };
       }
       if (/[0-9]/.test(name)) {
         return { isValid: false, message: 'Zita harifaniri kuve nenhamba (No numbers allowed in names).' };
@@ -6144,7 +6251,9 @@
         clearFieldValidationError('regEmail');
         return;
       }
-      if (!isValidEmailFormat(val)) {
+      if (hasXssOrInjectionPayload(val)) {
+        setFieldValidationError('regEmail', 'regEmailError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).');
+      } else if (!isValidEmailFormat(val)) {
         setFieldValidationError('regEmail', 'regEmailError', 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).');
       } else {
         clearFieldValidationError('regEmail');
@@ -6206,7 +6315,9 @@
         clearFieldValidationError('loginUsername');
         return;
       }
-      if (!isValidEmailFormat(val)) {
+      if (hasXssOrInjectionPayload(val)) {
+        setFieldValidationError('loginUsername', 'loginUsernameError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).');
+      } else if (!isValidEmailFormat(val)) {
         setFieldValidationError('loginUsername', 'loginUsernameError', 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).');
       } else {
         clearFieldValidationError('loginUsername');
@@ -6651,17 +6762,29 @@
         e.preventDefault();
         e.stopPropagation();
       }
+      if (loginLockoutInterval) {
+        return;
+      }
       clearAllAuthValidationErrors();
       dismissAuthBanner('loginError', true);
 
       const user = document.getElementById('loginUsername').value.trim();
       const pass = document.getElementById('loginPassword').value.trim();
+      const honeypot = (document.getElementById('loginHoneypot')?.value || '').trim();
+
+      if (honeypot) {
+        showAuthBanner('loginError', 'Chikumbiro charambwa nekuti charatidza senge robhoti (Bot / Honeypot detected).');
+        return;
+      }
 
       let hasError = false;
 
-      // Validation for Email field (Email only, validated format)
+      // Validation for Email field (Email only, validated format + XSS check)
       if (!user) {
         setFieldValidationError('loginUsername', 'loginUsernameError', 'Ndapota nyorai email yenyu.');
+        hasError = true;
+      } else if (hasXssOrInjectionPayload(user)) {
+        setFieldValidationError('loginUsername', 'loginUsernameError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS / Injection blocked).');
         hasError = true;
       } else if (!isValidEmailFormat(user)) {
         setFieldValidationError('loginUsername', 'loginUsernameError', 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).');
@@ -6680,7 +6803,7 @@
       }
 
       const loginBtn = document.getElementById('webLoginBtn') || (e ? e.currentTarget : null);
-      const originalContent = loginBtn ? loginBtn.innerHTML : '';
+      const originalContent = `<span>Pinda</span>`;
       if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.innerHTML = `
@@ -6690,14 +6813,30 @@
       }
 
       try {
+        const csrfToken = await ensureCsrfToken();
         const resp = await fetch('/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: user, password: pass })
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({
+            username: user,
+            password: pass,
+            website_url: honeypot,
+            csrf_token: csrfToken
+          })
         });
         const data = await resp.json();
         if (!resp.ok) {
-          throw new Error(data.detail || 'Kukanganisa pakupinda.');
+          if (resp.status === 429 && data.retry_after) {
+            startLoginLockoutCountdown(data.retry_after);
+          } else if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = originalContent;
+          }
+          showAuthBanner('loginError', data.detail || 'Kukanganisa pakupinda.');
+          return;
         }
 
         if (loginBtn) {
@@ -6726,12 +6865,16 @@
             setTimeout(() => {
               overlay.style.display = 'none';
               overlay.style.opacity = '1';
+              if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = originalContent;
+              }
             }, 350);
           }
         }, 400);
 
       } catch (err) {
-        if (loginBtn) {
+        if (loginBtn && !loginLockoutInterval) {
           loginBtn.disabled = false;
           loginBtn.innerHTML = originalContent;
         }
@@ -6751,10 +6894,16 @@
       const email = document.getElementById('regEmail').value.trim();
       const pass = document.getElementById('regPassword').value.trim();
       const conf = document.getElementById('regConfirmPassword').value.trim();
+      const honeypot = (document.getElementById('registerHoneypot')?.value || '').trim();
+
+      if (honeypot) {
+        showAuthBanner('registerError', 'Chikumbiro charambwa nekuti charatidza senge robhoti (Bot / Honeypot detected).');
+        return;
+      }
 
       let hasError = false;
 
-      // Validate Name (Real Human Name: No numbers, no special symbols)
+      // Validate Name (Real Human Name: No numbers, no special symbols, no XSS)
       const nameCheck = validateRealName(user);
       if (!nameCheck.isValid) {
         setFieldValidationError('regUsername', 'regUsernameError', nameCheck.message);
@@ -6764,6 +6913,9 @@
       // Validate Email
       if (!email) {
         setFieldValidationError('regEmail', 'regEmailError', 'Ndapota nyorai email yenyu.');
+        hasError = true;
+      } else if (hasXssOrInjectionPayload(email)) {
+        setFieldValidationError('regEmail', 'regEmailError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS / Injection blocked).');
         hasError = true;
       } else if (!isValidEmailFormat(email)) {
         setFieldValidationError('regEmail', 'regEmailError', 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).');
@@ -6808,10 +6960,20 @@
       }
 
       try {
+        const csrfToken = await ensureCsrfToken();
         const resp = await fetch('/auth/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: user, email: email, password: pass })
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({
+            username: user,
+            email: email,
+            password: pass,
+            website_url: honeypot,
+            csrf_token: csrfToken
+          })
         });
         const data = await resp.json();
         if (!resp.ok) {
