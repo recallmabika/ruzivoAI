@@ -6214,14 +6214,20 @@
     }
 
     const authBannerTimers = {};
+    const authBannerHideTimers = {};
 
     function showAuthBanner(elementId, message, type = 'error') {
       const el = document.getElementById(elementId);
       if (!el) return;
 
+      // Cancel BOTH any auto-dismiss timer AND any pending 300ms fade-out hide timer!
       if (authBannerTimers[elementId]) {
         clearTimeout(authBannerTimers[elementId]);
         delete authBannerTimers[elementId];
+      }
+      if (authBannerHideTimers[elementId]) {
+        clearTimeout(authBannerHideTimers[elementId]);
+        delete authBannerHideTimers[elementId];
       }
 
       const isSuccess = (type === 'success');
@@ -6241,23 +6247,34 @@
       el.style.display = 'flex';
       el.style.opacity = '1';
 
-      // Auto-dismiss both error and success messages after 5 seconds
+      // Auto-dismiss both error and success messages after 5 full seconds
       authBannerTimers[elementId] = setTimeout(() => {
         dismissAuthBanner(elementId);
       }, 5000);
     }
 
-    function dismissAuthBanner(elementId) {
+    function dismissAuthBanner(elementId, immediate = false) {
       const el = document.getElementById(elementId);
       if (!el) return;
       if (authBannerTimers[elementId]) {
         clearTimeout(authBannerTimers[elementId]);
         delete authBannerTimers[elementId];
       }
-      el.style.opacity = '0';
-      setTimeout(() => {
+      if (authBannerHideTimers[elementId]) {
+        clearTimeout(authBannerHideTimers[elementId]);
+        delete authBannerHideTimers[elementId];
+      }
+      if (immediate) {
+        el.style.opacity = '0';
         el.style.display = 'none';
         el.innerHTML = '';
+        return;
+      }
+      el.style.opacity = '0';
+      authBannerHideTimers[elementId] = setTimeout(() => {
+        el.style.display = 'none';
+        el.innerHTML = '';
+        delete authBannerHideTimers[elementId];
       }, 300);
     }
 
@@ -6635,7 +6652,7 @@
         e.stopPropagation();
       }
       clearAllAuthValidationErrors();
-      dismissAuthBanner('loginError');
+      dismissAuthBanner('loginError', true);
 
       const user = document.getElementById('loginUsername').value.trim();
       const pass = document.getElementById('loginPassword').value.trim();
@@ -6728,7 +6745,7 @@
         e.stopPropagation();
       }
       clearAllAuthValidationErrors();
-      dismissAuthBanner('registerError');
+      dismissAuthBanner('registerError', true);
 
       const user = document.getElementById('regUsername').value.trim();
       const email = document.getElementById('regEmail').value.trim();
