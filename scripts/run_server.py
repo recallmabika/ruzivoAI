@@ -1128,11 +1128,11 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             if re.search(r"([a-zA-Z])\1\1", username, re.IGNORECASE):
-                self.send_json_response(400, {"detail": "Zita harigoni kuve nemabhii akafanana akatevedzana katatu (No name has 3 consecutive same letters)."})
+                self.send_json_response(400, {"detail": "Zita harigoni kuve nemavara akafanana akatevedzana katatu (No name has 3 consecutive same letters)."})
                 return
 
             if len(username.strip()) < 2 or len(username.strip()) > 40:
-                self.send_json_response(400, {"detail": "Zita rinofanira kuve nemabhii ari pakati pe 2 ne 40."})
+                self.send_json_response(400, {"detail": "Zita rinofanira kuve nemavara ari pakati pe 2 ne 40."})
                 return
 
             if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
@@ -1140,15 +1140,15 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             if len(password) < 8 or len(password) > 24:
-                self.send_json_response(400, {"detail": "Pasiwedhi inofanira kuve nemabhii ari pakati pe 8 ne 24."})
+                self.send_json_response(400, {"detail": "Pasiwedhi inofanira kuve nemavara ari pakati pe 8 ne 24."})
                 return
 
             if not re.search(r'[A-Z]', password):
-                self.send_json_response(400, {"detail": "Pasiwedhi inoda bhii guru (A-Z)."})
+                self.send_json_response(400, {"detail": "Pasiwedhi inoda vara guru (A-Z)."})
                 return
 
             if not re.search(r'[a-z]', password):
-                self.send_json_response(400, {"detail": "Pasiwedhi inoda bhii diki (a-z)."})
+                self.send_json_response(400, {"detail": "Pasiwedhi inoda vara diki (a-z)."})
                 return
 
             if not re.search(r'[0-9]', password):

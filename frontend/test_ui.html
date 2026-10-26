@@ -4665,15 +4665,15 @@
                 <div class="pwd-requirements-box" id="regPasswordReqBox">
                   <div class="pwd-req-item" id="reqLen">
                     <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
-                    <span>Mabhii ari pakati pe 8 ne 24</span>
+                    <span>Mavara ari pakati pe 8 ne 24</span>
                   </div>
                   <div class="pwd-req-item" id="reqUpper">
                     <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
-                    <span>Bhii guru (Uppercase letter: A-Z)</span>
+                    <span>Vara guru (Uppercase letter: A-Z)</span>
                   </div>
                   <div class="pwd-req-item" id="reqLower">
                     <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
-                    <span>Bhii diki (Lowercase letter: a-z)</span>
+                    <span>Vara diki (Lowercase letter: a-z)</span>
                   </div>
                   <div class="pwd-req-item" id="reqNum">
                     <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
@@ -6067,13 +6067,13 @@
         return { isValid: false, message: 'Zita harifaniri kuve nezviratidzo zvakasiyana (No special characters allowed).' };
       }
       if (/([a-zA-Z])\1\1/i.test(name)) {
-        return { isValid: false, message: 'Zita harigoni kuve nemabhii akafanana akatevedzana katatu (No name has 3 consecutive same letters).' };
+        return { isValid: false, message: 'Zita harigoni kuve nemavara akafanana akatevedzana katatu (No name has 3 consecutive same letters).' };
       }
       if (trimmed.length < 2) {
-        return { isValid: false, message: 'Zita rinofanira kuve nemabhii 2 kana kudarika.' };
+        return { isValid: false, message: 'Zita rinofanira kuve nemavara 2 kana kudarika.' };
       }
       if (trimmed.length > 40) {
-        return { isValid: false, message: 'Zita rakarebesa (Mabhii asingapfuuri 40).' };
+        return { isValid: false, message: 'Zita rakarebesa (Mavara asingapfuuri 40).' };
       }
       return { isValid: true, message: '' };
     }
@@ -6164,11 +6164,11 @@
       if (!res.isValid) {
         let msg = '';
         if (val.length < 8 || val.length > 24) {
-          msg = 'Pasiwedhi inofanira kuve nemabhii ari pakati pe 8 ne 24.';
+          msg = 'Pasiwedhi inofanira kuve nemavara ari pakati pe 8 ne 24.';
         } else if (!res.upperMet) {
-          msg = 'Isa bhii guru (A-Z).';
+          msg = 'Isa vara guru (A-Z).';
         } else if (!res.lowerMet) {
-          msg = 'Isa bhii diki (a-z).';
+          msg = 'Isa vara diki (a-z).';
         } else if (!res.numMet) {
           msg = 'Isa nhamba (0-9).';
         } else if (!res.specialMet) {
@@ -6779,11 +6779,11 @@
       } else if (!pwdRes.isValid) {
         let msg = '';
         if (pass.length < 8 || pass.length > 24) {
-          msg = 'Pasiwedhi inofanira kuve nemabhii ari pakati pe 8 ne 24.';
+          msg = 'Pasiwedhi inofanira kuve nemavara ari pakati pe 8 ne 24.';
         } else if (!pwdRes.upperMet) {
-          msg = 'Isa bhii guru (A-Z).';
+          msg = 'Isa vara guru (A-Z).';
         } else if (!pwdRes.lowerMet) {
-          msg = 'Isa bhii diki (a-z).';
+          msg = 'Isa vara diki (a-z).';
         } else if (!pwdRes.numMet) {
           msg = 'Isa nhamba (0-9).';
         } else if (!pwdRes.specialMet) {
