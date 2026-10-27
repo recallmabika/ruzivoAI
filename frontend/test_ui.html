@@ -5268,47 +5268,293 @@
     .zitrac-footer {
       width: 100%;
       margin-top: 100px;
-      padding-top: 60px;
-      border-top: 1px solid var(--border-subtle);
-      background: var(--bg-landing, #FFFFFF);
-      color: var(--text-main, #141413);
+      padding: 70px 0 30px;
+      border-top: 1px solid var(--border-subtle, #EAEAEA);
+      background: var(--bg-cream, #FFFFFF);
+      color: var(--text-main, #1F1E1D);
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     }
 
     body.theme-dark .zitrac-footer {
-      background: #1C1B19;
-      color: #F5F5F3;
-      border-top-color: #2F2E2A;
+      background: #08090A;
+      color: #F7F8F8;
+      border-top-color: rgba(255, 255, 255, 0.08);
     }
 
-    .zitrac-hero-brand {
+    .zitrac-footer-container {
+      width: 100%;
+      max-width: 1220px;
+      padding: 0 32px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Split Section: Subscribe/Contact Left + 5 Columns Right */
+    .zitrac-top-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1.3fr;
+      gap: 60px;
+      width: 100%;
+      padding-bottom: 60px;
+    }
+
+    @media (max-width: 1040px) {
+      .zitrac-top-grid {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+    }
+
+    /* Left Side: Headlines, Newsletter & Monospace Direct Desks */
+    .zitrac-left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .zitrac-connect-headline {
+      font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(24px, 2.7vw, 36px);
+      font-weight: 300;
+      color: var(--text-main);
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      margin: 0;
+    }
+
+    body.theme-dark .zitrac-connect-headline {
+      color: #FFFFFF;
+    }
+
+    .zitrac-connect-headline .arrow-link {
+      display: inline-block;
+      color: #EF4444;
+      font-weight: 400;
+      margin-left: 6px;
+      transition: transform 0.2s ease;
+    }
+
+    .zitrac-connect-headline:hover .arrow-link {
+      transform: translateX(5px);
+    }
+
+    .zitrac-subscribe-subhead {
+      font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(22px, 2.5vw, 32px);
+      font-weight: 300;
+      color: var(--text-main);
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      margin: -4px 0 6px;
+    }
+
+    body.theme-dark .zitrac-subscribe-subhead {
+      color: #FFFFFF;
+    }
+
+    .zitrac-subscribe-form {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 520px;
+      margin-top: 4px;
+    }
+
+    .zitrac-input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .zitrac-sub-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 18px;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle, #D1D5DB);
+      background: var(--bg-cream, #FFFFFF);
+      color: var(--text-main, #1F1E1D);
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    body.theme-dark .zitrac-sub-input {
+      background: #111215;
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #F7F8F8;
+    }
+
+    .zitrac-sub-input:focus {
+      border-color: var(--claude-accent, #2E7D32);
+    }
+
+    .zitrac-sub-btn {
+      height: 44px;
+      padding: 0 26px;
+      border-radius: 9999px;
+      background: #0B111E;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    body.theme-dark .zitrac-sub-btn {
+      background: #FFFFFF;
+      color: #08090A;
+    }
+
+    .zitrac-sub-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .zitrac-disclaimer {
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      color: var(--text-subtle, #9CA3AF);
+      letter-spacing: 0.02em;
+      margin-top: -4px;
+    }
+
+    .zitrac-desk-info {
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11.5px;
+      line-height: 1.8;
+      color: var(--text-muted, #6B7280);
+      margin-top: 14px;
+    }
+
+    .zitrac-desk-info .desk-label {
+      color: var(--text-main, #1F1E1D);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    body.theme-dark .zitrac-desk-info .desk-label {
+      color: #D1D5DB;
+    }
+
+    .zitrac-desk-info .hotline-label {
+      color: #EF4444;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .zitrac-desk-info a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .zitrac-desk-info a:hover {
+      color: var(--claude-accent, #2E7D32);
+      text-decoration: underline;
+    }
+
+    /* Right Side: 5 Technical Columns (Exact Monospace Typography) */
+    .zitrac-columns-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 820px) {
+      .zitrac-columns-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+    }
+
+    .zitrac-nav-col {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .zitrac-col-header {
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-subtle, #9CA3AF);
+      margin-bottom: 8px;
+    }
+
+    body.theme-dark .zitrac-col-header {
+      color: #717680;
+    }
+
+    .zitrac-col-link {
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      color: var(--text-muted, #4B5563);
+      text-decoration: none;
+      transition: color 0.15s ease, transform 0.15s ease;
+      cursor: pointer;
+      line-height: 1.4;
+      display: inline-block;
+    }
+
+    body.theme-dark .zitrac-col-link {
+      color: #9CA3AF;
+    }
+
+    .zitrac-col-link:hover {
+      color: var(--text-main, #1F1E1D);
+      transform: translateX(2px);
+    }
+
+    body.theme-dark .zitrac-col-link:hover {
+      color: #FFFFFF;
+    }
+
+    /* Giant Middle Brand Title (RUZIV<O>) */
+    .zitrac-monumental-wrap {
       width: 100%;
       text-align: center;
-      padding: 40px 20px 24px;
+      padding: 70px 0 50px;
+      user-select: none;
     }
 
-    .zitrac-title {
+    .zitrac-monumental-title {
       font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: clamp(48px, 10vw, 120px);
+      font-size: clamp(60px, 12.5vw, 150px);
       font-weight: 300;
       letter-spacing: 0.28em;
       margin: 0;
       line-height: 1;
-      color: var(--text-main, #141413);
-      user-select: none;
-      transition: color 0.2s ease, transform 0.3s ease;
+      color: var(--text-main, #1F1E1D);
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    body.theme-dark .zitrac-monumental-title {
+      color: #FFFFFF;
+    }
+
+    .zitrac-monumental-title:hover {
+      transform: scale(1.01);
     }
 
     .zitrac-logo-o {
-      width: clamp(38px, 8.5vw, 102px);
-      height: clamp(38px, 8.5vw, 102px);
+      width: clamp(48px, 10.5vw, 126px);
+      height: clamp(48px, 10.5vw, 126px);
       object-fit: contain;
       display: inline-block;
       vertical-align: middle;
@@ -5316,120 +5562,77 @@
       transition: transform 0.35s ease;
     }
 
-    .zitrac-title:hover .zitrac-logo-o {
+    .zitrac-monumental-title:hover .zitrac-logo-o {
       transform: rotate(180deg) scale(1.06);
     }
 
-    .zitrac-title:hover {
-      transform: scale(1.01);
+    .zitrac-monumental-sub {
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--text-subtle, #9CA3AF);
+      margin-top: 24px;
     }
 
-    .zitrac-subtitle {
-      margin-top: 18px;
-      font-size: 12.5px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--text-muted, #737370);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
+    body.theme-dark .zitrac-monumental-sub {
+      color: #717680;
     }
 
-    .zitrac-email-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 9999px;
-      background: rgba(217, 119, 6, 0.08);
-      border: 1px solid rgba(217, 119, 6, 0.25);
-      color: var(--claude-accent, #D97706);
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 0.02em;
-      text-decoration: none;
-      text-transform: none; /* Keep clean lowercase email */
-      transition: all 0.15s ease;
-    }
-
-    .zitrac-email-badge:hover {
-      background: rgba(217, 119, 6, 0.16);
-      border-color: rgba(217, 119, 6, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .zitrac-subtitle-dot {
-      display: inline-block;
-      width: 3px;
-      height: 3px;
-      background: var(--text-subtle, #A3A39E);
-      border-radius: 50%;
-    }
-
-    .zitrac-bar {
+    /* Bottom Row: KEEP IN TOUCH [Icons] | Copyright + Live Times | Status Pill + Theme Picker */
+    .zitrac-bottom-bar {
       width: 100%;
-      border-top: 1px solid var(--border-subtle);
-      margin-top: 70px;
-      padding: 18px 28px;
+      padding-top: 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
       font-size: 11px;
-      color: var(--text-muted, #737370);
-      letter-spacing: 0.12em;
+      color: var(--text-subtle, #9CA3AF);
+      letter-spacing: 0.08em;
       flex-wrap: wrap;
     }
 
-    body.theme-dark .zitrac-bar {
-      border-top-color: #2F2E2A;
-    }
-
-    .zitrac-bar-left {
+    .zitrac-bottom-left {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       text-transform: uppercase;
       font-weight: 600;
-      font-size: 10.5px;
-      letter-spacing: 0.18em;
-    }
-
-    .zitrac-social-links {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      letter-spacing: 0.14em;
     }
 
     .zitrac-social-btn {
-      color: var(--text-muted, #737370);
+      color: var(--text-subtle, #9CA3AF);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       transition: color 0.15s ease, transform 0.15s ease;
-      cursor: pointer;
       text-decoration: none;
     }
 
     .zitrac-social-btn:hover {
-      color: var(--text-main, #141413);
+      color: var(--text-main, #1F1E1D);
       transform: translateY(-1px);
     }
 
-    .zitrac-bar-center {
+    body.theme-dark .zitrac-social-btn:hover {
+      color: #FFFFFF;
+    }
+
+    .zitrac-bottom-center {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       text-transform: uppercase;
-      font-size: 10.5px;
-      letter-spacing: 0.14em;
+      font-size: 11px;
+      letter-spacing: 0.1em;
       flex-wrap: wrap;
       justify-content: center;
     }
 
-    .zitrac-bar-right {
+    .zitrac-bottom-right {
       display: flex;
       align-items: center;
       gap: 14px;
@@ -5442,59 +5645,53 @@
       padding: 6px 14px;
       border-radius: 9999px;
       border: 1px solid rgba(16, 185, 129, 0.35);
-      background: rgba(16, 185, 129, 0.05);
+      background: rgba(16, 185, 129, 0.06);
       color: #059669;
       font-size: 10.5px;
       font-weight: 600;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.2s ease;
       text-decoration: none;
+      transition: all 0.2s ease;
     }
 
-    .zitrac-status-pill:hover {
-      background: rgba(16, 185, 129, 0.12);
-      border-color: rgba(16, 185, 129, 0.6);
-      transform: translateY(-1px);
+    body.theme-dark .zitrac-status-pill {
+      color: #10B981;
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.1);
     }
 
     .zitrac-status-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #10B981;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-      animation: zitracPulse 2s infinite ease-in-out;
+      box-shadow: 0 0 6px #10B981;
     }
 
-    @keyframes zitracPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.55; transform: scale(0.85); }
-    }
-
-    .zitrac-theme-toggle {
+    .zitrac-theme-segment {
       display: inline-flex;
       align-items: center;
-      border: 1px solid var(--border-subtle);
+      background: var(--bg-cream, #FFFFFF);
+      border: 1px solid var(--border-subtle, #EAEAEA);
       border-radius: 9999px;
       padding: 3px;
-      background: var(--bg-card, #FFFFFF);
       gap: 2px;
     }
 
-    body.theme-dark .zitrac-theme-toggle {
-      background: #252422;
-      border-color: #383734;
+    body.theme-dark .zitrac-theme-segment {
+      background: #111215;
+      border-color: rgba(255, 255, 255, 0.1);
     }
 
     .zitrac-theme-btn {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       border: none;
       background: transparent;
-      color: var(--text-muted, #737370);
+      color: var(--text-muted);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -5504,110 +5701,83 @@
     }
 
     .zitrac-theme-btn:hover {
-      color: var(--text-main, #141413);
+      color: var(--text-main);
     }
 
     .zitrac-theme-btn.active {
-      background: var(--text-main, #141413);
-      color: var(--bg-landing, #FFFFFF);
+      background: var(--text-main);
+      color: var(--bg-cream);
     }
 
     body.theme-dark .zitrac-theme-btn.active {
-      background: #F5F5F3;
-      color: #1C1B19;
+      background: #FFFFFF;
+      color: #000000;
     }
 
-    /* Floating Bottom Action Buttons (Chat with Us & Scroll to Top) */
-    .zitrac-float-actions {
+    /* Fixed Floating Bottom-Right Pill Dock: Chat with Us + Scroll to Top */
+    .zitrac-floating-dock {
       position: fixed;
-      bottom: 22px;
+      bottom: 24px;
       right: 24px;
       display: flex;
       align-items: center;
       gap: 10px;
-      z-index: 10001;
+      z-index: 999;
     }
 
-    .zitrac-chat-pill {
+    .zitrac-floating-chat {
       display: inline-flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       padding: 10px 18px;
       border-radius: 9999px;
-      background: #FFFFFF;
-      color: #141413;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
+      background: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--border-subtle, #EAEAEA);
+      color: var(--text-main, #1F1E1D);
+      font-size: 13.5px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
       text-decoration: none;
     }
 
-    body.theme-dark .zitrac-chat-pill {
-      background: #232220;
-      color: #F5F5F3;
-      border-color: #383734;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+    body.theme-dark .zitrac-floating-chat {
+      background: #111215;
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
     }
 
-    .zitrac-chat-pill:hover {
+    .zitrac-floating-chat:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
 
-    .zitrac-scroll-top-btn {
-      width: 42px;
-      height: 42px;
+    .zitrac-floating-scrolltop {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: #FFFFFF;
-      color: #141413;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      background: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--border-subtle, #EAEAEA);
+      color: var(--text-main, #1F1E1D);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
     }
 
-    body.theme-dark .zitrac-scroll-top-btn {
-      background: #232220;
-      color: #F5F5F3;
-      border-color: #383734;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-    }
-
-    .zitrac-scroll-top-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-      background: var(--text-main, #141413);
+    body.theme-dark .zitrac-floating-scrolltop {
+      background: #111215;
+      border-color: rgba(255, 255, 255, 0.12);
       color: #FFFFFF;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
     }
 
-    body.theme-dark .zitrac-scroll-top-btn:hover {
-      background: #F5F5F3;
-      color: #141413;
-    }
-
-    @media (max-width: 820px) {
-      .zitrac-bar {
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        text-align: center;
-        padding: 24px 16px;
-      }
-      .zitrac-bar-left, .zitrac-bar-center, .zitrac-bar-right {
-        justify-content: center;
-      }
-      .zitrac-float-actions {
-        bottom: 16px;
-        right: 16px;
-      }
+    .zitrac-floating-scrolltop:hover {
+      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -6534,154 +6704,179 @@
         </div>
       </section>
 
-      <!-- SECTION 6: Monumental Minimalist Footer -->
+      <!-- SECTION 6: Monumental Minimalist Footer (Exact Zitrac Engineering Layout) -->
       <footer class="zitrac-footer">
-        <!-- Giant Architectural Branding -->
-        <div class="zitrac-hero-brand">
-          <h2 class="zitrac-title" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" style="cursor: pointer;" title="Dzokera Pamusoro">
-            <span>RUZIV</span><img src="/assets/logo.png" alt="O" class="zitrac-logo-o">
-          </h2>
-          
-          <div class="zitrac-subtitle">
-            <span>Enterprise ChiShona AI</span>
-            <span class="zitrac-subtitle-dot"></span>
-            <span>Harare, Zimbabwe</span>
-            <span class="zitrac-subtitle-dot"></span>
-            <a href="mailto:support@ruzivo-ai.tech" class="zitrac-email-badge" title="Bata Ruzivo Support">
-              <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2;">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-              <span>support@ruzivo-ai.tech</span>
-            </a>
+        <div class="zitrac-footer-container">
+          <!-- TOP ROW: Connect & Subscribe (Left) + 5 Columns Navigation (Right) -->
+          <div class="zitrac-top-grid">
+            <!-- Left Side: Connect & Technical Briefings Form -->
+            <div class="zitrac-left-panel">
+              <h3 class="zitrac-connect-headline">
+                Connect with our engineering team <span class="arrow-link">&rarr;</span>
+              </h3>
+              <h4 class="zitrac-subscribe-subhead">
+                Subscribe to technical briefings
+              </h4>
+
+              <form class="zitrac-subscribe-form" onsubmit="event.preventDefault(); showDirectModal('Nhoroondo dzeRuzivo', 'Maita basa nekunyoresa tsamba yedu yeruzivo. Tichakutumirai ruzivo rwehunyanzvi hweAI neChiShona.'); this.reset();">
+                <div class="zitrac-input-wrapper">
+                  <input type="email" class="zitrac-sub-input" placeholder="you@company.co.zw" required autocomplete="email">
+                </div>
+                <button type="submit" class="zitrac-sub-btn">SUBSCRIBE</button>
+              </form>
+
+              <div class="zitrac-disclaimer">
+                Critical CVE security advisories, Zimbabwe enterprise IT alerts &bull; No spam.
+              </div>
+
+              <div class="zitrac-desk-info">
+                <div><span class="desk-label">DIRECT DESK:</span> <a href="mailto:support@ruzivo-ai.tech">support@ruzivo-ai.tech</a> &nbsp;|&nbsp; <a href="mailto:info@ruzivo-ai.tech">info@ruzivo-ai.tech</a></div>
+                <div><span class="hotline-label">HOTLINES:</span> +263 71 800 1031 &nbsp;|&nbsp; +263 77 459 0058</div>
+              </div>
+            </div>
+
+            <!-- Right Side: 5 Technical Columns (Exact Monospace Typography) -->
+            <div class="zitrac-columns-grid">
+              <!-- Col 1: CAPABILITIES -->
+              <div class="zitrac-nav-col">
+                <div class="zitrac-col-header">CAPABILITIES</div>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">IT Consulting</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">AI &amp; Automation</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">Zero-Trust SOC</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">Web Engineering</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">cPanel &amp; DNS</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">School Portals</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">Cloud Migration</a>
+              </div>
+
+              <!-- Col 2: INFRASTRUCTURE -->
+              <div class="zitrac-nav-col">
+                <div class="zitrac-col-header">INFRASTRUCTURE</div>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">.co.zw Registry</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">Penetration Audits</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">Disaster Recovery</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">REST &amp; APIs</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">AWS / Cloudflare</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">SLA Benchmarks</a>
+              </div>
+
+              <!-- Col 3: COMPANY -->
+              <div class="zitrac-nav-col">
+                <div class="zitrac-col-header">COMPANY</div>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('aboutSection')">About Ruzivo</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('curriculumSection')">Recent Work</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('authSection')">Contact Us</a>
+              </div>
+
+              <!-- Col 4: HELP -->
+              <div class="zitrac-nav-col">
+                <div class="zitrac-col-header">HELP</div>
+                <a class="zitrac-col-link" onclick="showDirectModal('Support Desk', 'Rubatsiro rwunowanikwa pa: support@ruzivo-ai.tech kana nhare dzedu.')">Support Desk</a>
+                <a class="zitrac-col-link" href="mailto:support@ruzivo-ai.tech">Email Support</a>
+                <a class="zitrac-col-link" href="https://wa.me/263718001031" target="_blank" rel="noopener noreferrer">WhatsApp Help</a>
+                <a class="zitrac-col-link" href="tel:+263718001031">Call (+263 71 800 1031)</a>
+                <a class="zitrac-col-link" href="tel:+263774590058">Call (+263 77 459 0058)</a>
+                <a class="zitrac-col-link" onclick="scrollToLandingSection('tsumoSection')">Other</a>
+              </div>
+
+              <!-- Col 5: TRUST & LEGAL -->
+              <div class="zitrac-nav-col">
+                <div class="zitrac-col-header">TRUST &amp; LEGAL</div>
+                <a class="zitrac-col-link" href="/privacy">Privacy Policy</a>
+                <a class="zitrac-col-link" href="/terms">Terms of Service</a>
+                <a class="zitrac-col-link" onclick="showCookiePreferencesModal()">Security Protocol</a>
+                <a class="zitrac-col-link" onclick="openSystemStatusModal()">SLA Guarantee</a>
+                <a class="zitrac-col-link" onclick="openSystemStatusModal()">Incident Dispatch</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- MIDDLE: Monumental Architectural Title RUZIV<O> -->
+          <div class="zitrac-monumental-wrap">
+            <h2 class="zitrac-monumental-title" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" title="Dzokera Pamusoro">
+              <span>RUZIV</span><img src="/assets/logo.png" alt="O" class="zitrac-logo-o">
+            </h2>
+            <div class="zitrac-monumental-sub">
+              ENTERPRISE COMPUTING &bull; HARARE, ZIMBABWE
+            </div>
+          </div>
+
+          <!-- BOTTOM BAR: KEEP IN TOUCH [Icons] | Copyright & Clocks | Status Pill + Theme Picker -->
+          <div class="zitrac-bottom-bar">
+            <!-- Left: Keep in touch -->
+            <div class="zitrac-bottom-left">
+              <span>KEEP IN TOUCH</span>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="LinkedIn">
+                  <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: currentColor;"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.738-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="YouTube">
+                  <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: currentColor;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="Facebook">
+                  <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: currentColor;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Center: Copyright & Clocks -->
+            <div class="zitrac-bottom-center">
+              <span>&copy; RUZIVO 2026</span>
+              <span>&bull;</span>
+              <span id="zitracTimeCAT">HRE, ZWE (CAT) --:--</span>
+              <span>&bull;</span>
+              <span id="zitracTimeGMT">LND, UK (GMT) --:--</span>
+            </div>
+
+            <!-- Right: Status Pill & Theme Switcher -->
+            <div class="zitrac-bottom-right">
+              <div class="zitrac-status-pill" onclick="openSystemStatusModal()" title="System Status">
+                <span class="zitrac-status-dot"></span>
+                <span>ALL SYSTEMS OPERATIONAL</span>
+              </div>
+
+              <div class="zitrac-theme-segment" role="group" aria-label="Theme selector">
+                <button type="button" class="zitrac-theme-btn" id="zitracThemeLight" onclick="setZitracTheme('light')" title="Light Mode">
+                  <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2;">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                  </svg>
+                </button>
+                <button type="button" class="zitrac-theme-btn active" id="zitracThemeSystem" onclick="setZitracTheme('system')" title="System Sync">
+                  <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2;">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </button>
+                <button type="button" class="zitrac-theme-btn" id="zitracThemeDark" onclick="setZitracTheme('dark')" title="Dark Mode">
+                  <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Linear-Inspired 5-Column Navigation Grid -->
-        <div class="linear-footer-nav">
-          <!-- Col 1: Platform & Brand -->
-          <div class="linear-footer-col">
-            <div class="linear-footer-col-title">Ruzivo AI</div>
-            <p style="font-size: 13px; line-height: 1.5; color: var(--text-muted); margin: 0;">
-              Chikuva chemhando yepamusoro chedzidzo yeChiShona, tsika, pamwe netsumo dzechinyakare chakarerukira vadzidzi nevadzidzisi.
-            </p>
-          </div>
-
-          <!-- Col 2: Dzidzo & Zvidzidzo -->
-          <div class="linear-footer-col">
-            <div class="linear-footer-col-title">Dzidzo</div>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('curriculumSection')">ZIMSEC Grade 7</a>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('curriculumSection')">O-Level Form 1–4</a>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('curriculumSection')">A-Level Form 5–6</a>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('tsumoSection')">Tsumo & Madimikira</a>
-          </div>
-
-          <!-- Col 3: Tsika & Zvinyorwa -->
-          <div class="linear-footer-col">
-            <div class="linear-footer-col-title">Tsika & Unhu</div>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('tsumoSection')">Zvirungamutauro</a>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('tsumoSection')">Nhetembo dzeVakare</a>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('aboutSection')">Dura reRuzivo (14K)</a>
-            <a class="linear-footer-link" onclick="scrollToLandingSection('aboutSection')">Zviyero zveAI</a>
-          </div>
-
-          <!-- Col 4: Zvemitemo & Mutemo -->
-          <div class="linear-footer-col">
-            <div class="linear-footer-col-title">Mitemo</div>
-            <a class="linear-footer-link" href="/privacy">Chakavanzika (Privacy)</a>
-            <a class="linear-footer-link" href="/terms">Mitemo (Terms)</a>
-            <a class="linear-footer-link" onclick="showCookiePreferencesModal()">Mitemo yeCookies</a>
-            <a class="linear-footer-link" onclick="openSystemStatusModal()">Mamiriro eServer</a>
-          </div>
-
-          <!-- Col 5: Bata Nesu / Connect -->
-          <div class="linear-footer-col">
-            <div class="linear-footer-col-title">Bata Nesu</div>
-            <a class="linear-footer-link" href="mailto:support@ruzivo-ai.tech">Email Support</a>
-            <a class="linear-footer-link" href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a class="linear-footer-link" href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube Channel</a>
-            <a class="linear-footer-link" href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook Page</a>
-          </div>
-        </div>
-
-        <!-- Bottom Status & Operational Bar -->
-        <div class="zitrac-bar">
-          <!-- Left: Keep In Touch & Social Icons -->
-          <div class="zitrac-bar-left">
-            <span>Keep in Touch</span>
-            <div class="zitrac-social-links">
-              <!-- LinkedIn -->
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="LinkedIn" title="LinkedIn">
-                <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.738-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                </svg>
-              </a>
-              <!-- YouTube -->
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="YouTube" title="YouTube">
-                <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </a>
-              <!-- Facebook -->
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="Facebook" title="Facebook">
-                <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <!-- Email Mailto direct icon -->
-              <a href="mailto:support@ruzivo-ai.tech" class="zitrac-social-btn" aria-label="Email Us" title="support@ruzivo-ai.tech">
-                <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2;">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <!-- Center: Copyright & Live Timezones (Harare CAT, London GMT) -->
-          <div class="zitrac-bar-center">
-            <span>&copy; Ruzivo 2026</span>
-            <span class="zitrac-subtitle-dot"></span>
-            <span id="zitracTimeCAT">HRE, ZWE (CAT) --:--</span>
-            <span class="zitrac-subtitle-dot"></span>
-            <span id="zitracTimeGMT">LND, UK (GMT) --:--</span>
-          </div>
-
-          <!-- Right: System Operational Pill & 3-Way Theme Segment Toggle -->
-          <div class="zitrac-bar-right">
-            <div class="zitrac-status-pill" onclick="openSystemStatusModal()" title="Tarisa Mamiriro eServer">
-              <span class="zitrac-status-dot"></span>
-              <span>All Systems Operational</span>
-            </div>
-
-            <div class="zitrac-theme-toggle" role="group" aria-label="Theme selector">
-              <button type="button" class="zitrac-theme-btn" id="zitracThemeLight" onclick="selectThemeSegment('light')" title="Light Theme" aria-label="Light Theme">
-                <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2;">
-                  <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-              </button>
-              <button type="button" class="zitrac-theme-btn" id="zitracThemeSystem" onclick="selectThemeSegment('system')" title="System Theme" aria-label="System Theme">
-                <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2;">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-              </button>
-              <button type="button" class="zitrac-theme-btn" id="zitracThemeDark" onclick="selectThemeSegment('dark')" title="Dark Theme" aria-label="Dark Theme">
-                <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2;">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
+        <!-- Fixed Floating Bottom-Right Pill Dock: Chat with Us + Scroll to Top -->
+        <div class="zitrac-floating-dock" aria-label="Quick actions">
+          <button type="button" class="zitrac-floating-chat" onclick="scrollToAuthSection()" title="Tanga Hurukuro">
+            <span class="zitrac-status-dot" style="width: 8px; height: 8px;"></span>
+            <span>Chat with Us</span>
+          </button>
+          <button type="button" class="zitrac-floating-scrolltop" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" title="Dzokera Pamusoro">
+            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin="round;">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
         </div>
       </footer>
 
