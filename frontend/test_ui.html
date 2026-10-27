@@ -4931,7 +4931,8 @@
               <div class="auth-error" id="loginError"></div>
 
               <!-- OAuth Provider Button: Google -->
-              <button type="button" class="oauth-btn" onclick="loginWithGoogle()">
+              <div id="googleLoginBtnContainer" style="width: 100%; display: flex; justify-content: center; min-height: 44px; margin-bottom: 2px;"></div>
+              <button type="button" class="oauth-btn" id="customGoogleLoginBtn" onclick="loginWithGoogle()" style="display: flex;">
                 <svg class="oauth-icon" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
                   <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
@@ -4988,7 +4989,8 @@
               <div class="auth-error" id="registerError"></div>
 
               <!-- OAuth Provider Buttons -->
-              <button type="button" class="oauth-btn" onclick="loginWithGoogle()">
+              <div id="googleRegisterBtnContainer" style="width: 100%; display: flex; justify-content: center; min-height: 44px; margin-bottom: 2px;"></div>
+              <button type="button" class="oauth-btn" id="customGoogleRegisterBtn" onclick="loginWithGoogle()" style="display: flex;">
                 <svg class="oauth-icon" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
                   <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
@@ -6657,6 +6659,80 @@
   </div>
 
   <script>
+    // Global Auth Banner & Notification Timers (Declared at top of script to prevent TDZ ReferenceError)
+    const authBannerTimers = {};
+    const authBannerHideTimers = {};
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showAuthBanner(elementId, message, type = 'error') {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      if (authBannerTimers[elementId]) {
+        clearTimeout(authBannerTimers[elementId]);
+        delete authBannerTimers[elementId];
+      }
+      if (authBannerHideTimers[elementId]) {
+        clearTimeout(authBannerHideTimers[elementId]);
+        delete authBannerHideTimers[elementId];
+      }
+
+      const isSuccess = (type === 'success');
+      el.className = 'auth-error' + (isSuccess ? ' success' : '');
+      
+      const iconSvg = isSuccess
+        ? `<svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: #16A34A; fill: none; stroke-width: 2.3; flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><polyline points="16 9 10.5 14.5 8 12"></polyline></svg>`
+        : `<svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: #DC2626; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+
+      const closeSvg = `<svg viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+      el.innerHTML = `
+        ${iconSvg}
+        <span style="flex: 1; line-height: 1.45; font-size: 13px; font-weight: 500;">${escapeHtml(message)}</span>
+        <button type="button" class="alert-dismiss-btn" onclick="dismissAuthBanner('${elementId}')" title="Bvisa" aria-label="Bvisa">${closeSvg}</button>
+      `;
+      el.style.display = 'flex';
+      el.style.opacity = '1';
+
+      authBannerTimers[elementId] = setTimeout(() => {
+        dismissAuthBanner(elementId);
+      }, 5000);
+    }
+
+    function dismissAuthBanner(elementId, immediate = false) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (authBannerTimers[elementId]) {
+        clearTimeout(authBannerTimers[elementId]);
+        delete authBannerTimers[elementId];
+      }
+      if (authBannerHideTimers[elementId]) {
+        clearTimeout(authBannerHideTimers[elementId]);
+        delete authBannerHideTimers[elementId];
+      }
+      if (immediate) {
+        el.style.opacity = '0';
+        el.style.display = 'none';
+        el.innerHTML = '';
+        return;
+      }
+      el.style.opacity = '0';
+      authBannerHideTimers[elementId] = setTimeout(() => {
+        el.style.display = 'none';
+        el.innerHTML = '';
+        delete authBannerHideTimers[elementId];
+      }, 300);
+    }
+
     let conversations = [];
     let currentChatId = null;
     let currentUser = null;
@@ -6666,7 +6742,6 @@
     initSidebar();
 
     // Run auth state check immediately synchronously to prevent flicker
-    initSidebar();
     initWebAuth();
 
     window.onload = function() {
@@ -7038,70 +7113,7 @@
       }
     }
 
-    const authBannerTimers = {};
-    const authBannerHideTimers = {};
-
-    function showAuthBanner(elementId, message, type = 'error') {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-
-      // Cancel BOTH any auto-dismiss timer AND any pending 300ms fade-out hide timer!
-      if (authBannerTimers[elementId]) {
-        clearTimeout(authBannerTimers[elementId]);
-        delete authBannerTimers[elementId];
-      }
-      if (authBannerHideTimers[elementId]) {
-        clearTimeout(authBannerHideTimers[elementId]);
-        delete authBannerHideTimers[elementId];
-      }
-
-      const isSuccess = (type === 'success');
-      el.className = 'auth-error' + (isSuccess ? ' success' : '');
-      
-      const iconSvg = isSuccess
-        ? `<svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: #16A34A; fill: none; stroke-width: 2.3; flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><polyline points="16 9 10.5 14.5 8 12"></polyline></svg>`
-        : `<svg viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke: #DC2626; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
-
-      const closeSvg = `<svg viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-
-      el.innerHTML = `
-        ${iconSvg}
-        <span style="flex: 1; line-height: 1.45; font-size: 13px; font-weight: 500;">${escapeHtml(message)}</span>
-        <button type="button" class="alert-dismiss-btn" onclick="dismissAuthBanner('${elementId}')" title="Bvisa" aria-label="Bvisa">${closeSvg}</button>
-      `;
-      el.style.display = 'flex';
-      el.style.opacity = '1';
-
-      // Auto-dismiss both error and success messages after 5 full seconds
-      authBannerTimers[elementId] = setTimeout(() => {
-        dismissAuthBanner(elementId);
-      }, 5000);
-    }
-
-    function dismissAuthBanner(elementId, immediate = false) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      if (authBannerTimers[elementId]) {
-        clearTimeout(authBannerTimers[elementId]);
-        delete authBannerTimers[elementId];
-      }
-      if (authBannerHideTimers[elementId]) {
-        clearTimeout(authBannerHideTimers[elementId]);
-        delete authBannerHideTimers[elementId];
-      }
-      if (immediate) {
-        el.style.opacity = '0';
-        el.style.display = 'none';
-        el.innerHTML = '';
-        return;
-      }
-      el.style.opacity = '0';
-      authBannerHideTimers[elementId] = setTimeout(() => {
-        el.style.display = 'none';
-        el.innerHTML = '';
-        delete authBannerHideTimers[elementId];
-      }, 300);
-    }
+// (Auth banner functions defined at top of script)
 
     function toggleAuthMode(mode) {
       const loginCard = document.getElementById('loginCard');
@@ -7831,6 +7843,38 @@
             auto_select: false,
             cancel_on_tap_outside: true
           });
+
+          // Render official Google Sign In buttons if containers exist
+          const loginContainer = document.getElementById('googleLoginBtnContainer');
+          const regContainer = document.getElementById('googleRegisterBtnContainer');
+          const customLoginBtn = document.getElementById('customGoogleLoginBtn');
+          const customRegBtn = document.getElementById('customGoogleRegisterBtn');
+
+          if (loginContainer) {
+            google.accounts.id.renderButton(loginContainer, {
+              type: 'standard',
+              theme: 'outline',
+              size: 'large',
+              text: 'continue_with',
+              shape: 'rectangular',
+              logo_alignment: 'left',
+              width: 380
+            });
+            if (customLoginBtn) customLoginBtn.style.display = 'none';
+          }
+
+          if (regContainer) {
+            google.accounts.id.renderButton(regContainer, {
+              type: 'standard',
+              theme: 'outline',
+              size: 'large',
+              text: 'signup_with',
+              shape: 'rectangular',
+              logo_alignment: 'left',
+              width: 380
+            });
+            if (customRegBtn) customRegBtn.style.display = 'none';
+          }
         } catch(e) {
           console.warn('Google accounts initialize error:', e);
         }
@@ -7842,11 +7886,10 @@
       const errElem = document.getElementById(activeCard === 'login' ? 'loginError' : 'registerError');
       if (errElem) errElem.style.display = 'none';
 
-      // 1. Try real Google Identity Services Prompt / Popup if available
+      // 1. Try real Google Identity Services if available
       if (window.google && window.google.accounts && window.google.accounts.id) {
         try {
           initGoogleAuthClient();
-          // Trigger Google One-Tap / Account Selector
           google.accounts.id.prompt((notification) => {
             if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
               console.log('Google prompt not displayed/skipped, opening fallback dialog.');
@@ -7859,7 +7902,7 @@
         }
       }
 
-      // 2. Graceful Fallback if Google GIS script failed to load
+      // 2. Fallback modal dialog
       openGoogleFallbackModal(activeCard);
     }
 
