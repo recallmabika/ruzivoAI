@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaApiLoaded&render=explicit" async defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -7140,6 +7140,8 @@
         regCard.style.display = 'none';
         loginCard.style.display = 'flex';
       }
+
+      setTimeout(renderRecaptchaWidgets, 50);
     }
 
     function continueAsGuest() {
@@ -7795,13 +7797,54 @@
 
     const GOOGLE_CLIENT_ID = "1031580468211-3jjn56i6ncsk9urivmo6glkjdu0780n2.apps.googleusercontent.com";
     const RECAPTCHA_SITE_KEY = "6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp";
+    let loginWidgetId = null;
+    let registerWidgetId = null;
+
+    function renderRecaptchaWidgets() {
+      if (!window.grecaptcha || typeof window.grecaptcha.render !== 'function') {
+        return;
+      }
+      try {
+        const loginEl = document.getElementById('loginRecaptcha');
+        if (loginEl && loginWidgetId === null && loginEl.children.length === 0) {
+          loginWidgetId = grecaptcha.render('loginRecaptcha', {
+            'sitekey': RECAPTCHA_SITE_KEY,
+            'theme': 'light'
+          });
+        }
+      } catch (e) {
+        console.warn('loginRecaptcha render warning:', e);
+      }
+
+      try {
+        const regEl = document.getElementById('registerRecaptcha');
+        if (regEl && registerWidgetId === null && regEl.children.length === 0) {
+          registerWidgetId = grecaptcha.render('registerRecaptcha', {
+            'sitekey': RECAPTCHA_SITE_KEY,
+            'theme': 'light'
+          });
+        }
+      } catch (e) {
+        console.warn('registerRecaptcha render warning:', e);
+      }
+    }
+
+    window.onRecaptchaApiLoaded = function() {
+      renderRecaptchaWidgets();
+    };
 
     function getRecaptchaToken(action = 'LOGIN') {
       try {
         if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
-          // Check standard grecaptcha response from user checkbox click
-          const resp = grecaptcha.getResponse();
-          if (resp) return resp;
+          if (action === 'LOGIN' && loginWidgetId !== null) {
+            const resp = grecaptcha.getResponse(loginWidgetId);
+            if (resp) return resp;
+          } else if (action === 'REGISTER' && registerWidgetId !== null) {
+            const resp = grecaptcha.getResponse(registerWidgetId);
+            if (resp) return resp;
+          }
+          const defaultResp = grecaptcha.getResponse();
+          if (defaultResp) return defaultResp;
         }
       } catch (e) {
         console.warn('reCAPTCHA getResponse error:', e);
