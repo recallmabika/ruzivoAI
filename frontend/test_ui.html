@@ -3384,13 +3384,21 @@
        ========================================================================= */
     .linear-showcase-section {
       width: 100%;
-      background: #08090A;
-      color: #F7F8F8;
+      background: var(--bg-sidebar, #FAFAFA);
+      color: var(--text-main, #1F1E1D);
       border-radius: 24px;
       padding: 70px 48px;
       margin: 60px 0 30px;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-subtle, #EAEAEA);
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.theme-dark .linear-showcase-section {
+      background: #08090A;
+      color: #F7F8F8;
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -3403,23 +3411,34 @@
     }
 
     .linear-showcase-headline {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       font-size: clamp(26px, 3.8vw, 42px);
-      font-weight: 500;
+      font-weight: 400;
       line-height: 1.25;
-      letter-spacing: -0.025em;
-      max-width: 900px;
+      letter-spacing: -0.028em;
+      max-width: 920px;
       margin-bottom: 56px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
 
     .linear-showcase-headline .bold-white {
+      color: var(--text-main, #1F1E1D);
+      font-weight: 700;
+    }
+
+    body.theme-dark .linear-showcase-headline .bold-white {
       color: #FFFFFF;
-      font-weight: 600;
     }
 
     .linear-showcase-headline .muted-gray {
-      color: #8A8F98;
+      color: var(--text-muted, #6B6864);
       font-weight: 400;
+    }
+
+    body.theme-dark .linear-showcase-headline .muted-gray {
+      color: #8A8F98;
     }
 
     .linear-wireframe-grid {
@@ -3437,10 +3456,10 @@
     }
 
     .linear-wireframe-card {
-      background: #0D0E11;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--border-subtle, #EAEAEA);
       border-radius: 16px;
-      padding: 30px 24px;
+      padding: 34px 28px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -3448,20 +3467,24 @@
       position: relative;
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: default;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    body.theme-dark .linear-wireframe-card {
+      background: #0D0E11;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: none;
     }
 
     .linear-wireframe-card:hover {
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(46, 125, 50, 0.4);
       transform: translateY(-5px);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
     }
 
-    .linear-wireframe-tag {
-      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      color: #62666D;
-      text-transform: uppercase;
+    body.theme-dark .linear-wireframe-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
     }
 
     .linear-wireframe-canvas {
@@ -3475,33 +3498,79 @@
     .linear-wireframe-svg {
       width: 140px;
       height: 140px;
-      stroke: #8A8F98;
+      stroke: var(--text-subtle, #99948D);
       transition: stroke 0.3s ease, transform 0.4s ease;
     }
 
+    body.theme-dark .linear-wireframe-svg {
+      stroke: #8A8F98;
+    }
+
     .linear-wireframe-card:hover .linear-wireframe-svg {
-      stroke: #FFFFFF;
+      stroke: var(--claude-accent, #2E7D32);
       transform: scale(1.05);
+    }
+
+    body.theme-dark .linear-wireframe-card:hover .linear-wireframe-svg {
+      stroke: #FFFFFF;
     }
 
     .linear-wireframe-info {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       margin-top: 8px;
     }
 
     .linear-wireframe-title {
-      font-size: 16px;
+      font-size: 16.5px;
       font-weight: 600;
+      color: var(--text-main, #1F1E1D);
+      letter-spacing: -0.015em;
+      line-height: 1.35;
+    }
+
+    body.theme-dark .linear-wireframe-title {
       color: #FFFFFF;
-      letter-spacing: -0.01em;
     }
 
     .linear-wireframe-desc {
       font-size: 13.5px;
-      line-height: 1.5;
+      line-height: 1.55;
+      color: var(--text-muted, #6B6864);
+    }
+
+    body.theme-dark .linear-wireframe-desc {
       color: #8A8F98;
+    }
+
+    .linear-cta-btn {
+      padding: 13px 28px;
+      font-size: 14.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      background: var(--text-main, #1F1E1D);
+      color: var(--bg-cream, #FFFFFF);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    body.theme-dark .linear-cta-btn {
+      background: #FFFFFF;
+      color: #000000;
+    }
+
+    .linear-cta-btn:hover {
+      transform: translateY(-1.5px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    body.theme-dark .linear-cta-btn:hover {
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
     }
 
     /* =========================================================================
@@ -5688,14 +5757,13 @@
         <!-- Pure Linear-Style Architectural Engineering Showcase (Isometric Wireframes) -->
         <div class="linear-showcase-section reveal-on-scroll">
           <div class="linear-showcase-headline">
-            <span class="bold-white">A new species of indigenous AI tool.</span>
-            <span class="muted-gray">Purpose-built for modern Zimbabwean students and teachers with authentic Shona language models at its core.</span>
+            <span class="bold-white">Mhando itsva yeArtificial Intelligence yemunyika medu.</span>
+            <span class="muted-gray">Yakanyatsogadzirirwa vadzidzi nevarairidzi vemuZimbabwe, iine mienzaniso chaiyo yemutauro weChiShona pamwoyo wayo.</span>
           </div>
 
           <div class="linear-wireframe-grid">
-            <!-- FIG 0.1: Purpose-built Shona RAG Stack -->
+            <!-- 1: Hwaro hweRAG hweChiShona -->
             <div class="linear-wireframe-card">
-              <span class="linear-wireframe-tag">FIG 0.1</span>
               <div class="linear-wireframe-canvas">
                 <svg class="linear-wireframe-svg" viewBox="0 0 100 100" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
                   <!-- Isometric Layered Stack with Core Cylinder -->
@@ -5705,18 +5773,17 @@
                   <path d="M 22 46 L 22 58 C 22 64, 78 64, 78 58 L 78 46"/>
                   <path d="M 22 58 L 22 70 C 22 76, 78 76, 78 70 L 78 58"/>
                   <!-- Neural Center Aperture -->
-                  <ellipse cx="50" cy="22" rx="14" ry="6" stroke="#FFFFFF" stroke-dasharray="2 2"/>
+                  <ellipse cx="50" cy="22" rx="14" ry="6" stroke="currentColor" stroke-dasharray="2 2"/>
                 </svg>
               </div>
               <div class="linear-wireframe-info">
-                <div class="linear-wireframe-title">Purpose-Built RAG Stack</div>
-                <div class="linear-wireframe-desc">Multi-layered vector embeddings grounded in 14,200+ verified Shona literary corpus.</div>
+                <div class="linear-wireframe-title">Hwaro hwakadzama hweRAG</div>
+                <div class="linear-wireframe-desc">Kuverengwa kwemazwi nepfungwa zvakadzama zvakatsigirwa nezvinyorwa zveChiShona zvinodarika 14,200+.</div>
               </div>
             </div>
 
-            <!-- FIG 0.2: Isometric Modular Intelligence Blocks -->
+            <!-- 2: Masoja eAI Anoshanda Pamwe -->
             <div class="linear-wireframe-card">
-              <span class="linear-wireframe-tag">FIG 0.2</span>
               <div class="linear-wireframe-canvas">
                 <svg class="linear-wireframe-svg" viewBox="0 0 100 100" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
                   <!-- Isometric Cube 1 (Back Center Top) -->
@@ -5734,14 +5801,13 @@
                 </svg>
               </div>
               <div class="linear-wireframe-info">
-                <div class="linear-wireframe-title">Powered by Neural Agents</div>
-                <div class="linear-wireframe-desc">Modular agents specialized for grammar analysis, proverbs, and essay evaluation.</div>
+                <div class="linear-wireframe-title">Inofambiswa neNeural Agents</div>
+                <div class="linear-wireframe-desc">Masoja ehungwaru akarongeka ekuongorora girama, kudzidzisa tsumo nemadimikira, nekukwenenzvera zvinyorwa.</div>
               </div>
             </div>
 
-            <!-- FIG 0.3: Precision Tiered Performance Steps -->
+            <!-- 3: Kumhanya Kusinganetse -->
             <div class="linear-wireframe-card">
-              <span class="linear-wireframe-tag">FIG 0.3</span>
               <div class="linear-wireframe-canvas">
                 <svg class="linear-wireframe-svg" viewBox="0 0 100 100" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
                   <!-- Cascading Architectural Blade Slices -->
@@ -5754,15 +5820,16 @@
                 </svg>
               </div>
               <div class="linear-wireframe-info">
-                <div class="linear-wireframe-title">Designed for Sub-Second Speed</div>
-                <div class="linear-wireframe-desc">Sub-second streaming token inference delivering immediate, contextual tutoring.</div>
+                <div class="linear-wireframe-title">Yakarongerwa Kumhanya Pakarepo</div>
+                <div class="linear-wireframe-desc">Mhinduro dzinoyerera mumasekondi mashoma pasina kumirira, kuitira rubatsiro runokurumidza mumafoni nemakombiyuta.</div>
               </div>
             </div>
           </div>
 
           <div style="display: flex; gap: 14px; margin-top: 48px; flex-wrap: wrap;">
-            <button type="button" class="nav-btn-signin" onclick="scrollToAuthSection()" style="padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: #000000; border: none; cursor: pointer; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
-              Tanga Kushandisa Ruzivo &rarr;
+            <button type="button" class="linear-cta-btn" onclick="scrollToAuthSection()">
+              <span>Tanga Kushandisa Ruzivo</span>
+              <span>&rarr;</span>
             </button>
           </div>
         </div>
