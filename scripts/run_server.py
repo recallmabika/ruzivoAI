@@ -69,8 +69,8 @@ def load_dotenv():
 load_dotenv()
 
 # Google reCAPTCHA Enterprise Configuration
-RECAPTCHA_SITE_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp").strip()
-RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "6Ld68AIuAAAAANvr7x5dG7stmVxpssHeHy7oprN3").strip()
+RECAPTCHA_SITE_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "6LeQQwMuAAAAACyZi2_yKpfyG11ZFv6YDPALMn9X").strip()
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp").strip()
 
 def verify_recaptcha_token(token: str, expected_action: str = "", remote_ip: str = "") -> tuple[bool, str]:
     """Verifies Google reCAPTCHA token against Google's siteverify API.
