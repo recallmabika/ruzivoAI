@@ -5895,6 +5895,318 @@
       }
     }
 
+
+
+    /* ==========================================================================
+       ARCHITECTURAL MINIMALIST AUTHENTICATION SECTION (FLAT, BORDERED, CLEAN)
+       ========================================================================== */
+    .landing-auth-section {
+      width: 100%;
+      padding: 60px 0 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .auth-section-container {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .auth-context-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .auth-panel-headline {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: clamp(32px, 4vw, 46px);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .auth-panel-lead {
+      font-size: 15.5px;
+      line-height: 1.65;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: transparent;
+      border-radius: 0;
+      padding: 0 0 0 16px;
+      border-left: 2.5px solid #10B981;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      margin: 0;
+    }
+
+    body.theme-dark .auth-panel-lead {
+      color: #C0C4CC;
+      background: transparent;
+    }
+
+    .auth-features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .auth-feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: transparent;
+      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .auth-feature-item:hover {
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    body.theme-dark .auth-feature-item {
+      background: #08090A;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    body.theme-dark .auth-feature-item:hover {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .auth-feature-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10B981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    body.theme-dark .auth-feature-check {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+    }
+
+    .auth-feature-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+      letter-spacing: -0.01em;
+    }
+
+    .auth-feature-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    body.theme-dark .auth-feature-desc {
+      color: #A3A8B4;
+    }
+
+    /* Auth Card: Flat Architectural Bordered Frame */
+    .landing-auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-cream, #FFFFFF);
+      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.1)) !important;
+      border-radius: 12px;
+      padding: 34px 30px;
+      box-shadow: none !important;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color 0.25s ease;
+      position: relative;
+    }
+
+    body.theme-dark .landing-auth-card {
+      background: #08090A;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .landing-auth-card:hover {
+      box-shadow: none !important;
+      border-color: rgba(16, 185, 129, 0.35) !important;
+    }
+
+    .auth-card-title {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .auth-card-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    body.theme-dark .auth-card-subtitle {
+      color: #A3A8B4;
+    }
+
+    .auth-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted, #71717A);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    body.theme-dark .auth-label {
+      color: #8A8F98;
+    }
+
+    .auth-input {
+      width: 100%;
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+    }
+
+    body.theme-dark .auth-input {
+      background: #0D0E10;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #F7F8F8;
+    }
+
+    .auth-input:focus {
+      border-color: #10B981;
+      background: transparent;
+    }
+
+    body.theme-dark .auth-input:focus {
+      border-color: #10B981;
+      background: #0D0E10;
+    }
+
+    /* Buttons: Clean crisp pill/rounded modern buttons */
+    .oauth-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: transparent;
+      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      box-shadow: none;
+      transition: all 0.2s ease;
+    }
+
+    body.theme-dark .oauth-btn {
+      background: #0D0E10;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #F7F8F8;
+    }
+
+    .oauth-btn:hover {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: #10B981;
+      transform: translateY(-1px);
+      box-shadow: none;
+    }
+
+    body.theme-dark .oauth-btn:hover {
+      background: #121316;
+      border-color: #10B981;
+    }
+
+    .auth-btn-primary {
+      background: #10B981;
+      color: #FFFFFF;
+      border: 1px solid #10B981;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      box-shadow: none;
+      transition: all 0.2s ease;
+    }
+
+    .auth-btn-primary:hover:not(:disabled) {
+      background: #059669;
+      border-color: #059669;
+      transform: translateY(-1px);
+      box-shadow: none;
+    }
+
+    body.theme-dark .auth-btn-primary {
+      background: #10B981;
+      color: #000000;
+      border-color: #10B981;
+    }
+
+    body.theme-dark .auth-btn-primary:hover:not(:disabled) {
+      background: #34D399;
+      border-color: #34D399;
+    }
+
+    .auth-switch {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .auth-switch a {
+      color: #10B981;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+
 </style>
 </head>
 <body>
@@ -6133,7 +6445,7 @@
               <div class="auth-feature-item">
                 <div class="auth-feature-check">✓</div>
                 <div>
-                  <div class="auth-feature-title">Tsumo, Madimikira & Nhetembo</div>
+                  <div class="auth-feature-title">Tsumo, Madimikira neNhetembo</div>
                   <div class="auth-feature-desc">Kududzira chirevo chetsumo uye zvirungamutauro zvemhando yepamusoro.</div>
                 </div>
               </div>
