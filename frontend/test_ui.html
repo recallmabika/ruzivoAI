@@ -3051,47 +3051,93 @@
     }
 
     .hero-btn-primary {
+      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      background: #FFFFFF;
-      color: #08090A;
-      padding: 13px 28px;
+      gap: 16px;
+      background: #08090A;
+      color: #FFFFFF;
+      padding: 20px 48px;
+      min-width: 320px;
       border-radius: 9999px;
-      font-size: 14.5px;
+      font-size: 17px;
       font-weight: 600;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       text-decoration: none;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      box-shadow: none !important;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    body:not(.theme-dark) .hero-btn-primary {
+      background: #0F1011;
+      color: #FFFFFF;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-btn-bg-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+      transform: scale(1.05);
+    }
+
+    .hero-btn-video-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+    }
+
+    .hero-btn-text {
+      position: relative;
+      z-index: 3;
+      transition: transform 0.25s ease;
+    }
+
+    .hero-btn-chevron {
+      position: relative;
+      z-index: 3;
+      transition: transform 0.25s ease;
+    }
+
     .hero-btn-primary:hover {
-      background: #FFFFFF;
-      transform: translateY(-1.5px);
-      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    body:not(.theme-dark) .hero-btn-primary:hover {
+      border-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-btn-primary:hover .hero-btn-bg-video {
+      opacity: 1;
+    }
+
+    .hero-btn-primary:hover .hero-btn-video-overlay {
+      opacity: 1;
+    }
+
+    .hero-btn-primary:hover .hero-btn-chevron {
+      transform: translateX(4px);
     }
 
     .hero-btn-primary:active {
       transform: translateY(0);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    body:not(.theme-dark) .hero-btn-primary {
-      background: #08090A;
-      color: #FFFFFF;
-      border: 1px solid #08090A;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-    }
-
-    body:not(.theme-dark) .hero-btn-primary:hover {
-      background: #1F2023;
-      color: #FFFFFF;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
     .hero-btn-guest {
@@ -7268,7 +7314,29 @@
       window.currentHeroSlide = 'dialogue';
       window.heroSlideInterval = null;
 
-      window.switchHeroSlide = function(target) {
+            window.playHeroBtnVideo = function(btn) {
+        try {
+          var vid = btn.querySelector('.hero-btn-bg-video');
+          if (vid) {
+            vid.currentTime = 0;
+            var p = vid.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(function(e) {});
+            }
+          }
+        } catch(e) {}
+      };
+
+      window.pauseHeroBtnVideo = function(btn) {
+        try {
+          var vid = btn.querySelector('.hero-btn-bg-video');
+          if (vid) {
+            vid.pause();
+          }
+        } catch(e) {}
+      };
+
+window.switchHeroSlide = function(target) {
         window.currentHeroSlide = target;
         var slideD = document.getElementById('heroSlideDialogue');
         var slideL = document.getElementById('heroSlideLogo');
@@ -7442,9 +7510,14 @@
           <p class="landing-hero-subtitle">Mubatsiri weChiShona ane ruzivo rwakadzama rwezvidzidzo, mutauro, nhoroondo, netsika dzevanhu vatema.</p>
           
           <div class="landing-hero-cta-group">
-            <button type="button" class="hero-btn-primary" onclick="openLinearAuthModal('login')">
-              <span>Pinda muAkaundi Yako</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" class="hero-btn-primary" onclick="openLinearAuthModal('login')" onmouseenter="playHeroBtnVideo(this)" onmouseleave="pauseHeroBtnVideo(this)">
+              <!-- Dynamic Video Background on Hover -->
+              <video class="hero-btn-bg-video" loop muted playsinline preload="auto">
+                <source src="assets/ruzivo.mp4" type="video/mp4">
+              </video>
+              <div class="hero-btn-video-overlay"></div>
+              <span class="hero-btn-text">Pinda muAkaundi Yako</span>
+              <svg class="hero-btn-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>
