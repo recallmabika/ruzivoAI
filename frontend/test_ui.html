@@ -6360,6 +6360,264 @@
       color: #FFFFFF;
     }
 
+    
+    /* ==========================================================================
+       LINEAR ARCHITECTURAL HERO PREVIEW CONSOLE
+       ========================================================================== */
+    .linear-hero-preview-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .linear-hero-preview-card {
+      width: 100%;
+      max-width: 580px;
+      background: #0A0A0C;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    body:not(.theme-dark) .linear-hero-preview-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .linear-hero-preview-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    body:not(.theme-dark) .linear-hero-preview-card:hover {
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+
+    .linear-preview-header {
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    body:not(.theme-dark) .linear-preview-header {
+      background: #FAFAFA;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .linear-preview-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .linear-preview-dots .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #FF5F56; }
+    .dot-yellow { background: #FFBD2E; }
+    .dot-green { background: #27C93F; }
+
+    .linear-preview-title {
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+      font-size: 11.5px;
+      color: #8A8F98;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .linear-preview-badge {
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.12);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .linear-preview-body {
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .linear-dialogue-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .dialogue-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .user-avatar {
+      background: #27272A;
+      color: #F4F4F5;
+    }
+
+    body:not(.theme-dark) .user-avatar {
+      background: #E4E4E7;
+      color: #18181B;
+    }
+
+    .ai-avatar {
+      background: transparent;
+    }
+
+    .ai-avatar img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .dialogue-bubble {
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      line-height: 1.58;
+      max-width: 90%;
+    }
+
+    .user-bubble {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #F7F8F8;
+    }
+
+    body:not(.theme-dark) .user-bubble {
+      background: #F4F4F5;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      color: #18181B;
+    }
+
+    .ai-bubble {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      color: #E2E4E9;
+    }
+
+    body:not(.theme-dark) .ai-bubble {
+      background: #FAFAFA;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      color: #27272A;
+    }
+
+    .ai-bubble-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .ai-name {
+      font-weight: 600;
+      font-size: 12.5px;
+      color: #FFFFFF;
+    }
+
+    body:not(.theme-dark) .ai-name {
+      color: #09090B;
+    }
+
+    .ai-tag {
+      font-size: 11px;
+      color: #8A8F98;
+    }
+
+    .ai-text {
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .linear-source-chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .source-chip {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #9CA3AF;
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+    }
+
+    body:not(.theme-dark) .source-chip {
+      background: #EEEEF0;
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #52525B;
+    }
+
+    .linear-preview-footer {
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.015);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: #71717A;
+    }
+
+    body:not(.theme-dark) .linear-preview-footer {
+      background: #FAFAFA;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      color: #71717A;
+    }
+
+    .footer-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #34D399;
+    }
+
     /* ==========================================================================
        LINEAR DEDICATED FULLSCREEN AUTH MODAL (PITCH BLACK / CLEAN WHITE)
        ========================================================================== */
@@ -6375,6 +6633,10 @@
       justify-content: center;
       padding: 32px 20px;
       overflow-y: auto;
+    }
+
+    .linear-auth-overlay.is-open {
+      display: flex !important;
     }
 
     body:not(.theme-dark) .linear-auth-overlay {
@@ -6800,11 +7062,6 @@
       <!-- SECTION 1: Pure Hero Showcase -->
       <section class="landing-hero-section">
         <div class="landing-hero-content">
-          <div class="landing-hero-brand">
-            <img src="assets/logo.png" alt="Ruzivo Logo" style="width: 36px; height: 36px; object-fit: contain;">
-            <span class="landing-hero-brand-name">Ruzivo</span>
-          </div>
-          
           <h1 class="landing-hero-headline">Bvunza zvine musoro</h1>
           <p class="landing-hero-subtitle">Mubatsiri weChiShona ane ruzivo rwakadzama rwezvidzidzo, mutauro, nhoroondo, netsika dzevanhu vatema.</p>
           
@@ -6818,50 +7075,60 @@
           </div>
         </div>
 
-        <!-- Right Column: Visual Moodboard with Animated Zimbabwe & Logo Background -->
-        <div class="landing-visual-panel">
-          <!-- Animated Background Emblem & Orbiting Rings -->
-          <div class="landing-bg-logo-container" aria-hidden="true">
-            <div class="landing-bg-logo-glow"></div>
-            <div class="landing-bg-logo-ring ring-1"></div>
-            <div class="landing-bg-logo-ring ring-2"></div>
-            <img src="/assets/logo.png" alt="" class="landing-bg-logo-orbit">
-          </div>
-
-          <div class="moodboard-canvas">
-            <!-- Big RUZIVO Bold Centerpiece (Reveals during cycle) -->
-            <div class="big-ruzivo-display" aria-hidden="true">
-              <div class="big-ruzivo-text">RUZIVO</div>
-              <div class="big-ruzivo-sub">ChiShona NLP & AI Core</div>
+        <!-- Right Column: Linear Minimalist Architectural Interface Preview -->
+        <div class="linear-hero-preview-container">
+          <div class="linear-hero-preview-card">
+            <!-- Terminal Header -->
+            <div class="linear-preview-header">
+              <div class="linear-preview-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="linear-preview-title">
+                <span class="status-pulse"></span>
+                ruzivo-core &bull; zvidzidzo-live
+              </div>
+              <div class="linear-preview-badge">ZIMSEC RAG</div>
             </div>
 
-            <!-- Alternating Floating Content Cards -->
-            <div class="moodboard-content-wrapper">
-              <div class="moodboard-header">
-                <div class="moodboard-tag">
-                  <img src="/assets/logo.png" alt="Ruzivo Logo" style="width: 16px; height: 16px; object-fit: contain;">
-                  <span>Ruzivo AI Core</span>
-                </div>
-                <span style="font-size:12px; color:#78716C; font-weight:500;">ChiShona NLP</span>
-              </div>
-
-              <div class="moodboard-notes-grid">
-                <div class="sticky-note note-card-left">
-                  <div class="sticky-note-title" id="typewriterTitle1">Kudzidza neRuzivo</div>
-                  <span id="typewriterText1"></span><span class="typewriter-cursor" id="typewriterCursor1"></span>
-                </div>
-                <div class="sticky-note secondary note-card-right">
-                  <div class="sticky-note-title" id="typewriterTitle2">Tsumo & Madimikira</div>
-                  <span id="typewriterText2"></span><span class="typewriter-cursor" id="typewriterCursor2"></span>
+            <!-- Prompt & Live AI Dialogue Simulation -->
+            <div class="linear-preview-body">
+              <div class="linear-dialogue-row user-row">
+                <div class="dialogue-avatar user-avatar">M</div>
+                <div class="dialogue-bubble user-bubble">
+                  Mhoroi Ruzivo. Ndeupi musiyano uripo pakati pe<strong>Chirevo</strong> ne<strong>Chivakashure</strong>?
                 </div>
               </div>
 
-              <div class="moodboard-bottom-stat stat-card-bottom">
-                <div>
-                  <div class="stat-label">Hwaro hweMabhuku Akasimbiswa</div>
-                  <div style="font-size:11px; color:#78716C; margin-top:2px;">Chishona Corpus & Textbook RAG</div>
+              <div class="linear-dialogue-row ai-row">
+                <div class="dialogue-avatar ai-avatar">
+                  <img src="assets/logo.png" alt="Ruzivo">
                 </div>
-                <div class="stat-val">14,201</div>
+                <div class="dialogue-bubble ai-bubble">
+                  <div class="ai-bubble-header">
+                    <span class="ai-name">Ruzivo AI</span>
+                    <span class="ai-tag">Girama yeChiShona</span>
+                  </div>
+                  <div class="ai-text">
+                    <strong>Chirevo</strong> ipfungwa yakazara ine chiito (Semuenzaniso: <em>"Mukomana anochera mvura."</em>).<br><br>
+                    <strong>Chivakashure</strong> chimedu cheizwi chinotanga chirevo kana zita (Semuenzaniso: <em>"mu-"</em> mumupanda 1).
+                  </div>
+                  <div class="linear-source-chips">
+                    <span class="source-chip">Bumbiro reZIMSEC</span>
+                    <span class="source-chip">Dura reRuzivo 14,201+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terminal Footer Status -->
+            <div class="linear-preview-footer">
+              <div class="footer-stat">
+                <span class="stat-dot"></span> Mhinduro: <strong>0.38s</strong>
+              </div>
+              <div class="footer-stat">
+                ChiShona: <strong>100% Chakarurama</strong>
               </div>
             </div>
           </div>
@@ -7499,7 +7766,7 @@
           </div>
 
           <div style="display: flex; gap: 14px; margin-top: 48px; flex-wrap: wrap;">
-            <button type="button" class="linear-cta-btn" onclick="scrollToAuthSection()">
+            <button type="button" class="linear-cta-btn" onclick="openLinearAuthModal('signup')">
               <span>Tanga Kushandisa Ruzivo</span>
               <span class="chevron-arrow">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -13676,7 +13943,8 @@
       currentLinearMode = mode || 'login';
       const overlay = document.getElementById('linearAuthOverlay');
       if (overlay) {
-        overlay.style.display = 'flex';
+        overlay.classList.add('is-open');
+        overlay.style.setProperty('display', 'flex', 'important');
         document.body.style.overflow = 'hidden';
       }
       updateLinearModeUI();
@@ -13686,7 +13954,8 @@
     function closeLinearAuthModal() {
       const overlay = document.getElementById('linearAuthOverlay');
       if (overlay) {
-        overlay.style.display = 'none';
+        overlay.classList.remove('is-open');
+        overlay.style.setProperty('display', 'none', 'important');
         document.body.style.overflow = '';
       }
     }
@@ -13711,6 +13980,15 @@
         if (footerToggle) footerToggle.innerHTML = 'Hausati wava neakaundi? <a onclick="toggleLinearMode(\'signup\')">Gadzira Akaundi</a> kana <a onclick="window.open(\'/terms\', \'_blank\')">tsvaga zvimwe</a>';
       }
     }
+
+        // Explicitly bind auth triggers to window so inline onclick handlers always resolve
+    window.openLinearAuthModal = openLinearAuthModal;
+    window.closeLinearAuthModal = closeLinearAuthModal;
+    window.toggleLinearMode = toggleLinearMode;
+    window.switchLinearStep = switchLinearStep;
+    window.handleLinearGoogleAuth = handleLinearGoogleAuth;
+    window.handleLinearEmailSubmit = handleLinearEmailSubmit;
+    window.handleLinearCodeSubmit = handleLinearCodeSubmit;
 
     function switchLinearStep(step) {
       const stepChoice = document.getElementById('linearStepChoice');
