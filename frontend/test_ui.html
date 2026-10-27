@@ -5910,10 +5910,24 @@
     .auth-section-container {
       width: 100%;
       max-width: 1100px;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: 1.15fr 1fr;
       gap: 64px;
       align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .auth-section-container {
+        grid-template-columns: 1fr !important;
+        gap: 36px !important;
+      }
+      .landing-auth-card {
+        max-width: 100% !important;
+      }
+      .landing-auth-section {
+        padding: 30px 0 20px !important;
+      }
     }
 
     .auth-context-panel {
@@ -6510,6 +6524,41 @@
       letter-spacing: 0.3em;
       font-size: 18px !important;
       font-weight: 600;
+    }
+
+
+
+    /* Master Mobile Viewport & Container Containment */
+    @media (max-width: 900px) {
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+      }
+      .auth-overlay {
+        width: 100% !important;
+        overflow-x: hidden !important;
+      }
+      .landing-navbar, .landing-navbar-inner {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .landing-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        overflow-x: hidden !important;
+      }
+      .zitrac-footer, .zitrac-footer-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      #googleLoginBtnContainer iframe, #googleRegisterBtnContainer iframe {
+        max-width: 100% !important;
+      }
     }
 
 </style>
@@ -13589,11 +13638,18 @@
     function updateLinearModeUI() {
       const heading = document.getElementById('linearAuthHeading');
       const footerToggle = document.getElementById('linearAuthFooterToggle');
+      const passkeyBtn = document.getElementById('linearPasskeyBtn');
+      const termsAgreement = document.getElementById('linearTermsAgreement');
+
       if (currentLinearMode === 'signup') {
-        if (heading) heading.innerText = 'Sign up for Ruzivo';
-        if (footerToggle) footerToggle.innerHTML = 'Already have an account? <a onclick="toggleLinearMode(\'login\')">Log in</a> or <a onclick="window.open(\'/terms\', \'_blank\')">learn more</a>';
+        if (heading) heading.innerText = 'Create your workspace';
+        if (passkeyBtn) passkeyBtn.style.display = 'none'; // Linear sign up only has Google, email, SAML SSO
+        if (termsAgreement) termsAgreement.style.display = 'block';
+        if (footerToggle) footerToggle.innerHTML = 'Already have an account? <a onclick="toggleLinearMode(\'login\')">Log in</a>';
       } else {
         if (heading) heading.innerText = 'Log in to Ruzivo';
+        if (passkeyBtn) passkeyBtn.style.display = 'flex';
+        if (termsAgreement) termsAgreement.style.display = 'none';
         if (footerToggle) footerToggle.innerHTML = 'Don\'t have an account? <a onclick="toggleLinearMode(\'signup\')">Sign up</a> or <a onclick="window.open(\'/terms\', \'_blank\')">learn more</a>';
       }
     }
@@ -13748,9 +13804,14 @@
         <button type="button" class="linear-btn-pill" onclick="switchLinearStep('sso')">
           Continue with SAML SSO
         </button>
-        <button type="button" class="linear-btn-pill" onclick="switchLinearStep('passkey')">
+        <button type="button" class="linear-btn-pill" id="linearPasskeyBtn" onclick="switchLinearStep('passkey')">
           Log in with passkey
         </button>
+      </div>
+
+      <!-- Linear Terms & Privacy Legal Agreement (Signup view) -->
+      <div id="linearTermsAgreement" style="display: none; margin-top: 24px; font-size: 11.5px; line-height: 1.55; color: var(--text-muted, #8A8F98); max-width: 290px;">
+        By signing up, you agree to our <a href="/terms" target="_blank" style="color: inherit; text-decoration: underline;">Terms of Service</a>, <a href="/privacy" target="_blank" style="color: inherit; text-decoration: underline;">Privacy Policy</a>, and <a href="/terms" target="_blank" style="color: inherit; text-decoration: underline;">Data Processing Agreement</a>.
       </div>
 
       <div class="linear-auth-footer-text" id="linearAuthFooterToggle">
