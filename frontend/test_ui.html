@@ -4373,15 +4373,31 @@
 
     .zitrac-title {
       font-family: 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: clamp(52px, 11vw, 130px);
+      font-size: clamp(48px, 10vw, 120px);
       font-weight: 300;
       letter-spacing: 0.28em;
-      text-indent: 0.28em; /* offset letter-spacing on last char */
       margin: 0;
       line-height: 1;
       color: var(--text-main, #141413);
       user-select: none;
       transition: color 0.2s ease, transform 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zitrac-logo-o {
+      width: clamp(38px, 8.5vw, 102px);
+      height: clamp(38px, 8.5vw, 102px);
+      object-fit: contain;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 0.12em;
+      transition: transform 0.35s ease;
+    }
+
+    .zitrac-title:hover .zitrac-logo-o {
+      transform: rotate(180deg) scale(1.06);
     }
 
     .zitrac-title:hover {
@@ -4707,8 +4723,8 @@
           <a class="landing-nav-link" data-section="curriculumSection" onclick="scrollToLandingSection('curriculumSection')">Zvidzidzo (Curriculum)</a>
           <a class="landing-nav-link" data-section="tsumoSection" onclick="scrollToLandingSection('tsumoSection')">Tsumo & Tsika</a>
           <a class="landing-nav-link" data-section="aboutSection" onclick="scrollToLandingSection('aboutSection')">Nezvedu (About)</a>
-          <a class="landing-nav-link" href="/privacy" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openPrivacyModal();}">Chakavanzika (Privacy)</a>
-          <a class="landing-nav-link" href="/terms" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openTermsModal();}">Mitemo (Terms)</a>
+          <a class="landing-nav-link" href="/privacy">Chakavanzika (Privacy)</a>
+          <a class="landing-nav-link" href="/terms">Mitemo (Terms)</a>
         </nav>
 
         <div class="landing-nav-actions">
@@ -4981,7 +4997,7 @@
               </div>
 
               <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
-                Nekupinda unobvumirana ne <a href="/terms" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openTermsModal();}" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Mitemo yeKushandisa</a> pamwe ne <a href="/privacy" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openPrivacyModal();}" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Kuchengetedzwa kweChakavanzika</a>.
+                Nekupinda unobvumirana ne <a href="/terms" target="_blank" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Mitemo yeKushandisa</a> pamwe ne <a href="/privacy" target="_blank" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Kuchengetedzwa kweChakavanzika</a>.
               </div>
             </div>
 
@@ -5084,7 +5100,7 @@
               </div>
 
               <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
-                Nekugadzira akaundi unobvumirana ne <a href="/terms" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openTermsModal();}" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Mitemo yeKushandisa</a> pamwe ne <a href="/privacy" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openPrivacyModal();}" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Kuchengetedzwa kweChakavanzika</a>.
+                Nekugadzira akaundi unobvumirana ne <a href="/terms" target="_blank" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Mitemo yeKushandisa</a> pamwe ne <a href="/privacy" target="_blank" style="color: var(--claude-accent); text-decoration: underline; cursor: pointer;">Kuchengetedzwa kweChakavanzika</a>.
               </div>
             </div>
           </div>
@@ -5260,7 +5276,9 @@
       <footer class="zitrac-footer">
         <!-- Giant Architectural Branding -->
         <div class="zitrac-hero-brand">
-          <h2 class="zitrac-title" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" style="cursor: pointer;" title="Dzokera Pamusoro">RUZIVO</h2>
+          <h2 class="zitrac-title" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" style="cursor: pointer;" title="Dzokera Pamusoro">
+            <span>RUZIV</span><img src="/assets/logo.png" alt="O" class="zitrac-logo-o">
+          </h2>
           
           <div class="zitrac-subtitle">
             <span>Enterprise ChiShona AI</span>
@@ -5277,11 +5295,11 @@
           </div>
         </div>
 
-        <!-- Links Row: Privacy, Terms, Curriculum, About (Clean, easy-to-read title casing) -->
+        <!-- Links Row: Privacy, Terms, Curriculum, About (Dedicated standalone pages) -->
         <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; font-size: 13px; margin-top: 14px; color: var(--text-muted);">
-          <a href="/privacy" onclick="openPrivacyModal(event)" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Kuchengetedzwa kweChakavanzika (Privacy Policy)</a>
+          <a href="/privacy" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Kuchengetedzwa kweChakavanzika (Privacy Policy)</a>
           <span style="opacity: 0.35;">•</span>
-          <a href="/terms" onclick="openTermsModal(event)" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Mitemo yeKushandisa (Terms of Service)</a>
+          <a href="/terms" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Mitemo yeKushandisa (Terms of Service)</a>
           <span style="opacity: 0.35;">•</span>
           <a onclick="scrollToLandingSection('curriculumSection')" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Zvidzidzo (Curriculum)</a>
           <span style="opacity: 0.35;">•</span>
