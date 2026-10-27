@@ -6126,14 +6126,7 @@
       const errEl = document.getElementById(errorId);
       if (inputEl) inputEl.classList.add('is-invalid');
       if (errEl) {
-        errEl.innerHTML = `
-          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke: #DC2626; fill: none; stroke-width: 2.2; flex-shrink: 0; margin-top: 1px;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <span style="flex: 1;">${escapeHtml(message)}</span>
-        `;
+        errEl.innerHTML = `<span style="flex: 1;">${escapeHtml(message)}</span>`;
         errEl.classList.add('show');
       }
     }
