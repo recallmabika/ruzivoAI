@@ -3591,15 +3591,20 @@
        LINEAR-STYLE BENTO GRID & SCROLL-TRIGGERED REVEAL ANIMATIONS
        ========================================================================= */
     .reveal-on-scroll {
-      opacity: 0;
-      transform: translateY(22px);
+      opacity: 1;
+      transform: translateY(0);
       transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: opacity, transform;
     }
 
-    .reveal-on-scroll.is-revealed {
-      opacity: 1;
-      transform: translateY(0);
+    .reveal-pending {
+      opacity: 0 !important;
+      transform: translateY(22px) !important;
+    }
+
+    .reveal-pending.is-revealed {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
     }
 
     .landing-cards-grid {
@@ -9006,6 +9011,13 @@
     // Run auth state check immediately synchronously to prevent flicker
     initWebAuth();
 
+        // Initialize scroll observer as early as possible so sections are instantly rendered
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initScrollRevealObserver);
+    } else {
+      setTimeout(initScrollRevealObserver, 10);
+    }
+
     window.onload = function() {
       initSidebar();
       initWebAuth();
@@ -9090,21 +9102,41 @@
       const revealElements = document.querySelectorAll('.reveal-on-scroll, .landing-feature-card, .tsumo-quote-card, .stripe-stat-item');
       if (!revealElements.length) return;
 
+      if (!('IntersectionObserver' in window)) {
+        revealElements.forEach(el => {
+          el.classList.add('is-revealed');
+          el.classList.remove('reveal-pending');
+        });
+        return;
+      }
+
+      // Check whether authOverlay is active or standard window scroll
+      const authOverlayEl = document.getElementById('authOverlay');
+      const rootTarget = (authOverlayEl && getComputedStyle(authOverlayEl).display !== 'none') ? authOverlayEl : null;
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-revealed');
+            entry.target.classList.remove('reveal-pending');
             observer.unobserve(entry.target);
           }
         });
       }, {
-        root: document.getElementById('authOverlay') || null,
-        threshold: 0.1,
-        rootMargin: '0px 0px -40px 0px'
+        root: rootTarget,
+        threshold: 0.05,
+        rootMargin: '0px 0px 100px 0px'
       });
 
       revealElements.forEach((el, index) => {
-        el.classList.add('reveal-on-scroll');
+        // Only add reveal-pending if element is not already in the viewport
+        const rect = el.getBoundingClientRect();
+        const inViewport = (rect.top < window.innerHeight && rect.bottom > 0);
+        if (!inViewport) {
+          el.classList.add('reveal-pending');
+        } else {
+          el.classList.add('is-revealed');
+        }
         el.style.transitionDelay = `${(index % 4) * 60}ms`;
         observer.observe(el);
       });
@@ -13411,7 +13443,24 @@
     function scrollToLandingSection(sectionId) {
       const section = document.getElementById(sectionId);
       if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Ensure the section and its contents are immediately visible
+        section.classList.add('is-revealed');
+        section.classList.remove('reveal-pending');
+        section.querySelectorAll('.reveal-on-scroll, .linear-story-card, .tsumo-linear-card, .stripe-stat-item, .linear-wireframe-card').forEach(el => {
+          el.classList.add('is-revealed');
+          el.classList.remove('reveal-pending');
+        });
+
+        const overlay = document.getElementById('authOverlay');
+        if (overlay && getComputedStyle(overlay).display !== 'none') {
+          const navOffset = 90;
+          const overlayRect = overlay.getBoundingClientRect();
+          const targetRect = section.getBoundingClientRect();
+          const targetTop = overlay.scrollTop + (targetRect.top - overlayRect.top) - navOffset;
+          overlay.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+        } else {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         setActiveLandingNavLink(sectionId);
       }
     }
