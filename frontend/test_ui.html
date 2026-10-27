@@ -3545,32 +3545,50 @@
     }
 
     .linear-cta-btn {
-      padding: 13px 28px;
-      font-size: 14.5px;
+      padding: 16px 36px;
+      font-size: 16px;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: 9999px;
       background: var(--text-main, #1F1E1D);
       color: var(--bg-cream, #FFFFFF);
       border: none;
       cursor: pointer;
-      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      letter-spacing: -0.01em;
     }
 
     body.theme-dark .linear-cta-btn {
       background: #FFFFFF;
-      color: #000000;
+      color: #08090A;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .linear-cta-btn:hover {
-      transform: translateY(-1.5px) scale(1.02);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px) scale(1.025);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
     }
 
     body.theme-dark .linear-cta-btn:hover {
-      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.22);
+    }
+
+    .linear-cta-btn:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .linear-cta-btn .chevron-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .linear-cta-btn:hover .chevron-arrow {
+      transform: translateX(4px);
     }
 
     /* =========================================================================
@@ -5829,7 +5847,11 @@
           <div style="display: flex; gap: 14px; margin-top: 48px; flex-wrap: wrap;">
             <button type="button" class="linear-cta-btn" onclick="scrollToAuthSection()">
               <span>Tanga Kushandisa Ruzivo</span>
-              <span>&rarr;</span>
+              <span class="chevron-arrow">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
             </button>
           </div>
         </div>
