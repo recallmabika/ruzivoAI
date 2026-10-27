@@ -12,6 +12,7 @@ import sqlite3
 import psycopg2
 import hashlib
 import secrets
+import urllib.request
 from urllib.parse import parse_qs, quote_plus, urlparse
 from pathlib import Path
 from google import genai
@@ -1612,9 +1613,25 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             data = parsed_json
+            credential = str(data.get("credential", "")).strip()
             email = str(data.get("email", "")).strip()
             name = str(data.get("name", "")).strip()
             provider = str(data.get("provider", "google")).strip()
+
+            # If a Google ID Token (credential) is supplied, verify it directly via Google's tokeninfo API
+            if credential and provider == "google":
+                try:
+                    verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={quote_plus(credential)}"
+                    req = urllib.request.Request(verify_url, headers={"User-Agent": "Ruzivo-Auth-Server/1.0"})
+                    with urllib.request.urlopen(req, timeout=5) as g_resp:
+                        if g_resp.getcode() == 200:
+                            g_data = json.loads(g_resp.read().decode("utf-8"))
+                            verified_email = g_data.get("email")
+                            if verified_email:
+                                email = verified_email.strip()
+                                name = g_data.get("name") or g_data.get("given_name") or name or email.split("@")[0]
+                except Exception as g_err:
+                    print(f"[OAuth] Google token verification fallback: {g_err}")
 
             if contains_xss_or_injection(email) or contains_xss_or_injection(name):
                 self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
