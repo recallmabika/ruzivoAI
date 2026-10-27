@@ -2747,12 +2747,13 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(31, 30, 29, 0.45);
+      background: rgba(31, 30, 29, 0.55);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      backdrop-filter: blur(3px);
+      z-index: 10005;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
 
     .modal-box {
@@ -4386,17 +4387,39 @@
     }
 
     .zitrac-subtitle {
-      margin-top: 24px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
+      margin-top: 18px;
+      font-size: 12.5px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
       color: var(--text-muted, #737370);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
+    }
+
+    .zitrac-email-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: rgba(217, 119, 6, 0.08);
+      border: 1px solid rgba(217, 119, 6, 0.25);
+      color: var(--claude-accent, #D97706);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      text-transform: none; /* Keep clean lowercase email */
+      transition: all 0.15s ease;
+    }
+
+    .zitrac-email-badge:hover {
+      background: rgba(217, 119, 6, 0.16);
+      border-color: rgba(217, 119, 6, 0.5);
+      transform: translateY(-1px);
     }
 
     .zitrac-subtitle-dot {
@@ -5219,36 +5242,43 @@
         </div>
       </section>
 
-      <!-- SECTION 6: Monumental ZITRAC-Inspired Footer -->
+      <!-- SECTION 6: Monumental Minimalist Footer -->
       <footer class="zitrac-footer">
         <!-- Giant Architectural Branding -->
         <div class="zitrac-hero-brand">
           <h2 class="zitrac-title" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" style="cursor: pointer;" title="Dzokera Pamusoro">RUZIVO</h2>
+          
           <div class="zitrac-subtitle">
-            <span>ENTERPRISE SHONA AI</span>
+            <span>Enterprise ChiShona AI</span>
             <span class="zitrac-subtitle-dot"></span>
-            <span>HARARE, ZIMBABWE</span>
+            <span>Harare, Zimbabwe</span>
             <span class="zitrac-subtitle-dot"></span>
-            <a href="mailto:support@ruzivo-ai.tech" style="color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor;" title="Bata Ruzivo Support">SUPPORT@RUZIVO-AI.TECH</a>
+            <a href="mailto:support@ruzivo-ai.tech" class="zitrac-email-badge" title="Bata Ruzivo Support">
+              <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2;">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <span>support@ruzivo-ai.tech</span>
+            </a>
           </div>
         </div>
 
-        <!-- Links Row: Privacy, Terms, Curriculum, About -->
-        <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 10px; color: var(--text-muted);">
-          <a href="/privacy" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openPrivacyModal();}" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Kuchengetedzwa kweChakavanzika (Privacy Policy)</a>
-          <span style="opacity: 0.4;">/</span>
-          <a href="/terms" onclick="if(!event.ctrlKey&&!event.metaKey){event.preventDefault();openTermsModal();}" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Mitemo yeKushandisa (Terms of Service)</a>
-          <span style="opacity: 0.4;">/</span>
+        <!-- Links Row: Privacy, Terms, Curriculum, About (Clean, easy-to-read title casing) -->
+        <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; font-size: 13px; margin-top: 14px; color: var(--text-muted);">
+          <a href="/privacy" onclick="openPrivacyModal(event)" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Kuchengetedzwa kweChakavanzika (Privacy Policy)</a>
+          <span style="opacity: 0.35;">•</span>
+          <a href="/terms" onclick="openTermsModal(event)" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Mitemo yeKushandisa (Terms of Service)</a>
+          <span style="opacity: 0.35;">•</span>
           <a onclick="scrollToLandingSection('curriculumSection')" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Zvidzidzo (Curriculum)</a>
-          <span style="opacity: 0.4;">/</span>
+          <span style="opacity: 0.35;">•</span>
           <a onclick="scrollToLandingSection('aboutSection')" style="color: inherit; cursor: pointer; text-decoration: none; transition: color 0.15s ease;" onmouseover="this.style.color='var(--claude-accent)'" onmouseout="this.style.color='var(--text-muted)'">Nezve Purojekiti</a>
         </div>
 
-        <!-- Precise Bottom Status & Operational Bar -->
+        <!-- Bottom Status & Operational Bar -->
         <div class="zitrac-bar">
           <!-- Left: Keep In Touch & Social Icons -->
           <div class="zitrac-bar-left">
-            <span>KEEP IN TOUCH</span>
+            <span>Keep in Touch</span>
             <div class="zitrac-social-links">
               <!-- LinkedIn -->
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="zitrac-social-btn" aria-label="LinkedIn" title="LinkedIn">
@@ -5280,7 +5310,7 @@
 
           <!-- Center: Copyright & Live Timezones (Harare CAT, London GMT) -->
           <div class="zitrac-bar-center">
-            <span>&copy; RUZIVO 2026</span>
+            <span>&copy; Ruzivo 2026</span>
             <span class="zitrac-subtitle-dot"></span>
             <span id="zitracTimeCAT">HRE, ZWE (CAT) --:--</span>
             <span class="zitrac-subtitle-dot"></span>
@@ -5291,7 +5321,7 @@
           <div class="zitrac-bar-right">
             <div class="zitrac-status-pill" onclick="openSystemStatusModal()" title="Tarisa Mamiriro eServer">
               <span class="zitrac-status-dot"></span>
-              <span>ALL SYSTEMS OPERATIONAL</span>
+              <span>All Systems Operational</span>
             </div>
 
             <div class="zitrac-theme-toggle" role="group" aria-label="Theme selector">
@@ -5325,15 +5355,8 @@
         </div>
       </footer>
 
-      <!-- Floating Bottom Action Buttons (Matching image: 'Chat with Us' Pill & Scroll to Top) -->
+      <!-- Floating Scroll-to-Top Action -->
       <div class="zitrac-float-actions">
-        <button type="button" class="zitrac-chat-pill" onclick="handleZitracChatAction()">
-          <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
-          <svg viewBox="0 0 24 24" style="width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2;">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
-          <span>Chat with Us</span>
-        </button>
         <button type="button" class="zitrac-scroll-top-btn" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'}); window.scrollTo({top: 0, behavior: 'smooth'});" aria-label="Dzokera Pamusoro" title="Dzokera Pamusoro">
           <svg viewBox="0 0 24 24" style="width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.2;">
             <polyline points="18 15 12 9 6 15"></polyline>
@@ -6652,9 +6675,16 @@
       loadConversations();
     };
 
-    function openPrivacyModal() {
+    function openPrivacyModal(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       const modal = document.getElementById('privacyModal');
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.style.zIndex = '10005';
+      }
     }
 
     function closePrivacyModal(event) {
@@ -6665,9 +6695,16 @@
       if (modal) modal.style.display = 'none';
     }
 
-    function openTermsModal() {
+    function openTermsModal(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       const modal = document.getElementById('termsModal');
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.style.zIndex = '10005';
+      }
     }
 
     function closeTermsModal(event) {
