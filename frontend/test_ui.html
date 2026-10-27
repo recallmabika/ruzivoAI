@@ -6385,26 +6385,17 @@
     }
 
     .hero-slide-item {
-      position: absolute;
-      inset: 0;
       width: 100%;
-      height: 100%;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      pointer-events: none;
-      transform: scale(0.96) translateY(10px);
-      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-      visibility: hidden;
+      transition: opacity 0.4s ease;
     }
 
     .hero-slide-item.active {
-      opacity: 1;
-      pointer-events: auto;
-      transform: scale(1) translateY(0);
-      visibility: visible;
-      position: relative;
+      display: flex !important;
+      opacity: 1 !important;
     }
 
     /* Kinetic Logo Emblem Card */
@@ -6416,32 +6407,31 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(255, 255, 255, 0.04);
+      box-shadow: none !important;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
       padding: 32px 20px 24px;
-      transition: border-color 0.3s ease, transform 0.3s ease;
+      transition: border-color 0.25s ease;
     }
 
     body:not(.theme-dark) .hero-kinetic-emblem-card {
       background: #FFFFFF;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+      box-shadow: none !important;
     }
 
     .hero-kinetic-emblem-card:hover {
       border-color: rgba(255, 255, 255, 0.18);
-      transform: translateY(-2px);
     }
 
     body:not(.theme-dark) .hero-kinetic-emblem-card:hover {
       border-color: rgba(0, 0, 0, 0.16);
     }
 
-    /* Orbit Stage & Rings */
+    /* Orbit Stage & Simple Clean Dashed Lines */
     .kinetic-orbit-stage {
       position: relative;
       width: 320px;
@@ -6452,57 +6442,57 @@
     }
 
     .kinetic-rotating-emblem {
-      width: 180px;
-      height: 180px;
+      width: 175px;
+      height: 175px;
       object-fit: contain;
       z-index: 4;
-      animation: kineticEmblemSpin 24s linear infinite;
-      filter: drop-shadow(0 0 24px rgba(46, 125, 50, 0.35));
+      animation: kineticEmblemSpin 28s linear infinite;
+      filter: none !important;
       transition: transform 0.3s ease;
     }
 
     .kinetic-glow-pulse {
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(245, 158, 11, 0.2) 40%, rgba(59, 130, 246, 0.15) 70%, transparent 85%);
-      filter: blur(28px);
-      animation: kineticGlowPulse 6s ease-in-out infinite alternate;
-      z-index: 1;
+      display: none !important;
     }
 
     .kinetic-dashed-ring {
       position: absolute;
       border-radius: 50%;
-      border: 1.2px dashed rgba(255, 255, 255, 0.12);
+      border: 1px dashed rgba(255, 255, 255, 0.14);
       z-index: 2;
     }
 
     body:not(.theme-dark) .kinetic-dashed-ring {
-      border-color: rgba(0, 0, 0, 0.12);
+      border-color: rgba(0, 0, 0, 0.14);
     }
 
     .ring-inner {
-      width: 220px;
-      height: 220px;
-      animation: kineticRingRotate 18s linear infinite reverse;
-      border-color: rgba(16, 185, 129, 0.35);
+      width: 215px;
+      height: 215px;
+      animation: kineticRingRotate 24s linear infinite reverse;
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+    }
+
+    body:not(.theme-dark) .ring-inner {
+      border-color: rgba(0, 0, 0, 0.18);
     }
 
     .ring-middle {
-      width: 270px;
-      height: 270px;
-      animation: kineticRingRotate 30s linear infinite;
-      border-style: dotted;
-      border-color: rgba(245, 158, 11, 0.3);
+      width: 265px;
+      height: 265px;
+      animation: kineticRingRotate 38s linear infinite;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    body:not(.theme-dark) .ring-middle {
+      border-color: rgba(0, 0, 0, 0.12);
     }
 
     .ring-outer {
-      width: 310px;
-      height: 310px;
-      animation: kineticRingRotate 42s linear infinite reverse;
-      border-color: rgba(255, 255, 255, 0.08);
+      width: 305px;
+      height: 305px;
+      animation: kineticRingRotate 52s linear infinite reverse;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
     }
 
     body:not(.theme-dark) .ring-outer {
@@ -6636,7 +6626,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(255, 255, 255, 0.04);
+      box-shadow: none !important;
       display: flex;
       flex-direction: column;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -6646,7 +6636,7 @@
     body:not(.theme-dark) .linear-hero-preview-card {
       background: #FFFFFF;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+      box-shadow: none !important;
     }
 
     .linear-hero-preview-card:hover {
@@ -7273,6 +7263,135 @@
 
   <!-- Real Web Authentication Modal / Overlay: Claude Landing Aesthetic -->
   <div class="auth-overlay" id="authOverlay">
+    <script>
+      // Immediately-available UI handlers for hero slider and authentication modal
+      window.currentHeroSlide = 'dialogue';
+      window.heroSlideInterval = null;
+
+      window.switchHeroSlide = function(target) {
+        window.currentHeroSlide = target;
+        var slideD = document.getElementById('heroSlideDialogue');
+        var slideL = document.getElementById('heroSlideLogo');
+        var tabD = document.getElementById('heroTabDialogue');
+        var tabL = document.getElementById('heroTabLogo');
+
+        if (target === 'dialogue') {
+          if (slideD) slideD.classList.add('active');
+          if (slideL) slideL.classList.remove('active');
+          if (tabD) tabD.classList.add('active');
+          if (tabL) tabL.classList.remove('active');
+        } else {
+          if (slideD) slideD.classList.remove('active');
+          if (slideL) slideL.classList.add('active');
+          if (tabD) tabD.classList.remove('active');
+          if (tabL) tabL.classList.add('active');
+        }
+      };
+
+      window.startHeroSlideAutoCycle = function() {
+        if (window.heroSlideInterval) clearInterval(window.heroSlideInterval);
+        window.heroSlideInterval = setInterval(function() {
+          var next = (window.currentHeroSlide === 'dialogue') ? 'logo' : 'dialogue';
+          window.switchHeroSlide(next);
+        }, 5000);
+      };
+
+      window.currentLinearMode = 'login';
+      window.openLinearAuthModal = function(mode) {
+        window.currentLinearMode = mode || 'login';
+        var overlay = document.getElementById('linearAuthOverlay');
+        if (overlay) {
+          overlay.classList.add('is-open');
+          overlay.style.setProperty('display', 'flex', 'important');
+          overlay.style.setProperty('z-index', '100010', 'important');
+        }
+        if (typeof window.updateLinearModeUI === 'function') {
+          window.updateLinearModeUI();
+        }
+        if (typeof window.switchLinearStep === 'function') {
+          window.switchLinearStep('choice');
+        }
+      };
+
+      window.closeLinearAuthModal = function() {
+        var overlay = document.getElementById('linearAuthOverlay');
+        if (overlay) {
+          overlay.classList.remove('is-open');
+          overlay.style.setProperty('display', 'none', 'important');
+        }
+      };
+
+      setTimeout(window.startHeroSlideAutoCycle, 500);
+    </script>
+
+  <!-- Linear Minimalist Authentication Modal Overlay -->
+  <div class="linear-auth-overlay" id="linearAuthOverlay" role="dialog" aria-modal="true" aria-label="Sign In to Ruzivo">
+    <button type="button" class="linear-auth-close-btn" onclick="closeLinearAuthModal()" title="Vhara" aria-label="Close">
+      &times;
+    </button>
+
+    <!-- STEP 1: Main Method Selector (Continue with Google, email) -->
+    <div class="linear-auth-box" id="linearStepChoice">
+      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
+      <h2 class="linear-auth-heading" id="linearAuthHeading">Pinda muRuzivo</h2>
+
+      <div class="linear-auth-actions-stack">
+        <button type="button" class="linear-btn-google" onclick="handleLinearGoogleAuth()">
+          Enderera mberi neGoogle
+        </button>
+        <button type="button" class="linear-btn-pill" onclick="switchLinearStep('email')">
+          Enderera mberi neEmail
+        </button>
+      </div>
+
+      <!-- Linear Terms & Privacy Legal Agreement (Signup view) -->
+      <div id="linearTermsAgreement" style="display: none; margin-top: 24px; font-size: 11.5px; line-height: 1.55; color: var(--text-muted, #8A8F98); max-width: 290px;">
+        Pakunyoresa akaundi, munotenderana ne <a href="/terms" target="_blank" style="color: inherit; text-decoration: underline;">Mitemo yeKushandisa</a>, <a href="/privacy" target="_blank" style="color: inherit; text-decoration: underline;">Mitemo yeChakavanzika</a>, pamwe ne <a href="/terms" target="_blank" style="color: inherit; text-decoration: underline;">Kuchengetedzwa kweData</a>.
+      </div>
+
+      <div class="linear-auth-footer-text" id="linearAuthFooterToggle">
+        Hausati wava neakaundi? <a onclick="toggleLinearMode('signup')">Gadzira Akaundi</a> kana <a onclick="window.open('/terms', '_blank')">tsvaga zvimwe</a>
+      </div>
+    </div>
+
+    <!-- STEP 2: Email Input Step -->
+    <div class="linear-auth-box" id="linearStepEmail" style="display: none;">
+      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
+      <h2 class="linear-auth-heading">Nyorai email yenyu</h2>
+
+      <form class="linear-auth-actions-stack" onsubmit="handleLinearEmailSubmit(event)">
+        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" required autocomplete="email">
+        <button type="submit" class="linear-btn-pill">
+          Enderera mberi neEmail
+        </button>
+      </form>
+
+      <button type="button" class="linear-back-link" onclick="switchLinearStep('choice')">
+        Dzokera pakupinda
+      </button>
+    </div>
+
+    <!-- STEP 3: Check Your Email / Enter Code Step -->
+    <div class="linear-auth-box" id="linearStepCode" style="display: none;">
+      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
+      <h2 class="linear-auth-heading" style="margin-bottom: 10px;">Tarisa email yako</h2>
+      <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 24px 0; line-height: 1.5;">
+        Takutumira kabhodhi kekupinda mubhokisi retsamba.<br>
+        Ndapota tarisa email pa <span id="linearSentEmailDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
+      </p>
+
+      <form class="linear-auth-actions-stack" onsubmit="handleLinearCodeSubmit(event)">
+        <input type="text" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" required autocomplete="one-time-code">
+        <button type="submit" class="linear-btn-google">
+          Enderera mberi neCode
+        </button>
+      </form>
+
+      <button type="button" class="linear-back-link" onclick="switchLinearStep('email')">
+        Dzokera pakupinda
+      </button>
+    </div>
+  </div>
     <script>
       (function() {
         try {
@@ -14458,74 +14577,7 @@
   </div>
 
 
-  <!-- Linear Minimalist Authentication Modal Overlay -->
-  <div class="linear-auth-overlay" id="linearAuthOverlay" role="dialog" aria-modal="true" aria-label="Sign In to Ruzivo">
-    <button type="button" class="linear-auth-close-btn" onclick="closeLinearAuthModal()" title="Vhara" aria-label="Close">
-      &times;
-    </button>
 
-    <!-- STEP 1: Main Method Selector (Continue with Google, email) -->
-    <div class="linear-auth-box" id="linearStepChoice">
-      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading" id="linearAuthHeading">Pinda muRuzivo</h2>
-
-      <div class="linear-auth-actions-stack">
-        <button type="button" class="linear-btn-google" onclick="handleLinearGoogleAuth()">
-          Enderera mberi neGoogle
-        </button>
-        <button type="button" class="linear-btn-pill" onclick="switchLinearStep('email')">
-          Enderera mberi neEmail
-        </button>
-      </div>
-
-      <!-- Linear Terms & Privacy Legal Agreement (Signup view) -->
-      <div id="linearTermsAgreement" style="display: none; margin-top: 24px; font-size: 11.5px; line-height: 1.55; color: var(--text-muted, #8A8F98); max-width: 290px;">
-        Pakunyoresa akaundi, munotenderana ne <a href="/terms" target="_blank" style="color: inherit; text-decoration: underline;">Mitemo yeKushandisa</a>, <a href="/privacy" target="_blank" style="color: inherit; text-decoration: underline;">Mitemo yeChakavanzika</a>, pamwe ne <a href="/terms" target="_blank" style="color: inherit; text-decoration: underline;">Kuchengetedzwa kweData</a>.
-      </div>
-
-      <div class="linear-auth-footer-text" id="linearAuthFooterToggle">
-        Hausati wava neakaundi? <a onclick="toggleLinearMode('signup')">Gadzira Akaundi</a> kana <a onclick="window.open('/terms', '_blank')">tsvaga zvimwe</a>
-      </div>
-    </div>
-
-    <!-- STEP 2: Email Input Step -->
-    <div class="linear-auth-box" id="linearStepEmail" style="display: none;">
-      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading">Nyorai email yenyu</h2>
-
-      <form class="linear-auth-actions-stack" onsubmit="handleLinearEmailSubmit(event)">
-        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" required autocomplete="email">
-        <button type="submit" class="linear-btn-pill">
-          Enderera mberi neEmail
-        </button>
-      </form>
-
-      <button type="button" class="linear-back-link" onclick="switchLinearStep('choice')">
-        Dzokera pakupinda
-      </button>
-    </div>
-
-    <!-- STEP 3: Check Your Email / Enter Code Step -->
-    <div class="linear-auth-box" id="linearStepCode" style="display: none;">
-      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading" style="margin-bottom: 10px;">Tarisa email yako</h2>
-      <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 24px 0; line-height: 1.5;">
-        Takutumira kabhodhi kekupinda mubhokisi retsamba.<br>
-        Ndapota tarisa email pa <span id="linearSentEmailDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
-      </p>
-
-      <form class="linear-auth-actions-stack" onsubmit="handleLinearCodeSubmit(event)">
-        <input type="text" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" required autocomplete="one-time-code">
-        <button type="submit" class="linear-btn-google">
-          Enderera mberi neCode
-        </button>
-      </form>
-
-      <button type="button" class="linear-back-link" onclick="switchLinearStep('email')">
-        Dzokera pakupinda
-      </button>
-    </div>
-  </div>
 
 </body>
 </html>
