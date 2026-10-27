@@ -68,6 +68,53 @@ def load_dotenv():
 
 load_dotenv()
 
+# Google reCAPTCHA Enterprise Configuration
+RECAPTCHA_SITE_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "6Ld68AIuAAAAAKFSiFE8U48XWpWvaN48xVGlmad3").strip()
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "6Ld68AIuAAAAANvr7x5dG7stmVxpssHeHy7oprN3").strip()
+
+def verify_recaptcha_token(token: str, expected_action: str = "", remote_ip: str = "") -> tuple[bool, str]:
+    """Verifies Google reCAPTCHA token against Google's siteverify API.
+    Fails open gracefully if network fails, but blocks known invalid tokens or low scores.
+    """
+    if not token or not RECAPTCHA_SECRET_KEY:
+        # If no secret configured or testing without recaptcha, pass gracefully
+        return True, "skipped"
+    try:
+        verify_url = "https://www.google.com/recaptcha/api/siteverify"
+        post_data = {
+            "secret": RECAPTCHA_SECRET_KEY,
+            "response": token
+        }
+        if remote_ip:
+            post_data["remoteip"] = remote_ip
+        encoded_data = urllib.parse.urlencode(post_data).encode("utf-8")
+        req = urllib.request.Request(verify_url, data=encoded_data, headers={"User-Agent": "Ruzivo-Auth-Server/1.0"})
+        with urllib.request.urlopen(req, timeout=4) as response:
+            if response.getcode() == 200:
+                result = json.loads(response.read().decode("utf-8"))
+                success = result.get("success", False)
+                score = result.get("score", 1.0) # For v3/Enterprise
+                action = result.get("action", "")
+                
+                # Check score if present (scores below 0.3 are considered likely bots)
+                if success:
+                    if score is not None and score < 0.3:
+                        print(f"[reCAPTCHA] Bot score too low: {score} for action {action} from IP {remote_ip}")
+                        return False, "Bot activity detected (low risk score)."
+                    return True, "verified"
+                else:
+                    error_codes = result.get("error-codes", [])
+                    print(f"[reCAPTCHA] Verification failed: {error_codes} for IP {remote_ip}")
+                    # If invalid response token
+                    if "invalid-input-response" in error_codes:
+                        return False, "Verification failed (invalid reCAPTCHA token)."
+                    return True, "verification_skipped_on_error"
+    except Exception as e:
+        print(f"[reCAPTCHA] Warning: Google verification request error: {e}")
+        # Graceful fallback: do not break login for genuine users if Google API temporarily times out
+        return True, "fallback"
+    return True, "ok"
+
 # Real PostgreSQL Authentication Database for Users & Sessions
 AUTH_DB_FILE = PROJECT_ROOT / "data" / "ruzivo_auth.db"
 PGDATA_DIR = PROJECT_ROOT / "data" / "pgdata"
@@ -1454,6 +1501,13 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 )
                 return
 
+            recaptcha_token = str(data.get("recaptcha_token", "")).strip()
+            if recaptcha_token:
+                rc_valid, rc_msg = verify_recaptcha_token(recaptcha_token, expected_action="REGISTER", remote_ip=client_ip)
+                if not rc_valid:
+                    self.send_json_response(400, {"detail": "Google reCAPTCHA yakundikana kusimbisa kuti uri munhu (Bot check failed)."})
+                    return
+
             username = str(data.get("username", "")).strip()
             email = str(data.get("email", "")).strip()
             password = str(data.get("password", "")).strip()
@@ -1545,6 +1599,13 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 print(f"[SECURITY] Blocked XSS/Injection payload in /auth/login from IP {client_ip}")
                 self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
                 return
+
+            recaptcha_token = str(parsed_json.get("recaptcha_token", "")).strip() if isinstance(parsed_json, dict) else ""
+            if recaptcha_token:
+                rc_valid, rc_msg = verify_recaptcha_token(recaptcha_token, expected_action="LOGIN", remote_ip=client_ip)
+                if not rc_valid:
+                    self.send_json_response(400, {"detail": "Google reCAPTCHA yakundikana kusimbisa kuti uri munhu (Bot check failed)."})
+                    return
 
             # Brute-force lockout check (by IP and target email)
             allowed, retry_sec = check_brute_force_lockout(client_ip, username)
