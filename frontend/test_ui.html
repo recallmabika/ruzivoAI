@@ -13435,17 +13435,14 @@
     function updateLinearModeUI() {
       const heading = document.getElementById('linearAuthHeading');
       const footerToggle = document.getElementById('linearAuthFooterToggle');
-      const passkeyBtn = document.getElementById('linearPasskeyBtn');
       const termsAgreement = document.getElementById('linearTermsAgreement');
 
       if (currentLinearMode === 'signup') {
         if (heading) heading.innerText = 'Create your workspace';
-        if (passkeyBtn) passkeyBtn.style.display = 'none'; // Linear sign up only has Google, email, SAML SSO
         if (termsAgreement) termsAgreement.style.display = 'block';
         if (footerToggle) footerToggle.innerHTML = 'Already have an account? <a onclick="toggleLinearMode(\'login\')">Log in</a>';
       } else {
         if (heading) heading.innerText = 'Log in to Ruzivo';
-        if (passkeyBtn) passkeyBtn.style.display = 'flex';
         if (termsAgreement) termsAgreement.style.display = 'none';
         if (footerToggle) footerToggle.innerHTML = 'Don\'t have an account? <a onclick="toggleLinearMode(\'signup\')">Sign up</a> or <a onclick="window.open(\'/terms\', \'_blank\')">learn more</a>';
       }
@@ -13597,12 +13594,6 @@
         </button>
         <button type="button" class="linear-btn-pill" onclick="switchLinearStep('email')">
           Continue with email
-        </button>
-        <button type="button" class="linear-btn-pill" onclick="switchLinearStep('sso')">
-          Continue with SAML SSO
-        </button>
-        <button type="button" class="linear-btn-pill" id="linearPasskeyBtn" onclick="switchLinearStep('passkey')">
-          Log in with passkey
         </button>
       </div>
 
