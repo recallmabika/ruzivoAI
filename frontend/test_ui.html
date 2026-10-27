@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld68AIuAAAAAKFSiFE8U48XWpWvaN48xVGlmad3" async defer></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -4967,6 +4967,11 @@
                 <div class="auth-field-error" id="loginPasswordError"></div>
               </div>
 
+              <!-- Google reCAPTCHA Checkbox Widget -->
+              <div style="margin: 14px 0 16px 0; display: flex; justify-content: center; min-height: 78px;">
+                <div class="g-recaptcha" id="loginRecaptcha" data-sitekey="6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp"></div>
+              </div>
+
               <button type="button" class="auth-btn-primary" id="webLoginBtn" onclick="submitWebLogin(event)">
                 <span>Pinda</span>
               </button>
@@ -5063,6 +5068,11 @@
                   <input type="password" class="auth-input" id="regConfirmPassword" placeholder="••••••••" autocomplete="new-password" oninput="handleRealtimeConfirmPasswordValidation(this)">
                 </div>
                 <div class="auth-field-error" id="regConfirmPasswordError"></div>
+              </div>
+
+              <!-- Google reCAPTCHA Checkbox Widget -->
+              <div style="margin: 14px 0 16px 0; display: flex; justify-content: center; min-height: 78px;">
+                <div class="g-recaptcha" id="registerRecaptcha" data-sitekey="6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp"></div>
               </div>
 
               <button type="button" class="auth-btn-primary" onclick="submitWebRegister(event)">
@@ -7784,25 +7794,17 @@
     }
 
     const GOOGLE_CLIENT_ID = "1031580468211-3jjn56i6ncsk9urivmo6glkjdu0780n2.apps.googleusercontent.com";
-    const RECAPTCHA_SITE_KEY = "6Ld68AIuAAAAAKFSiFE8U48XWpWvaN48xVGlmad3";
+    const RECAPTCHA_SITE_KEY = "6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp";
 
-    async function getRecaptchaToken(action = 'LOGIN') {
+    function getRecaptchaToken(action = 'LOGIN') {
       try {
-        if (window.grecaptcha && window.grecaptcha.enterprise) {
-          return await new Promise((resolve) => {
-            grecaptcha.enterprise.ready(async () => {
-              try {
-                const token = await grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action: action });
-                resolve(token || '');
-              } catch (err) {
-                console.warn('reCAPTCHA execute error:', err);
-                resolve('');
-              }
-            });
-          });
+        if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
+          // Check standard grecaptcha response from user checkbox click
+          const resp = grecaptcha.getResponse();
+          if (resp) return resp;
         }
       } catch (e) {
-        console.warn('reCAPTCHA unavailable:', e);
+        console.warn('reCAPTCHA getResponse error:', e);
       }
       return '';
     }
