@@ -4969,7 +4969,7 @@
 
               <!-- Google reCAPTCHA Checkbox Widget -->
               <div style="margin: 14px 0 16px 0; display: flex; justify-content: center; min-height: 78px;">
-                <div class="g-recaptcha" id="loginRecaptcha" data-sitekey="6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp"></div>
+                <div id="loginRecaptcha"></div>
               </div>
 
               <button type="button" class="auth-btn-primary" id="webLoginBtn" onclick="submitWebLogin(event)">
@@ -5072,7 +5072,7 @@
 
               <!-- Google reCAPTCHA Checkbox Widget -->
               <div style="margin: 14px 0 16px 0; display: flex; justify-content: center; min-height: 78px;">
-                <div class="g-recaptcha" id="registerRecaptcha" data-sitekey="6LeQQwMuAAAAAH0-CF4htuBXKmQnJWHaxKcMqkNp"></div>
+                <div id="registerRecaptcha"></div>
               </div>
 
               <button type="button" class="auth-btn-primary" onclick="submitWebRegister(event)">
@@ -6759,6 +6759,7 @@
       initSidebar();
       initWebAuth();
       initGoogleAuthClient();
+      renderRecaptchaWidgets();
       loadSettingsPreferences();
       loadConversations();
     };
