@@ -6207,6 +6207,36 @@
       text-decoration: underline;
     }
 
+
+
+    /* Google Sign-In Dark Mode Alignment */
+    body.theme-dark #googleLoginBtnContainer iframe,
+    body.theme-dark #googleRegisterBtnContainer iframe {
+      color-scheme: dark;
+      border-radius: 6px;
+    }
+
+    body.theme-dark #googleLoginBtnContainer,
+    body.theme-dark #googleRegisterBtnContainer {
+      background: transparent;
+      border-radius: 6px;
+    }
+
+
+
+    /* Google Sign In Container & Iframe Dark Mode Overrides */
+    body.theme-dark #googleLoginBtnContainer,
+    body.theme-dark #googleRegisterBtnContainer {
+      background: transparent !important;
+      border-radius: 8px;
+    }
+
+    body.theme-dark #googleLoginBtnContainer iframe,
+    body.theme-dark #googleRegisterBtnContainer iframe {
+      color-scheme: dark !important;
+      border-radius: 6px !important;
+    }
+
 </style>
 </head>
 <body>
@@ -9886,6 +9916,10 @@
             cancel_on_tap_outside: true
           });
 
+          // Determine theme dynamically so button matches pure dark or light background
+          const isDark = document.body.classList.contains('theme-dark');
+          const googleTheme = isDark ? 'filled_black' : 'outline';
+
           // Render official Google Sign In buttons if containers exist
           const loginContainer = document.getElementById('googleLoginBtnContainer');
           const regContainer = document.getElementById('googleRegisterBtnContainer');
@@ -9893,9 +9927,10 @@
           const customRegBtn = document.getElementById('customGoogleRegisterBtn');
 
           if (loginContainer) {
+            loginContainer.innerHTML = '';
             google.accounts.id.renderButton(loginContainer, {
               type: 'standard',
-              theme: 'outline',
+              theme: googleTheme,
               size: 'large',
               text: 'continue_with',
               shape: 'rectangular',
@@ -9906,9 +9941,10 @@
           }
 
           if (regContainer) {
+            regContainer.innerHTML = '';
             google.accounts.id.renderButton(regContainer, {
               type: 'standard',
-              theme: 'outline',
+              theme: googleTheme,
               size: 'large',
               text: 'signup_with',
               shape: 'rectangular',
@@ -11341,6 +11377,11 @@
         document.getElementById('zitracThemeLight')?.classList.add('active');
         document.body.classList.remove('theme-dark');
         localStorage.setItem('ruzivo_theme', 'light');
+      }
+
+      // Re-render Google button so it immediately matches dark/light mode
+      if (typeof initGoogleAuthClient === 'function') {
+        initGoogleAuthClient();
       }
     }
 
