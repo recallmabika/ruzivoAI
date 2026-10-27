@@ -3356,12 +3356,32 @@
     .landing-section-tag {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--claude-accent);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 4px 12px 4px 10px;
+      border-radius: 9999px;
+      background: rgba(46, 125, 50, 0.08);
+      border: 1px solid rgba(46, 125, 50, 0.2);
+      color: var(--claude-accent, #2E7D32);
+      width: fit-content;
+      transition: all 0.2s ease;
+    }
+
+    body.theme-dark .landing-section-tag {
+      background: rgba(67, 160, 71, 0.12);
+      border: 1px solid rgba(67, 160, 71, 0.28);
+      color: #4CAF50;
+    }
+
+    .landing-section-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
     }
 
     .landing-section-title {
