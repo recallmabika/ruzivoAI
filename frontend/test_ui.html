@@ -3729,47 +3729,264 @@
       color: var(--text-main);
     }
 
-    /* Linear Bento Quote Cards */
-    .tsumo-quote-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 22px 22px;
+    /* =========================================================================
+       LINEAR TESTIMONIAL-STYLE TSUMO CARDS (3-COLUMN HERO GRID + CONTINUOUS SLIDING MARQUEE)
+       ========================================================================= */
+    .tsumo-hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 960px) {
+      .tsumo-hero-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+    }
+
+    /* Linear Quote Bento Card */
+    .tsumo-linear-card {
+      position: relative;
+      border-radius: 20px;
+      padding: 34px 30px 28px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      position: relative;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+      justify-content: space-between;
+      min-height: 290px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.25s ease;
+      cursor: default;
     }
 
-    .tsumo-quote-card:hover {
-      border-color: #B5B0A4;
-      transform: translateY(-3px);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+    .tsumo-linear-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
     }
 
-    .tsumo-title {
-      font-family: 'Raleway', sans-serif;
-      font-size: 16.5px;
+    /* Card Variant 1: Periwinkle / Soft Blue Gradient with Watermark */
+    .tsumo-linear-card.variant-periwinkle {
+      background: linear-gradient(135deg, #E6EEFA 0%, #DFEAF8 60%, #D5E4F5 100%);
+      color: #0E1626;
+      border: 1px solid rgba(14, 22, 38, 0.08);
+    }
+
+    body.theme-dark .tsumo-linear-card.variant-periwinkle {
+      background: linear-gradient(135deg, #131E33 0%, #0F1728 60%, #0A101C 100%);
+      color: #E2E8F0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Card Variant 2: Vivid Lime / Neon Chartreuse Gradient */
+    .tsumo-linear-card.variant-lime {
+      background: linear-gradient(135deg, #D9F94F 0%, #CEF533 50%, #C4EC25 100%);
+      color: #0C1202;
+      border: 1px solid rgba(12, 18, 2, 0.12);
+    }
+
+    body.theme-dark .tsumo-linear-card.variant-lime {
+      background: linear-gradient(135deg, #D4F63F 0%, #C8EC28 50%, #BFE220 100%);
+      color: #080D01;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card Variant 3: Crisp Minimalist Obsidian / Porcelain Gradient */
+    .tsumo-linear-card.variant-emerald {
+      background: linear-gradient(135deg, #E8F5E9 0%, #DCEDC8 50%, #C8E6C9 100%);
+      color: #0A1C0D;
+      border: 1px solid rgba(10, 28, 13, 0.08);
+    }
+
+    body.theme-dark .tsumo-linear-card.variant-emerald {
+      background: linear-gradient(135deg, #132415 0%, #0D1C0F 60%, #09130A 100%);
+      color: #E8F5E9;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Watermark Emblem in Background */
+    .tsumo-card-watermark {
+      position: absolute;
+      right: -25px;
+      bottom: -35px;
+      width: 220px;
+      height: 220px;
+      opacity: 0.12;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.4s ease;
+    }
+
+    .tsumo-linear-card:hover .tsumo-card-watermark {
+      opacity: 0.18;
+      transform: scale(1.05) rotate(5deg);
+    }
+
+    body.theme-dark .tsumo-linear-card.variant-periwinkle .tsumo-card-watermark,
+    body.theme-dark .tsumo-linear-card.variant-emerald .tsumo-card-watermark {
+      opacity: 0.08;
+    }
+
+    /* Quote Text Styling */
+    .tsumo-quote-headline {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-size: clamp(20px, 2.3vw, 25px);
       font-weight: 600;
-      color: var(--text-main);
-      line-height: 1.45;
+      line-height: 1.35;
+      letter-spacing: -0.022em;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tsumo-quote-explanation {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 14px;
+      opacity: 0.88;
+      position: relative;
+      z-index: 2;
+      font-weight: 450;
+    }
+
+    /* Author / Source Attribution Footer */
+    .tsumo-quote-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 26px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tsumo-meta-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    body.theme-dark .tsumo-linear-card:not(.variant-lime) .tsumo-meta-icon {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .tsumo-meta-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tsumo-meta-name {
+      font-size: 13.5px;
+      font-weight: 700;
       letter-spacing: -0.01em;
     }
 
-    .tsumo-meaning {
-      font-size: 13.5px;
-      color: var(--text-muted);
-      line-height: 1.6;
+    .tsumo-meta-role {
+      font-size: 11.5px;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
-    .tsumo-category {
-      font-size: 11px;
+    /* Continuous Sliding Marquee for Secondary Tsumo */
+    .tsumo-marquee-container {
+      width: 100%;
+      overflow: hidden;
+      margin-top: 20px;
+      padding: 14px 0 6px;
+      position: relative;
+      user-select: none;
+    }
+
+    .tsumo-marquee-container::before,
+    .tsumo-marquee-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .tsumo-marquee-container::before {
+      left: 0;
+      background: linear-gradient(to right, var(--bg-cream, #FFFFFF) 0%, transparent 100%);
+    }
+
+    .tsumo-marquee-container::after {
+      right: 0;
+      background: linear-gradient(to left, var(--bg-cream, #FFFFFF) 0%, transparent 100%);
+    }
+
+    .tsumo-marquee-track {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      animation: continuousTsumoSlide 36s linear infinite;
+      flex-shrink: 0;
+      width: max-content;
+    }
+
+    .tsumo-marquee-container:hover .tsumo-marquee-track {
+      animation-play-state: paused;
+    }
+
+    @keyframes continuousTsumoSlide {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .tsumo-marquee-pill {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 16px 22px;
+      border-radius: 14px;
+      background: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--border-subtle, #EAEAEA);
+      width: 320px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+
+    .tsumo-marquee-pill:hover {
+      transform: translateY(-3px);
+      border-color: var(--claude-accent, #2E7D32);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    }
+
+    .tsumo-pill-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main, #1F1E1D);
+      letter-spacing: -0.01em;
+    }
+
+    .tsumo-pill-desc {
+      font-size: 12px;
+      color: var(--text-muted, #6B6864);
+      line-height: 1.45;
+    }
+
+    .tsumo-pill-tag {
+      font-size: 10.5px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--claude-accent);
-      margin-top: 4px;
+      letter-spacing: 0.06em;
+      color: var(--claude-accent, #2E7D32);
+      margin-top: 2px;
     }
 
     /* About Section Grid & Stats */
@@ -5659,7 +5876,7 @@
         </div>
       </section>
 
-      <!-- SECTION 4: Tsumo & Tsika dzaVaShona -->
+      <!-- SECTION 4: Tsumo & Tsika dzaVaShona (Linear 3-Grid + Sliding Marquee) -->
       <section class="landing-content-section reveal-on-scroll" id="tsumoSection">
         <div class="landing-section-header">
           <div class="landing-section-tag">
@@ -5671,48 +5888,148 @@
           </p>
         </div>
 
-        <div class="landing-filter-bar">
-          <button type="button" class="landing-filter-btn active" onclick="filterTsumoList('all', this)">Dzose (All)</button>
-          <button type="button" class="landing-filter-btn" onclick="filterTsumoList('uchenjeri', this)">Uchenjeri (Wisdom)</button>
-          <button type="button" class="landing-filter-btn" onclick="filterTsumoList('hushamwari', this)">Hushamwari (Community)</button>
-          <button type="button" class="landing-filter-btn" onclick="filterTsumoList('kushinga', this)">Kushinga (Perseverance)</button>
+        <!-- 3-Column Hero Grid styled like Linear Testimonial Cards -->
+        <div class="tsumo-hero-grid">
+          <!-- Card 1: Periwinkle / Soft Blue Gradient (Wisdom / Uchenjeri) -->
+          <div class="tsumo-linear-card variant-periwinkle">
+            <svg class="tsumo-card-watermark" viewBox="0 0 100 100" fill="currentColor">
+              <!-- Ruzivo Shield Emblem -->
+              <path d="M50 5 L85 20 L85 55 C85 75 50 95 50 95 C50 95 15 75 15 55 L15 20 Z" fill="none" stroke="currentColor" stroke-width="6"/>
+              <circle cx="50" cy="45" r="16" fill="currentColor"/>
+            </svg>
+            <div>
+              <div class="tsumo-quote-headline">"Afirwa haaringwi kumeso."</div>
+              <div class="tsumo-quote-explanation">Kureva: Munhu ari mumatambudziko makuru haatariswi kuti afadze vamwe kana kusarurwa nezvaanoita achichema.</div>
+            </div>
+            <div class="tsumo-quote-meta">
+              <div class="tsumo-meta-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div class="tsumo-meta-text">
+                <span class="tsumo-meta-name">Uchenjeri hweTsika</span>
+                <span class="tsumo-meta-role">Magariro & Kunzwisisa</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Vivid Lime / Neon Chartreuse Gradient (Community / Hushamwari) -->
+          <div class="tsumo-linear-card variant-lime">
+            <svg class="tsumo-card-watermark" viewBox="0 0 100 100" fill="currentColor">
+              <!-- Geometric Unity Hexagon -->
+              <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="currentColor" stroke-width="6"/>
+              <circle cx="50" cy="50" r="12" fill="currentColor"/>
+            </svg>
+            <div>
+              <div class="tsumo-quote-headline">"Chara chimwe hachitswanyi inda."</div>
+              <div class="tsumo-quote-explanation">Kureva: Munhu mumwe chete haakwanisi kuita basa guru ega pasina kubatsirwa nevamwe muupenyu.</div>
+            </div>
+            <div class="tsumo-quote-meta">
+              <div class="tsumo-meta-icon" style="background: rgba(0, 0, 0, 0.12);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <div class="tsumo-meta-text">
+                <span class="tsumo-meta-name" style="color: #000000;">Hushamwari & Kubatana</span>
+                <span class="tsumo-meta-role" style="color: #263300;">Simba muVanhu</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Emerald / Botanical Grounding Gradient (Perseverance / Kushinga) -->
+          <div class="tsumo-linear-card variant-emerald">
+            <svg class="tsumo-card-watermark" viewBox="0 0 100 100" fill="currentColor">
+              <!-- Zimbabwe Bird / Mountain Peak Emblem -->
+              <polygon points="50,15 80,85 20,85" fill="none" stroke="currentColor" stroke-width="6"/>
+              <line x1="50" y1="15" x2="50" y2="85" stroke="currentColor" stroke-width="4"/>
+            </svg>
+            <div>
+              <div class="tsumo-quote-headline">"Ateya mariva murutsva haachatyi kusviba magaro."</div>
+              <div class="tsumo-quote-explanation">Kureva: Munhu anenge atanga kuita basa rine njodzi kana dambudziko anofanira kuritsungirira kusvikira rapere.</div>
+            </div>
+            <div class="tsumo-quote-meta">
+              <div class="tsumo-meta-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+              </div>
+              <div class="tsumo-meta-text">
+                <span class="tsumo-meta-name">Kushinga & Kutsungirira</span>
+                <span class="tsumo-meta-role">Kusarereka Basa</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="landing-cards-grid" id="tsumoGrid">
-          <div class="tsumo-quote-card" data-cat="uchenjeri">
-            <div class="tsumo-title">"Afirwa haaringwi kumeso."</div>
-            <div class="tsumo-meaning">Kureva: Munhu ari mumatambudziko makuru haatariswi kuti afadze vamwe kana kusarurwa nezvaanoita achichema.</div>
-            <div class="tsumo-category">Tsumo yeUchenjeri & Tsika</div>
-          </div>
+        <!-- Continuous Sliding Marquee for Additional Tsumo Cards -->
+        <div class="tsumo-marquee-container" aria-label="Tsumo dzinofamba">
+          <div class="tsumo-marquee-track">
+            <!-- Set 1 -->
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeUchenjeri', 'Akuruma nzeve ndewako: Munhu anokuyambira kana kukuraira pachivande munhu anokuda zvikuru anoda kuti upone.')">
+              <span class="tsumo-pill-title">"Akuruma nzeve ndewako."</span>
+              <span class="tsumo-pill-desc">Munhu anokuyambira kana kukuraira pachivande munhu anokuda zvikuru anoda kuti upone.</span>
+              <span class="tsumo-pill-tag">Uchenjeri</span>
+            </div>
 
-          <div class="tsumo-quote-card" data-cat="hushamwari">
-            <div class="tsumo-title">"Chara chimwe hachitswanyi inda."</div>
-            <div class="tsumo-meaning">Kureva: Munhu mumwe chete haakwanisi kuita basa guru ega pasina kubatsirwa nevamwe muupenyu.</div>
-            <div class="tsumo-category">Tsumo yeHushamwari & Kubatana</div>
-          </div>
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeHushamwari', 'Kandiro kanoenda kunobva kamwe: Kudyidzana nekupanana zvirinani muukama, munhu paanokupa chiro newewo unofanira kumurangarira.')">
+              <span class="tsumo-pill-title">"Kandiro kanoenda kunobva kamwe."</span>
+              <span class="tsumo-pill-desc">Kudyidzana nekupanana zvirinani muukama; kupa kunounza kudzorerwa.</span>
+              <span class="tsumo-pill-tag">Hushamwari</span>
+            </div>
 
-          <div class="tsumo-quote-card" data-cat="kushinga">
-            <div class="tsumo-title">"Ateya mariva murutsva haachatyi kusviba magaro."</div>
-            <div class="tsumo-meaning">Kureva: Munhu anenge atanga kuita basa rine njodzi kana dambudziko anofanira kuritsungirira kusvikira rapere.</div>
-            <div class="tsumo-category">Tsumo yeKushinga</div>
-          </div>
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeKushinga', 'Apunyaira haashayi misodzi: Munhu anoshanda nesimba nekushingaira haamboshayi mubayiro wezvibereko zvaanoita.')">
+              <span class="tsumo-pill-title">"Apunyaira haashayi misodzi."</span>
+              <span class="tsumo-pill-desc">Munhu anoshanda nesimba nekushingaira haamboshayi mubayiro wezvibereko.</span>
+              <span class="tsumo-pill-tag">Kushinga</span>
+            </div>
 
-          <div class="tsumo-quote-card" data-cat="uchenjeri">
-            <div class="tsumo-title">"Akuruma nzeve ndewako."</div>
-            <div class="tsumo-meaning">Kureva: Munhu anokuyambira kana kukuraira pachivande munhu anokuda zvikuru anoda kuti upone.</div>
-            <div class="tsumo-category">Tsumo yeUchenjeri</div>
-          </div>
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeKuchenjera', 'Mbeva zhinji hadzina mashe: Kana vanhu vakaungana vachiita basa pasina mutungamiriri, basa rinorasika.')">
+              <span class="tsumo-pill-title">"Mbeva zhinji hadzina mashe."</span>
+              <span class="tsumo-pill-desc">Basa rinoda mutungamiriri akajeka; ruzhinji rusina gwara rinokonzera mhirizhonga.</span>
+              <span class="tsumo-pill-tag">Hutungamiri</span>
+            </div>
 
-          <div class="tsumo-quote-card" data-cat="hushamwari">
-            <div class="tsumo-title">"Kandiro kanoenda kunobva kamwe."</div>
-            <div class="tsumo-meaning">Kureva: Kudyidzana nekupanana zvirinani muukama, munhu paanokupa chiro newewo unofanira kumurangarira.</div>
-            <div class="tsumo-category">Tsumo yeHushamwari</div>
-          </div>
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeUpenyu', 'Kure kwegava ndokusina mutsubvu: Munhu haaregi kuenda kunzvimbo yaanoziva kuti anowana zvakanaka.')">
+              <span class="tsumo-pill-title">"Kure kwegava ndokusina mutsubvu."</span>
+              <span class="tsumo-pill-desc">Kure kure kunoreruka kana paine zvibereko zvinofadza zvakamirira munhu.</span>
+              <span class="tsumo-pill-tag">Upenyu</span>
+            </div>
 
-          <div class="tsumo-quote-card" data-cat="kushinga">
-            <div class="tsumo-title">"Apunyaira haashayi misodzi."</div>
-            <div class="tsumo-meaning">Kureva: Munhu anoshanda nesimba nekushingaira haamboshayi mubayiro wezvibereko zvaanoita.</div>
-            <div class="tsumo-category">Tsumo yeKushinga</div>
+            <!-- Set 2 (Exact Duplicate for Seamless Continuous Loop) -->
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeUchenjeri', 'Akuruma nzeve ndewako: Munhu anokuyambira kana kukuraira pachivande munhu anokuda zvikuru anoda kuti upone.')">
+              <span class="tsumo-pill-title">"Akuruma nzeve ndewako."</span>
+              <span class="tsumo-pill-desc">Munhu anokuyambira kana kukuraira pachivande munhu anokuda zvikuru anoda kuti upone.</span>
+              <span class="tsumo-pill-tag">Uchenjeri</span>
+            </div>
+
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeHushamwari', 'Kandiro kanoenda kunobva kamwe: Kudyidzana nekupanana zvirinani muukama, munhu paanokupa chiro newewo unofanira kumurangarira.')">
+              <span class="tsumo-pill-title">"Kandiro kanoenda kunobva kamwe."</span>
+              <span class="tsumo-pill-desc">Kudyidzana nekupanana zvirinani muukama; kupa kunounza kudzorerwa.</span>
+              <span class="tsumo-pill-tag">Hushamwari</span>
+            </div>
+
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeKushinga', 'Apunyaira haashayi misodzi: Munhu anoshanda nesimba nekushingaira haamboshayi mubayiro wezvibereko zvaanoita.')">
+              <span class="tsumo-pill-title">"Apunyaira haashayi misodzi."</span>
+              <span class="tsumo-pill-desc">Munhu anoshanda nesimba nekushingaira haamboshayi mubayiro wezvibereko.</span>
+              <span class="tsumo-pill-tag">Kushinga</span>
+            </div>
+
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeKuchenjera', 'Mbeva zhinji hadzina mashe: Kana vanhu vakaungana vachiita basa pasina mutungamiriri, basa rinorasika.')">
+              <span class="tsumo-pill-title">"Mbeva zhinji hadzina mashe."</span>
+              <span class="tsumo-pill-desc">Basa rinoda mutungamiriri akajeka; ruzhinji rusina gwara rinokonzera mhirizhonga.</span>
+              <span class="tsumo-pill-tag">Hutungamiri</span>
+            </div>
+
+            <div class="tsumo-marquee-pill" onclick="showDirectModal('Tsumo yeUpenyu', 'Kure kwegava ndokusina mutsubvu: Munhu haaregi kuenda kunzvimbo yaanoziva kuti anowana zvakanaka.')">
+              <span class="tsumo-pill-title">"Kure kwegava ndokusina mutsubvu."</span>
+              <span class="tsumo-pill-desc">Kure kure kunoreruka kana paine zvibereko zvinofadza zvakamirira munhu.</span>
+              <span class="tsumo-pill-tag">Upenyu</span>
+            </div>
           </div>
         </div>
       </section>
