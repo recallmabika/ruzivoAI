@@ -3379,6 +3379,131 @@
       max-width: 720px;
     }
 
+        /* =========================================================================
+       LINEAR PITCH-BLACK ARCHITECTURAL SHOWCASE (Linear FIG 0.1, 0.2, 0.3)
+       ========================================================================= */
+    .linear-showcase-section {
+      width: 100%;
+      background: #08090A;
+      color: #F7F8F8;
+      border-radius: 24px;
+      padding: 70px 48px;
+      margin: 60px 0 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @media (max-width: 768px) {
+      .linear-showcase-section {
+        padding: 40px 24px;
+        border-radius: 18px;
+      }
+    }
+
+    .linear-showcase-headline {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: clamp(26px, 3.8vw, 42px);
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -0.025em;
+      max-width: 900px;
+      margin-bottom: 56px;
+    }
+
+    .linear-showcase-headline .bold-white {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .linear-showcase-headline .muted-gray {
+      color: #8A8F98;
+      font-weight: 400;
+    }
+
+    .linear-wireframe-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      width: 100%;
+    }
+
+    @media (max-width: 860px) {
+      .linear-wireframe-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+    }
+
+    .linear-wireframe-card {
+      background: #0D0E11;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      position: relative;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: default;
+    }
+
+    .linear-wireframe-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .linear-wireframe-tag {
+      font-family: "SF Mono", Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: #62666D;
+      text-transform: uppercase;
+    }
+
+    .linear-wireframe-canvas {
+      width: 100%;
+      height: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .linear-wireframe-svg {
+      width: 140px;
+      height: 140px;
+      stroke: #8A8F98;
+      transition: stroke 0.3s ease, transform 0.4s ease;
+    }
+
+    .linear-wireframe-card:hover .linear-wireframe-svg {
+      stroke: #FFFFFF;
+      transform: scale(1.05);
+    }
+
+    .linear-wireframe-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .linear-wireframe-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+
+    .linear-wireframe-desc {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: #8A8F98;
+    }
+
     /* =========================================================================
        LINEAR-STYLE BENTO GRID & SCROLL-TRIGGERED REVEAL ANIMATIONS
        ========================================================================= */
@@ -5560,14 +5685,83 @@
           </div>
         </div>
 
-        <div class="reveal-on-scroll" style="background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 34px 30px; line-height: 1.75; color: var(--text-muted); font-size: 15px; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-top: 32px;">
-          <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--claude-accent) 0%, #FACC15 50%, var(--claude-accent) 100%);"></div>
-          <h3 style="font-family: 'Raleway', sans-serif; font-size: 22px; font-weight: 600; color: var(--text-main); margin-bottom: 12px; letter-spacing: -0.01em;">Basa reRuzivo muNyika yeZimbabwe</h3>
-          <p style="margin-bottom: 16px; max-width: 780px;">
-            Munyika yanhasi, ruzivo rweAI ruri kuwedzera mumitauro yekunze yakaita seChirungu, French, kana Chinese. Ruzivo rwunovavarira kusimudzira mutauro wedu weChivanhu kuti vadzidzi, vadzidzisi, pamwe nevatsvakurudzi vawane mhinduro dzechokwadi dzine huremu hwezvidzidzo netsika dzedu.
-          </p>
-          <div style="display: flex; gap: 14px; margin-top: 20px; flex-wrap: wrap;">
-            <button type="button" class="nav-btn-signin" onclick="scrollToAuthSection()" style="padding: 11px 26px; font-size: 14px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 14px rgba(46, 125, 50, 0.25); transition: transform 0.15s ease;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
+        <!-- Pure Linear-Style Architectural Engineering Showcase (Isometric Wireframes) -->
+        <div class="linear-showcase-section reveal-on-scroll">
+          <div class="linear-showcase-headline">
+            <span class="bold-white">A new species of indigenous AI tool.</span>
+            <span class="muted-gray">Purpose-built for modern Zimbabwean students and teachers with authentic Shona language models at its core.</span>
+          </div>
+
+          <div class="linear-wireframe-grid">
+            <!-- FIG 0.1: Purpose-built Shona RAG Stack -->
+            <div class="linear-wireframe-card">
+              <span class="linear-wireframe-tag">FIG 0.1</span>
+              <div class="linear-wireframe-canvas">
+                <svg class="linear-wireframe-svg" viewBox="0 0 100 100" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- Isometric Layered Stack with Core Cylinder -->
+                  <ellipse cx="50" cy="22" rx="28" ry="12"/>
+                  <path d="M 22 22 L 22 34 C 22 40, 78 40, 78 34 L 78 22"/>
+                  <path d="M 22 34 L 22 46 C 22 52, 78 52, 78 46 L 78 34"/>
+                  <path d="M 22 46 L 22 58 C 22 64, 78 64, 78 58 L 78 46"/>
+                  <path d="M 22 58 L 22 70 C 22 76, 78 76, 78 70 L 78 58"/>
+                  <!-- Neural Center Aperture -->
+                  <ellipse cx="50" cy="22" rx="14" ry="6" stroke="#FFFFFF" stroke-dasharray="2 2"/>
+                </svg>
+              </div>
+              <div class="linear-wireframe-info">
+                <div class="linear-wireframe-title">Purpose-Built RAG Stack</div>
+                <div class="linear-wireframe-desc">Multi-layered vector embeddings grounded in 14,200+ verified Shona literary corpus.</div>
+              </div>
+            </div>
+
+            <!-- FIG 0.2: Isometric Modular Intelligence Blocks -->
+            <div class="linear-wireframe-card">
+              <span class="linear-wireframe-tag">FIG 0.2</span>
+              <div class="linear-wireframe-canvas">
+                <svg class="linear-wireframe-svg" viewBox="0 0 100 100" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- Isometric Cube 1 (Back Center Top) -->
+                  <path d="M 50 14 L 68 24 L 50 34 L 32 24 Z"/>
+                  <path d="M 32 24 L 32 44 L 50 54 L 50 34"/>
+                  <path d="M 68 24 L 68 44 L 50 54"/>
+                  <!-- Isometric Cube 2 (Left Front) -->
+                  <path d="M 28 46 L 44 55 L 28 64 L 12 55 Z"/>
+                  <path d="M 12 55 L 12 73 L 28 82 L 28 64"/>
+                  <path d="M 44 55 L 44 73 L 28 82"/>
+                  <!-- Isometric Cube 3 (Right Front) -->
+                  <path d="M 72 46 L 88 55 L 72 64 L 56 55 Z"/>
+                  <path d="M 56 55 L 56 73 L 72 82 L 72 64"/>
+                  <path d="M 88 55 L 88 73 L 72 82"/>
+                </svg>
+              </div>
+              <div class="linear-wireframe-info">
+                <div class="linear-wireframe-title">Powered by Neural Agents</div>
+                <div class="linear-wireframe-desc">Modular agents specialized for grammar analysis, proverbs, and essay evaluation.</div>
+              </div>
+            </div>
+
+            <!-- FIG 0.3: Precision Tiered Performance Steps -->
+            <div class="linear-wireframe-card">
+              <span class="linear-wireframe-tag">FIG 0.3</span>
+              <div class="linear-wireframe-canvas">
+                <svg class="linear-wireframe-svg" viewBox="0 0 100 100" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- Cascading Architectural Blade Slices -->
+                  <path d="M 20 80 L 35 25 L 47 25 L 32 80 Z"/>
+                  <path d="M 35 80 L 47 35 L 59 35 L 47 80 Z"/>
+                  <path d="M 50 80 L 59 45 L 71 45 L 62 80 Z"/>
+                  <path d="M 65 80 L 71 55 L 83 55 L 77 80 Z"/>
+                  <!-- Horizontal Base Baseline Grid -->
+                  <line x1="10" y1="80" x2="90" y2="80" stroke-dasharray="3 3"/>
+                </svg>
+              </div>
+              <div class="linear-wireframe-info">
+                <div class="linear-wireframe-title">Designed for Sub-Second Speed</div>
+                <div class="linear-wireframe-desc">Sub-second streaming token inference delivering immediate, contextual tutoring.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 14px; margin-top: 48px; flex-wrap: wrap;">
+            <button type="button" class="nav-btn-signin" onclick="scrollToAuthSection()" style="padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: #000000; border: none; cursor: pointer; transition: transform 0.15s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
               Tanga Kushandisa Ruzivo &rarr;
             </button>
           </div>
