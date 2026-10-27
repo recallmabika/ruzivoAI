@@ -1,37 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - Ruzivo AI</title>
-  <meta name="description" content="Privacy Policy for Ruzivo AI - Detailing user data collection, security, PBKDF2 encryption, and privacy compliance.">
+  <title>Kuchengetedzwa kweChakavanzika - Ruzivo AI</title>
+  <meta name="description" content="Chibvumirano cheChakavanzika (Privacy Policy) cheRuzivo AI - Kuchengetedzwa kweruzivo rwemushandisi, encryption, uye ruzivo rweGoogle OAuth.">
   <link rel="icon" type="image/png" href="/assets/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #FBFBFA;
-      --card-bg: #FFFFFF;
+      --bg: #FFFFFF;
       --text-main: #141413;
       --text-muted: #595856;
       --text-subtle: #8A8985;
       --border: #E8E7E3;
-      --accent: #D97706;
-      --accent-soft: rgba(217, 119, 6, 0.08);
-      --link: #0284C7;
+      --accent-tag: #2E7D32;
+      --accent-tag-bg: rgba(46, 125, 50, 0.08);
+      --link: #141413;
+      --callout-bg: #F7F7F6;
+      --callout-border: #D1D0CB;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #151413;
-        --card-bg: #1F1E1C;
+        --bg: #141413;
         --text-main: #F4F4F0;
         --text-muted: #B3B2AD;
         --text-subtle: #7A7975;
         --border: #2D2C28;
-        --accent: #F59E0B;
-        --accent-soft: rgba(245, 158, 11, 0.12);
-        --link: #38BDF8;
+        --accent-tag: #81C784;
+        --accent-tag-bg: rgba(129, 199, 132, 0.12);
+        --link: #F4F4F0;
+        --callout-bg: #1E1E1C;
+        --callout-border: #3D3C38;
       }
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,12 +41,12 @@
       background: var(--bg);
       color: var(--text-main);
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.7;
-      padding: 0 16px 80px;
+      line-height: 1.75;
+      padding: 0 24px 80px;
       -webkit-font-smoothing: antialiased;
     }
     .container {
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
     }
     header.site-header {
@@ -53,7 +55,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
     }
     .brand {
       display: flex;
@@ -75,7 +77,7 @@
     }
     .nav-links {
       display: flex;
-      gap: 18px;
+      gap: 20px;
       font-size: 14px;
     }
     .nav-links a {
@@ -86,22 +88,16 @@
     .nav-links a:hover {
       color: var(--text-main);
     }
-    .policy-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 44px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-    @media (max-width: 640px) {
-      .policy-card { padding: 24px 18px; }
+    .policy-content {
+      width: 100%;
+      padding: 10px 0;
     }
     .badge {
       display: inline-block;
       padding: 4px 12px;
       border-radius: 9999px;
-      background: var(--accent-soft);
-      color: var(--accent);
+      background: var(--accent-tag-bg);
+      color: var(--accent-tag);
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.06em;
@@ -110,29 +106,30 @@
     }
     h1 {
       font-family: 'Raleway', sans-serif;
-      font-size: clamp(28px, 4vw, 38px);
+      font-size: clamp(30px, 4.5vw, 42px);
       font-weight: 700;
       letter-spacing: -0.02em;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      color: var(--text-main);
     }
     .meta {
       font-size: 13.5px;
       color: var(--text-subtle);
       margin-bottom: 28px;
-      padding-bottom: 20px;
+      padding-bottom: 18px;
       border-bottom: 1px solid var(--border);
     }
     .lang-switcher {
       display: inline-flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      background: var(--bg);
+      gap: 6px;
+      margin-bottom: 32px;
+      background: var(--callout-bg);
       padding: 4px;
       border-radius: 8px;
       border: 1px solid var(--border);
     }
     .lang-btn {
-      padding: 6px 14px;
+      padding: 6px 16px;
       font-size: 13px;
       font-weight: 600;
       border: none;
@@ -140,50 +137,54 @@
       color: var(--text-muted);
       border-radius: 6px;
       cursor: pointer;
+      transition: all 0.15s ease;
     }
     .lang-btn.active {
-      background: var(--card-bg);
+      background: var(--bg);
       color: var(--text-main);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     h2 {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 700;
-      margin: 32px 0 12px;
+      margin: 36px 0 12px;
       color: var(--text-main);
+      letter-spacing: -0.01em;
     }
     p {
       color: var(--text-muted);
-      font-size: 15px;
+      font-size: 15.5px;
       margin-bottom: 16px;
     }
     ul {
-      margin-left: 20px;
-      margin-bottom: 20px;
+      margin-left: 22px;
+      margin-bottom: 22px;
       color: var(--text-muted);
-      font-size: 15px;
+      font-size: 15.5px;
     }
     li {
       margin-bottom: 8px;
     }
     .callout {
-      background: var(--accent-soft);
-      border-left: 4px solid var(--accent);
-      border-radius: 6px;
-      padding: 16px 20px;
-      margin: 24px 0;
-      font-size: 14.5px;
+      background: var(--callout-bg);
+      border-left: 3px solid var(--callout-border);
+      border-radius: 0 6px 6px 0;
+      padding: 18px 22px;
+      margin: 26px 0;
+      font-size: 15px;
       color: var(--text-main);
     }
     footer.site-footer {
-      margin-top: 50px;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
       text-align: center;
       font-size: 13px;
       color: var(--text-subtle);
     }
     footer.site-footer a {
-      color: var(--link);
-      text-decoration: none;
+      color: var(--text-muted);
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -195,26 +196,79 @@
         <span>Ruzivo AI</span>
       </a>
       <nav class="nav-links">
-        <a href="/">Home</a>
-        <a href="/terms">Terms of Service</a>
-        <a href="mailto:support@ruzivo-ai.tech">Support</a>
+        <a href="/">Kumba (Home)</a>
+        <a href="/terms">Mitemo (Terms)</a>
+        <a href="mailto:support@ruzivo-ai.tech">Rubatsiro (Support)</a>
       </nav>
     </header>
 
-    <main class="policy-card">
-      <div class="badge">Privacy &amp; Data Protection</div>
-      <h1>Privacy Policy</h1>
-      <div class="meta">
-        Last updated: October 27, 2026 &bull; Effective date: October 27, 2026
+    <main class="policy-content">
+      <div class="badge" id="policyBadge">Kuchengetedzwa kweChakavanzika &bull; Ruzivo Rwako</div>
+      <h1 id="policyTitle">Kuchengetedzwa kweChakavanzika (Privacy Policy)</h1>
+      <div class="meta" id="policyMeta">
+        Gadziriro yekupedzisira: Gumiguru 27, 2026 &bull; Nguva yekutanga kushanda: Gumiguru 27, 2026
       </div>
 
       <div class="lang-switcher" role="tablist">
-        <button class="lang-btn active" id="btnEn" onclick="switchLang('en')">English</button>
-        <button class="lang-btn" id="btnSn" onclick="switchLang('sn')">ChiShona</button>
+        <button class="lang-btn active" id="btnSn" onclick="switchLang('sn')">ChiShona</button>
+        <button class="lang-btn" id="btnEn" onclick="switchLang('en')">English</button>
       </div>
 
+      <!-- ChiShona Version (DEFAULT) -->
+      <section id="sectionSn">
+        <p>
+          Titambire ku <strong>Ruzivo AI</strong> ("isu", "yedu"), inowanikwa pa <strong>https://www.ruzivo-ai.tech</strong> pamwe ne <strong>https://ruzivo-ai.tech</strong>. Takazvipira zvakazara kuchengetedza zvakavanzika zvako neruzivo rweumwe neumwe anopinda muno. Chinyorwa chino chinotsanangura mashandiro atinoita ruzivo rwako nenzira dzekuchengeteka.
+        </p>
+
+        <div class="callout">
+          <strong>Chitsidzo Chedu Chikuru:</strong> Hatife takatengesa, kuhaya, kana kupa ruzivo rwako kune vekunze kana mabhizimusi ekushambadzira (advertisers). Zvose zvinoitwa zvinongoshanda mukusimudzira kudzidza kwako paRuzivo AI chete.
+        </div>
+
+        <h2>1. Ruzivo Rwatinoongorora</h2>
+        <p>Tinoongorora ruzivo chete rwaunozvipa pachezvako paunonyoresa kana kudzidza:</p>
+        <ul>
+          <li><strong>Ruzivo rweAkaundi:</strong> Zita, kero yeEmail, pamwe nepasiwedhi yakavharirwa nemhando Yepamusoro ye encryption (PBKDF2 SHA-256). Kana ukapinda neGoogle OAuth, tinongogamuchira email nezita rako zvakabvumidzwa neGoogle.</li>
+          <li><strong>Hurukuro dzedzidzo:</strong> Mibvunzo, maekisesaizi, pamwe netsumo dzaunobvunza kuti zvirambe zviri mudura rako rehurukuro paunodzidza.</li>
+          <li><strong>Kudzivirira Mabhot (Security &amp; Bot Defense):</strong> Kero ye IP yenguva pfupi pamwe nekushandiswa kweGoogle reCAPTCHA Enterprise kudzivirira kupaza sisitimu (brute-force attacks).</li>
+        </ul>
+
+        <h2>2. Kushandiswa kweRuzivo rweGoogle API (Google User Data)</h2>
+        <p>Ruzivo AI inoshandisa Google Identity Services (OAuth 2.0) kurerutsira vanoda kupinda neGoogle:</p>
+        <ul>
+          <li>Tinongokumbira ruzivo rwekutanga: Email yako, zita rako, pamwe nemufananidzo weGoogle (avatar).</li>
+          <li>Hatikumbire zvinyorwa zveGoogle Drive, tsamba dzeGmail, kana kero dzemamwe ma contacts ako.</li>
+          <li>Kutevedzera Mitemo yeGoogle: Kushandiswa kwese kweruzivo runobva kuGoogle kunotevedzera zvizere <strong>Google API Services User Data Policy</strong>, kusanganisira mitemo ye <em>Limited Use</em> requirements.</li>
+        </ul>
+
+        <h2>3. Chengetedzo yeRuzivo (Security &amp; Encryption)</h2>
+        <p>Isu tinoshandisa nzira dzechimanjemanje dzekuchengetedza data:</p>
+        <ul>
+          <li><strong>Pasiwedhi:</strong> Mapasiwedhi haambochengetwe semavara ari pachena; anochengetwa akasanganiswa neSalt nekuwanzwa kakapetwa zviuru zvina (PBKDF2 cryptographic hashing).</li>
+          <li><strong>Dandemutande rakavharwa:</strong> Zvose zvinofamba pakati pekombiyuta yako ne server zvinodzivirirwa ne SSL/TLS (HTTPS) encryption.</li>
+          <li><strong>CSRF &amp; Brute-Force:</strong> Sisitimu inozvidzivirira yoga panzira dzekunyepedzera kana kuedza mapasiwedhi akawandisa.</li>
+        </ul>
+
+        <h2>4. Kodzero Dzako Pamusoro peRuzivo Rwako</h2>
+        <p>Ndiwe muridzi weruzivo rwako nguva dzose:</p>
+        <ul>
+          <li><strong>Kuona neKuvandudza:</strong> Unogona kuona ruzivo rwako pama-settings eakaundi yako.</li>
+          <li><strong>Kudzima Zvachose:</strong> Unogona kudzima hurukuro dzose mudura, kana kudzima akaundi yako yose zvachose (Delete Account) kuburikidza ne 2FA security code. Data rese rinobva radzimwa muDatabase zvachose.</li>
+        </ul>
+
+        <h2>5. Zvigadzirwa zveCookies</h2>
+        <p>Tinoshandisa ma-cookies anokosha chete kuchengetedza kero yekupinda kwako (Session Token) pamwe ne CSRF security token kudzivirira kuba ma-sessions. Hatishandisi ma-cookies ekutsvaga zvaunotenga kune mamwe mawebhusaiti.</p>
+
+        <h2>6. Kutaura Nesu</h2>
+        <p>Kana uine chero mubvunzo pamusoro pekuchengetedzwa kweruzivo rwako, nyorera timu yedu pa:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:support@ruzivo-ai.tech" style="color: var(--text-main); font-weight: 500;">support@ruzivo-ai.tech</a></li>
+          <li><strong>Mambure:</strong> <a href="https://www.ruzivo-ai.tech" style="color: var(--text-main); font-weight: 500;">https://www.ruzivo-ai.tech</a></li>
+          <li><strong>Nzvimbo:</strong> Harare, Zimbabwe</li>
+        </ul>
+      </section>
+
       <!-- English Version -->
-      <section id="sectionEn">
+      <section id="sectionEn" style="display: none;">
         <p>
           Welcome to <strong>Ruzivo AI</strong> ("we", "us", or "our"), accessible at <strong>https://www.ruzivo-ai.tech</strong> and <strong>https://ruzivo-ai.tech</strong>. We are deeply committed to protecting your privacy and personal data. This Privacy Policy details how we collect, use, store, and safeguard your information when you interact with our educational platform.
         </p>
@@ -228,97 +282,47 @@
         <ul>
           <li><strong>Account Information:</strong> When registering, we collect your name or nickname, email address, and encrypted credentials. If you choose to sign in via Google OAuth, we receive your verified email address, name, and profile picture URL as authorized by your Google account.</li>
           <li><strong>Educational Interactions:</strong> Questions, educational prompts, Shona language exercises, and conversations you engage in with Ruzivo AI to maintain your study history and facilitate learning continuity.</li>
-          <li><strong>Technical &amp; Log Data:</strong> Standard HTTP request metadata including IP addresses (used strictly for brute-force rate-limiting and security defense), browser type, and CSRF token session state.</li>
+          <li><strong>Security &amp; Bot Defense:</strong> IP addresses and verification tokens via Google reCAPTCHA Enterprise to detect automated attacks, abuse, and brute-force intrusion attempts.</li>
         </ul>
 
-        <h2>2. How We Use Your Information</h2>
-        <p>We process your data for the following legitimate purposes:</p>
+        <h2>2. Google User Data Policy Compliance</h2>
+        <p>Ruzivo AI integrates Google Identity Services for user authentication. In compliance with Google's requirements:</p>
         <ul>
-          <li>To provide, operate, and maintain the Ruzivo AI Shona language learning assistant.</li>
-          <li>To authenticate user sessions securely and maintain account integrity.</li>
-          <li>To prevent fraudulent access, automated attacks (such as brute-force or SQL injection attempts), and abusive traffic.</li>
-          <li>To continuously improve Shona natural language processing accuracy and curriculum relevance based on user feedback (upvotes/downvotes).</li>
-          <li>To respond to your inquiries submitted to <strong>support@ruzivo-ai.tech</strong>.</li>
+          <li>We only access basic profile information (email address, name, profile picture) required for account creation and session authentication.</li>
+          <li>We do not request access to Google Drive, Gmail, Contacts, or sensitive non-profile scopes.</li>
+          <li>Ruzivo AI's use and transfer of information received from Google APIs will adhere to the <strong>Google API Services User Data Policy</strong>, including the <em>Limited Use</em> requirements.</li>
         </ul>
 
-        <h2>3. Password Security &amp; Cryptography</h2>
-        <p>
-          We employ state-of-the-art cryptographic safeguards. User passwords are never stored in plaintext; they are hashed using <strong>PBKDF2 with HMAC-SHA256</strong> with a unique, cryptographically secure 16-byte salt per user across 100,000 iterations. No employee, administrator, or third party has access to your raw password.
-        </p>
-
-        <h2>4. Google API User Data &amp; OAuth Compliance</h2>
-        <p>
-          Ruzivo AI's use and transfer of information received from Google APIs adheres strictly to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" style="color: var(--link);">Google API Services User Data Policy</a>, including the Limited Use requirements.
-        </p>
+        <h2>3. Data Security and Encryption</h2>
+        <p>We implement defense-in-depth technical security controls:</p>
         <ul>
-          <li>We only request access to basic profile information (`openid`, `profile`, `email`) for authentication and profile identification.</li>
-          <li>We do not transfer or disclose Google user data to third parties, advertising platforms, data brokers, or information resellers.</li>
-          <li>We do not use Google user data for advertising purposes.</li>
+          <li><strong>Cryptographic Hashing:</strong> Passwords are never stored in plaintext. They are salted and hashed using PBKDF2 with SHA-256 over thousands of iterations.</li>
+          <li><strong>Transport Layer Security:</strong> All data in transit between your browser and our servers is encrypted using modern TLS (HTTPS).</li>
+          <li><strong>Session Integrity:</strong> Authentication utilizes cryptographically signed session tokens and strict CSRF tokens to safeguard each interaction.</li>
         </ul>
 
-        <h2>5. Your Rights &amp; Data Erasure (Right to be Forgotten)</h2>
-        <p>You maintain full ownership and control over your personal data:</p>
+        <h2>4. User Rights and Data Deletion</h2>
+        <p>You maintain complete control over your educational and personal data:</p>
         <ul>
-          <li><strong>Access &amp; Export:</strong> You can view your account profile and chat history anytime within the platform settings.</li>
-          <li><strong>Permanent Deletion:</strong> You have the absolute right to delete your account and all associated conversations at any time through the platform settings or by submitting a request to <strong>support@ruzivo-ai.tech</strong>. Upon confirmation, your account record and conversations are permanently deleted from our PostgreSQL database with zero lingering retention.</li>
+          <li><strong>Access and Export:</strong> You can review your profile, learning history, and saved memories directly within platform settings.</li>
+          <li><strong>Permanent Deletion:</strong> You have the right to request full deletion of your account and all associated conversation history at any time. This can be executed through our verified self-service 2FA account deletion workflow.</li>
         </ul>
+
+        <h2>5. Cookies and Local Storage</h2>
+        <p>We use essential cookies and browser storage strictly required for platform operation (session continuity, CSRF defense, and interface theme preferences). We do not deploy third-party advertising or cross-site tracking cookies.</p>
 
         <h2>6. Contact Us</h2>
-        <p>If you have any questions, concerns, or requests regarding this Privacy Policy, please contact our Data Protection team:</p>
+        <p>If you have any questions or inquiries regarding this Privacy Policy, please contact our data team:</p>
         <ul>
-          <li><strong>Email:</strong> <a href="mailto:support@ruzivo-ai.tech" style="color: var(--link);">support@ruzivo-ai.tech</a></li>
-          <li><strong>Website:</strong> <a href="https://www.ruzivo-ai.tech" style="color: var(--link);">https://www.ruzivo-ai.tech</a></li>
+          <li><strong>Email:</strong> <a href="mailto:support@ruzivo-ai.tech" style="color: var(--text-main); font-weight: 500;">support@ruzivo-ai.tech</a></li>
+          <li><strong>Website:</strong> <a href="https://www.ruzivo-ai.tech" style="color: var(--text-main); font-weight: 500;">https://www.ruzivo-ai.tech</a></li>
           <li><strong>Location:</strong> Harare, Zimbabwe</li>
-        </ul>
-      </section>
-
-      <!-- Shona Version -->
-      <section id="sectionSn" style="display: none;">
-        <p>
-          Kugamuchirwa ku<strong>Ruzivo AI</strong> ("isu", "yedu"), inowanikwa pa<strong>https://www.ruzivo-ai.tech</strong> ne <strong>https://ruzivo-ai.tech</strong>. Takazvipira zvakadzama kuchengetedza ruzivo rwenyu rwakavanzika. Gwaro rino reKuchengetedzwa kweChakavanzika rinotsanangura mashandisirwo, marongerwo, nekuchengetedzwa kweruzivo rwenyu rwezvidzidzo.
-        </p>
-
-        <div class="callout">
-          <strong>Chitsidzo chedu:</strong> Hatitengese, kurenda, kana kupa ruzivo rwenyu kune vekunze (third parties) kana masangano ekushambidza. Ruzivo rwenyu runoshandiswa chete kusimudzira dzidzo yemutauro weChiShona.
-        </div>
-
-        <h2>1. Ruzivo Rwatinochera (Data We Collect)</h2>
-        <p>Tinogamuchira ruzivo kubva kwamuri pamunonyoresa kana kushandisa Ruzivo AI:</p>
-        <ul>
-          <li><strong>Ruzivo rweAkaundi:</strong> Pamunonyoresa tinochengetedza email yenyu, zita renyu kana remadunhurirwa, nepasiwedhi yakachengetedzwa. Mukapinda neGoogle OAuth, tinogamuchira email yakasimbiswa neGoogle nezita renyu.</li>
-          <li><strong>Hurukuro dzeDzidzo:</strong> Mibvunzo, rondedzero, netsumo dzedzidzo dzamunobvunza kuti mukwanise kudzokorora kudzidza pava paya.</li>
-          <li><strong>Security &amp; Rate-Limiting:</strong> IP address dzinongoshandiswa kudzivirira kupaza system (brute force attack protection) neCSRF token session state.</li>
-        </ul>
-
-        <h2>2. Mashandisirwo eRuzivo Rwenyu</h2>
-        <p>Tinongoshandisa ruzivo urwu pazvinhu zvinotevera:</p>
-        <ul>
-          <li>Kupa nekuchengetedza dzidzo yeChiShona paRuzivo AI.</li>
-          <li>Kuchengetedza akaundi yenyu kuti pasave nemumwe anopinda zvisiri pamutemo.</li>
-          <li>Kuvandudza nekuwedzera huchenjeri hweAI pachishandiswa zvirevo zvinobva mukudzidza (feedback mechanism).</li>
-          <li>Kupindura mibvunzo yamunotitumira pa <strong>support@ruzivo-ai.tech</strong>.</li>
-        </ul>
-
-        <h2>3. Kuchengetedzwa kwePasiwedhi (Security &amp; Cryptography)</h2>
-        <p>
-          Mapasiwedhi ose anochengetedzwa pachishandiswa humhizha hwepamusoro hwe <strong>PBKDF2-HMAC-SHA256</strong> ine munyu (salt) wakasiyana kumushandisi wega wega uye yakasimbiswa kasingasviki 100,000 iterations. Hapana mushandi weRuzivo anokwanisa kuona pasiwedhi yenyu.
-        </p>
-
-        <h2>4. Kodzero Yenyu yeKudzima Zvose (Right to Erasure)</h2>
-        <p>Mune kodzero yakazara yekuongorora, kuchinja, kana kudzima akaundi yenyu zvachose (Delete Account) kubva mudatabase yedu nguva ipi zvayo pasina kusaririra kwezvinyorwa zvenyu.</p>
-
-        <h2>5. Mabatiro Atinoitwa</h2>
-        <p>Kana mune mibvunzo pamusoro pegwaro rino, tapota tinyorerei pa:</p>
-        <ul>
-          <li><strong>Email:</strong> <a href="mailto:support@ruzivo-ai.tech" style="color: var(--link);">support@ruzivo-ai.tech</a></li>
-          <li><strong>Mambure:</strong> <a href="https://www.ruzivo-ai.tech" style="color: var(--link);">https://www.ruzivo-ai.tech</a></li>
-          <li><strong>Nzvimbo:</strong> Harare, Zimbabwe</li>
         </ul>
       </section>
     </main>
 
     <footer class="site-footer">
-      &copy; 2026 Ruzivo AI &bull; Harare, Zimbabwe &bull; <a href="/terms">Terms of Service</a> &bull; <a href="mailto:support@ruzivo-ai.tech">support@ruzivo-ai.tech</a>
+      &copy; 2026 Ruzivo AI &bull; Harare, Zimbabwe &bull; <a href="/terms">Mitemo (Terms)</a> &bull; <a href="mailto:support@ruzivo-ai.tech">support@ruzivo-ai.tech</a>
     </footer>
   </div>
 
@@ -328,16 +332,26 @@
       const sn = document.getElementById('sectionSn');
       const btnEn = document.getElementById('btnEn');
       const btnSn = document.getElementById('btnSn');
-      if (lang === 'sn') {
-        en.style.display = 'none';
-        sn.style.display = 'block';
-        btnSn.classList.add('active');
-        btnEn.classList.remove('active');
-      } else {
+      const title = document.getElementById('policyTitle');
+      const badge = document.getElementById('policyBadge');
+      const meta = document.getElementById('policyMeta');
+
+      if (lang === 'en') {
         sn.style.display = 'none';
         en.style.display = 'block';
         btnEn.classList.add('active');
         btnSn.classList.remove('active');
+        title.innerText = 'Privacy Policy';
+        badge.innerText = 'Privacy & Data Protection';
+        meta.innerHTML = 'Last updated: October 27, 2026 &bull; Effective date: October 27, 2026';
+      } else {
+        en.style.display = 'none';
+        sn.style.display = 'block';
+        btnSn.classList.add('active');
+        btnEn.classList.remove('active');
+        title.innerText = 'Kuchengetedzwa kweChakavanzika (Privacy Policy)';
+        badge.innerText = 'Kuchengetedzwa kweChakavanzika • Ruzivo Rwako';
+        meta.innerHTML = 'Gadziriro yekupedzisira: Gumiguru 27, 2026 &bull; Nguva yekutanga kushanda: Gumiguru 27, 2026';
       }
     }
   </script>
