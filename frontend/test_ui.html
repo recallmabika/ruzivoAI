@@ -3337,7 +3337,7 @@
       width: 100%;
     }
 
-    /* General Landing Content Sections (Curriculum, Tsumo & Tsika, About) */
+    /* General Landing Content Sections (Curriculum, Tsumo neTsika, About) */
     .landing-content-section {
       width: 100%;
       display: flex;
@@ -3767,43 +3767,49 @@
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
     }
 
-    /* Card Variant 1: Periwinkle / Soft Blue Gradient with Watermark */
-    .tsumo-linear-card.variant-periwinkle {
-      background: linear-gradient(135deg, #E6EEFA 0%, #DFEAF8 60%, #D5E4F5 100%);
-      color: #0E1626;
-      border: 1px solid rgba(14, 22, 38, 0.08);
+    /* Card Variant 1: Pure Clean White / Subtle Minimalist Slate (Ruzivo Porcelain) */
+    .tsumo-linear-card.variant-white {
+      background: #FFFFFF;
+      color: #1F1E1D;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     }
 
-    body.theme-dark .tsumo-linear-card.variant-periwinkle {
-      background: linear-gradient(135deg, #131E33 0%, #0F1728 60%, #0A101C 100%);
-      color: #E2E8F0;
+    body.theme-dark .tsumo-linear-card.variant-white {
+      background: #141413;
+      color: #EFECE6;
       border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     }
 
-    /* Card Variant 2: Vivid Lime / Neon Chartreuse Gradient */
-    .tsumo-linear-card.variant-lime {
-      background: linear-gradient(135deg, #D9F94F 0%, #CEF533 50%, #C4EC25 100%);
-      color: #0C1202;
-      border: 1px solid rgba(12, 18, 2, 0.12);
+    /* Card Variant 2: Authentic Ruzivo Zimbabwean Emerald Green */
+    .tsumo-linear-card.variant-green {
+      background: #2E7D32;
+      color: #FFFFFF;
+      border: 1px solid #256629;
+      box-shadow: 0 8px 24px rgba(46, 125, 50, 0.22);
     }
 
-    body.theme-dark .tsumo-linear-card.variant-lime {
-      background: linear-gradient(135deg, #D4F63F 0%, #C8EC28 50%, #BFE220 100%);
-      color: #080D01;
-      border: 1px solid rgba(0, 0, 0, 0.15);
+    body.theme-dark .tsumo-linear-card.variant-green {
+      background: #1B5E20;
+      color: #FFFFFF;
+      border: 1px solid #2E7D32;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
     }
 
-    /* Card Variant 3: Crisp Minimalist Obsidian / Porcelain Gradient */
-    .tsumo-linear-card.variant-emerald {
-      background: linear-gradient(135deg, #E8F5E9 0%, #DCEDC8 50%, #C8E6C9 100%);
-      color: #0A1C0D;
-      border: 1px solid rgba(10, 28, 13, 0.08);
+    /* Card Variant 3: Deep Obsidian Black */
+    .tsumo-linear-card.variant-black {
+      background: #0D0E11;
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
 
-    body.theme-dark .tsumo-linear-card.variant-emerald {
-      background: linear-gradient(135deg, #132415 0%, #0D1C0F 60%, #09130A 100%);
-      color: #E8F5E9;
+    body.theme-dark .tsumo-linear-card.variant-black {
+      background: #08090A;
+      color: #F7F8F8;
       border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
     }
 
     /* Watermark Emblem in Background */
@@ -3813,19 +3819,22 @@
       bottom: -35px;
       width: 220px;
       height: 220px;
-      opacity: 0.12;
+      opacity: 0.08;
       pointer-events: none;
       transition: opacity 0.3s ease, transform 0.4s ease;
     }
 
     .tsumo-linear-card:hover .tsumo-card-watermark {
-      opacity: 0.18;
+      opacity: 0.14;
       transform: scale(1.05) rotate(5deg);
     }
 
-    body.theme-dark .tsumo-linear-card.variant-periwinkle .tsumo-card-watermark,
-    body.theme-dark .tsumo-linear-card.variant-emerald .tsumo-card-watermark {
-      opacity: 0.08;
+    .tsumo-linear-card.variant-green .tsumo-card-watermark {
+      opacity: 0.12;
+    }
+
+    .tsumo-linear-card.variant-black .tsumo-card-watermark {
+      opacity: 0.07;
     }
 
     /* Quote Text Styling */
@@ -3860,18 +3869,14 @@
     }
 
     .tsumo-meta-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 9px;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      background: rgba(0, 0, 0, 0.08);
-    }
-
-    body.theme-dark .tsumo-linear-card:not(.variant-lime) .tsumo-meta-icon {
-      background: rgba(255, 255, 255, 0.08);
+      background: transparent !important;
+      padding: 0;
     }
 
     .tsumo-meta-text {
@@ -5429,7 +5434,7 @@
 
         <nav class="landing-nav-links" id="landingNavLinks">
           <a class="landing-nav-link" data-section="curriculumSection" onclick="scrollToLandingSection('curriculumSection')">Zvidzidzo (Curriculum)</a>
-          <a class="landing-nav-link" data-section="tsumoSection" onclick="scrollToLandingSection('tsumoSection')">Tsumo & Tsika</a>
+          <a class="landing-nav-link" data-section="tsumoSection" onclick="scrollToLandingSection('tsumoSection')">Tsumo neTsika</a>
           <a class="landing-nav-link" data-section="aboutSection" onclick="scrollToLandingSection('aboutSection')">Nezvedu (About)</a>
         </nav>
 
@@ -5876,22 +5881,22 @@
         </div>
       </section>
 
-      <!-- SECTION 4: Tsumo & Tsika dzaVaShona (Linear 3-Grid + Sliding Marquee) -->
+      <!-- SECTION 4: Tsumo neTsika dzaVaShona (Linear 3-Grid + Sliding Marquee) -->
       <section class="landing-content-section reveal-on-scroll" id="tsumoSection">
         <div class="landing-section-header">
           <div class="landing-section-tag">
             <span>Tsika & Magariro</span>
           </div>
-          <h2 class="landing-section-title">Tsumo, Madimikira & Tsika dzaVaShona</h2>
+          <h2 class="landing-section-title">Tsumo, Madimikira neTsika dzaVaShona</h2>
           <p class="landing-section-desc">
             Tsumo dzeChiShona ihwaro hwehungwaru nehuchenjeri hwevatema hwakararama kwemazana emakore. Ona tsumo dzechokwadi pamwe netsananguro yadzo:
           </p>
         </div>
 
-        <!-- 3-Column Hero Grid styled like Linear Testimonial Cards -->
+        <!-- 3-Column Hero Grid (Ruzivo Palette: White, Green, Black) -->
         <div class="tsumo-hero-grid">
-          <!-- Card 1: Periwinkle / Soft Blue Gradient (Wisdom / Uchenjeri) -->
-          <div class="tsumo-linear-card variant-periwinkle">
+          <!-- Card 1: White Card (Uchenjeri) -->
+          <div class="tsumo-linear-card variant-white">
             <svg class="tsumo-card-watermark" viewBox="0 0 100 100" fill="currentColor">
               <!-- Ruzivo Shield Emblem -->
               <path d="M50 5 L85 20 L85 55 C85 75 50 95 50 95 C50 95 15 75 15 55 L15 20 Z" fill="none" stroke="currentColor" stroke-width="6"/>
@@ -5903,19 +5908,19 @@
             </div>
             <div class="tsumo-quote-meta">
               <div class="tsumo-meta-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
               </div>
               <div class="tsumo-meta-text">
                 <span class="tsumo-meta-name">Uchenjeri hweTsika</span>
-                <span class="tsumo-meta-role">Magariro & Kunzwisisa</span>
+                <span class="tsumo-meta-role">Magariro neKunzwisisa</span>
               </div>
             </div>
           </div>
 
-          <!-- Card 2: Vivid Lime / Neon Chartreuse Gradient (Community / Hushamwari) -->
-          <div class="tsumo-linear-card variant-lime">
+          <!-- Card 2: Green Card (Hushamwari neKubatana) -->
+          <div class="tsumo-linear-card variant-green">
             <svg class="tsumo-card-watermark" viewBox="0 0 100 100" fill="currentColor">
               <!-- Geometric Unity Hexagon -->
               <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="currentColor" stroke-width="6"/>
@@ -5923,11 +5928,11 @@
             </svg>
             <div>
               <div class="tsumo-quote-headline">"Chara chimwe hachitswanyi inda."</div>
-              <div class="tsumo-quote-explanation">Kureva: Munhu mumwe chete haakwanisi kuita basa guru ega pasina kubatsirwa nevamwe muupenyu.</div>
+              <div class="tsumo-quote-explanation" style="opacity: 0.95;">Kureva: Munhu mumwe chete haakwanisi kuita basa guru ega pasina kubatsirwa nevamwe muupenyu.</div>
             </div>
             <div class="tsumo-quote-meta">
-              <div class="tsumo-meta-icon" style="background: rgba(0, 0, 0, 0.12);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.2">
+              <div class="tsumo-meta-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -5935,14 +5940,14 @@
                 </svg>
               </div>
               <div class="tsumo-meta-text">
-                <span class="tsumo-meta-name" style="color: #000000;">Hushamwari & Kubatana</span>
-                <span class="tsumo-meta-role" style="color: #263300;">Simba muVanhu</span>
+                <span class="tsumo-meta-name" style="color: #FFFFFF;">Hushamwari neKubatana</span>
+                <span class="tsumo-meta-role" style="color: rgba(255, 255, 255, 0.85);">Simba muVanhu</span>
               </div>
             </div>
           </div>
 
-          <!-- Card 3: Emerald / Botanical Grounding Gradient (Perseverance / Kushinga) -->
-          <div class="tsumo-linear-card variant-emerald">
+          <!-- Card 3: Black Card (Kushinga neKutsungirira) -->
+          <div class="tsumo-linear-card variant-black">
             <svg class="tsumo-card-watermark" viewBox="0 0 100 100" fill="currentColor">
               <!-- Zimbabwe Bird / Mountain Peak Emblem -->
               <polygon points="50,15 80,85 20,85" fill="none" stroke="currentColor" stroke-width="6"/>
@@ -5950,16 +5955,16 @@
             </svg>
             <div>
               <div class="tsumo-quote-headline">"Ateya mariva murutsva haachatyi kusviba magaro."</div>
-              <div class="tsumo-quote-explanation">Kureva: Munhu anenge atanga kuita basa rine njodzi kana dambudziko anofanira kuritsungirira kusvikira rapere.</div>
+              <div class="tsumo-quote-explanation" style="opacity: 0.85;">Kureva: Munhu anenge atanga kuita basa rine njodzi kana dambudziko anofanira kuritsungirira kusvikira rapere.</div>
             </div>
             <div class="tsumo-quote-meta">
               <div class="tsumo-meta-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                 </svg>
               </div>
               <div class="tsumo-meta-text">
-                <span class="tsumo-meta-name">Kushinga & Kutsungirira</span>
+                <span class="tsumo-meta-name">Kushinga neKutsungirira</span>
                 <span class="tsumo-meta-role">Kusarereka Basa</span>
               </div>
             </div>
