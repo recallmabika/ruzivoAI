@@ -6361,6 +6361,263 @@
     }
 
     
+    
+    /* ==========================================================================
+       HERO DUAL-SLIDE INTERACTIVE SHOWCASE (CONSOLE & KINETIC EMBLEM)
+       ========================================================================== */
+    .hero-showcase-slider-wrapper {
+      width: 100%;
+      max-width: 620px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .hero-showcase-slider-track {
+      position: relative;
+      width: 100%;
+      min-height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-slide-item {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96) translateY(10px);
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      visibility: hidden;
+    }
+
+    .hero-slide-item.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+      visibility: visible;
+      position: relative;
+    }
+
+    /* Kinetic Logo Emblem Card */
+    .hero-kinetic-emblem-card {
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+      background: #0A0A0C;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 32px 20px 24px;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    body:not(.theme-dark) .hero-kinetic-emblem-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .hero-kinetic-emblem-card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    body:not(.theme-dark) .hero-kinetic-emblem-card:hover {
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+
+    /* Orbit Stage & Rings */
+    .kinetic-orbit-stage {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kinetic-rotating-emblem {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      z-index: 4;
+      animation: kineticEmblemSpin 24s linear infinite;
+      filter: drop-shadow(0 0 24px rgba(46, 125, 50, 0.35));
+      transition: transform 0.3s ease;
+    }
+
+    .kinetic-glow-pulse {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(245, 158, 11, 0.2) 40%, rgba(59, 130, 246, 0.15) 70%, transparent 85%);
+      filter: blur(28px);
+      animation: kineticGlowPulse 6s ease-in-out infinite alternate;
+      z-index: 1;
+    }
+
+    .kinetic-dashed-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.2px dashed rgba(255, 255, 255, 0.12);
+      z-index: 2;
+    }
+
+    body:not(.theme-dark) .kinetic-dashed-ring {
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    .ring-inner {
+      width: 220px;
+      height: 220px;
+      animation: kineticRingRotate 18s linear infinite reverse;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .ring-middle {
+      width: 270px;
+      height: 270px;
+      animation: kineticRingRotate 30s linear infinite;
+      border-style: dotted;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .ring-outer {
+      width: 310px;
+      height: 310px;
+      animation: kineticRingRotate 42s linear infinite reverse;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    body:not(.theme-dark) .ring-outer {
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    @keyframes kineticEmblemSpin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.03); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    @keyframes kineticGlowPulse {
+      0% { transform: scale(0.85); opacity: 0.55; }
+      100% { transform: scale(1.15); opacity: 0.95; }
+    }
+
+    @keyframes kineticRingRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .kinetic-emblem-footer {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 4;
+      text-align: center;
+    }
+
+    .kinetic-emblem-title {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      color: var(--text-main);
+      text-transform: uppercase;
+    }
+
+    .kinetic-emblem-badge {
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #10B981;
+      letter-spacing: 0.2em;
+    }
+
+    /* Bottom Slider Tabs / Indicator Controls */
+    .hero-slide-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .hero-slide-tab {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      padding: 6px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-muted, #8A8F98);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body:not(.theme-dark) .hero-slide-tab {
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #64748B;
+    }
+
+    .hero-slide-tab:hover {
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    body:not(.theme-dark) .hero-slide-tab:hover {
+      border-color: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .hero-slide-tab.active {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    body:not(.theme-dark) .hero-slide-tab.active {
+      color: #0F172A;
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-slide-tab .tab-indicator-bar {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #71717A;
+      transition: all 0.2s ease;
+    }
+
+    .hero-slide-tab.active .tab-indicator-bar {
+      background: #10B981;
+      box-shadow: 0 0 6px #10B981;
+    }
+
     /* ==========================================================================
        LINEAR ARCHITECTURAL HERO PREVIEW CONSOLE
        ========================================================================== */
@@ -7075,62 +7332,101 @@
           </div>
         </div>
 
-        <!-- Right Column: Linear Minimalist Architectural Interface Preview -->
-        <div class="linear-hero-preview-container">
-          <div class="linear-hero-preview-card">
-            <!-- Terminal Header -->
-            <div class="linear-preview-header">
-              <div class="linear-preview-dots">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-              </div>
-              <div class="linear-preview-title">
-                <span class="status-pulse"></span>
-                ruzivo-core &bull; zvidzidzo-live
-              </div>
-              <div class="linear-preview-badge">ZIMSEC RAG</div>
-            </div>
+        <!-- Right Column: Interactive Dual-Slide Hero Showcase (Terminal Dialogue & Animated Kinetic Logo) -->
+        <div class="hero-showcase-slider-wrapper">
+          <div class="hero-showcase-slider-track" id="heroShowcaseTrack">
+            
+            <!-- SLIDE 1: Linear AI Dialogue Console -->
+            <div class="hero-slide-item active" id="heroSlideDialogue">
+              <div class="linear-hero-preview-card">
+                <!-- Terminal Header -->
+                <div class="linear-preview-header">
+                  <div class="linear-preview-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </div>
+                  <div class="linear-preview-title">
+                    <span class="status-pulse"></span>
+                    ruzivo-core &bull; zvidzidzo-live
+                  </div>
+                  <div class="linear-preview-badge">ZIMSEC RAG</div>
+                </div>
 
-            <!-- Prompt & Live AI Dialogue Simulation -->
-            <div class="linear-preview-body">
-              <div class="linear-dialogue-row user-row">
-                <div class="dialogue-avatar user-avatar">M</div>
-                <div class="dialogue-bubble user-bubble">
-                  Mhoroi Ruzivo. Ndeupi musiyano uripo pakati pe<strong>Chirevo</strong> ne<strong>Chivakashure</strong>?
+                <!-- Prompt & Live AI Dialogue Simulation -->
+                <div class="linear-preview-body">
+                  <div class="linear-dialogue-row user-row">
+                    <div class="dialogue-avatar user-avatar">M</div>
+                    <div class="dialogue-bubble user-bubble">
+                      Mhoroi Ruzivo. Ndeupi musiyano uripo pakati pe<strong>Chirevo</strong> ne<strong>Chivakashure</strong>?
+                    </div>
+                  </div>
+
+                  <div class="linear-dialogue-row ai-row">
+                    <div class="dialogue-avatar ai-avatar">
+                      <img src="assets/logo.png" alt="Ruzivo">
+                    </div>
+                    <div class="dialogue-bubble ai-bubble">
+                      <div class="ai-bubble-header">
+                        <span class="ai-name">Ruzivo AI</span>
+                        <span class="ai-tag">Girama yeChiShona</span>
+                      </div>
+                      <div class="ai-text">
+                        <strong>Chirevo</strong> ipfungwa yakazara ine chiito (Semuenzaniso: <em>"Mukomana anochera mvura."</em>).<br><br>
+                        <strong>Chivakashure</strong> chimedu cheizwi chinotanga chirevo kana zita (Semuenzaniso: <em>"mu-"</em> mumupanda 1).
+                      </div>
+                      <div class="linear-source-chips">
+                        <span class="source-chip">Bumbiro reZIMSEC</span>
+                        <span class="source-chip">Dura reRuzivo 14,201+</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Terminal Footer Status -->
+                <div class="linear-preview-footer">
+                  <div class="footer-stat">
+                    <span class="stat-dot"></span> Mhinduro: <strong>0.38s</strong>
+                  </div>
+                  <div class="footer-stat">
+                    ChiShona: <strong>100% Chakarurama</strong>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div class="linear-dialogue-row ai-row">
-                <div class="dialogue-avatar ai-avatar">
-                  <img src="assets/logo.png" alt="Ruzivo">
+            <!-- SLIDE 2: Kinetic Animated Emblem & Ruzivo Core Showcase -->
+            <div class="hero-slide-item" id="heroSlideLogo">
+              <div class="hero-kinetic-emblem-card">
+                <!-- Outer Radial Atmosphere & Orbit Rings -->
+                <div class="kinetic-orbit-stage" aria-hidden="true">
+                  <div class="kinetic-glow-pulse"></div>
+                  <div class="kinetic-dashed-ring ring-outer"></div>
+                  <div class="kinetic-dashed-ring ring-middle"></div>
+                  <div class="kinetic-dashed-ring ring-inner"></div>
+                  <img src="assets/logo.png" alt="Ruzivo AI Kinetic Emblem" class="kinetic-rotating-emblem">
                 </div>
-                <div class="dialogue-bubble ai-bubble">
-                  <div class="ai-bubble-header">
-                    <span class="ai-name">Ruzivo AI</span>
-                    <span class="ai-tag">Girama yeChiShona</span>
-                  </div>
-                  <div class="ai-text">
-                    <strong>Chirevo</strong> ipfungwa yakazara ine chiito (Semuenzaniso: <em>"Mukomana anochera mvura."</em>).<br><br>
-                    <strong>Chivakashure</strong> chimedu cheizwi chinotanga chirevo kana zita (Semuenzaniso: <em>"mu-"</em> mumupanda 1).
-                  </div>
-                  <div class="linear-source-chips">
-                    <span class="source-chip">Bumbiro reZIMSEC</span>
-                    <span class="source-chip">Dura reRuzivo 14,201+</span>
-                  </div>
+
+                <!-- Emblem Center Typography Badge -->
+                <div class="kinetic-emblem-footer">
+                  <div class="kinetic-emblem-title">RUZIVO</div>
+                  <div class="kinetic-emblem-badge">CHISHONA NLP &bull; ARTIFICIAL INTELLIGENCE CORE</div>
                 </div>
               </div>
             </div>
 
-            <!-- Terminal Footer Status -->
-            <div class="linear-preview-footer">
-              <div class="footer-stat">
-                <span class="stat-dot"></span> Mhinduro: <strong>0.38s</strong>
-              </div>
-              <div class="footer-stat">
-                ChiShona: <strong>100% Chakarurama</strong>
-              </div>
-            </div>
+          </div>
+
+          <!-- Bottom Slide Navigation Controls (Tabs & Indicators) -->
+          <div class="hero-slide-nav-bar">
+            <button type="button" class="hero-slide-tab active" id="heroTabDialogue" onclick="switchHeroSlide('dialogue')" aria-label="Show Live Dialogue">
+              <span class="tab-indicator-bar"></span>
+              <span class="tab-label">1. Zvidzidzo Live AI</span>
+            </button>
+            <button type="button" class="hero-slide-tab" id="heroTabLogo" onclick="switchHeroSlide('logo')" aria-label="Show Animated Logo">
+              <span class="tab-indicator-bar"></span>
+              <span class="tab-label">2. Ruzivo Core Kinetic</span>
+            </button>
           </div>
         </div>
       </section>
@@ -13843,6 +14139,49 @@
           card.style.display = 'none';
         }
       });
+    }
+
+    
+    // Dual-Slide Hero Showcase Controller (Live Terminal Dialogue & Kinetic Logo Emblem)
+    let currentHeroSlide = 'dialogue';
+    let heroSlideInterval = null;
+
+    function switchHeroSlide(target) {
+      currentHeroSlide = target;
+      const slideDialogue = document.getElementById('heroSlideDialogue');
+      const slideLogo = document.getElementById('heroSlideLogo');
+      const tabDialogue = document.getElementById('heroTabDialogue');
+      const tabLogo = document.getElementById('heroTabLogo');
+
+      if (target === 'dialogue') {
+        if (slideDialogue) slideDialogue.classList.add('active');
+        if (slideLogo) slideLogo.classList.remove('active');
+        if (tabDialogue) tabDialogue.classList.add('active');
+        if (tabLogo) tabLogo.classList.remove('active');
+      } else {
+        if (slideDialogue) slideDialogue.classList.remove('active');
+        if (slideLogo) slideLogo.classList.add('active');
+        if (tabDialogue) tabDialogue.classList.remove('active');
+        if (tabLogo) tabLogo.classList.add('active');
+      }
+    }
+
+    function startHeroSlideAutoCycle() {
+      if (heroSlideInterval) clearInterval(heroSlideInterval);
+      heroSlideInterval = setInterval(() => {
+        const nextSlide = (currentHeroSlide === 'dialogue') ? 'logo' : 'dialogue';
+        switchHeroSlide(nextSlide);
+      }, 7000);
+    }
+
+    // Attach to window so inline onclick always resolves
+    window.switchHeroSlide = switchHeroSlide;
+    window.startHeroSlideAutoCycle = startHeroSlideAutoCycle;
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startHeroSlideAutoCycle);
+    } else {
+      setTimeout(startHeroSlideAutoCycle, 200);
     }
 
     // Dynamic Sentence Typewriter for Landing Page
