@@ -3729,6 +3729,250 @@
       color: var(--text-main);
     }
 
+        /* =========================================================================
+       LINEAR-STYLE CURRICULUM CUSTOMER STORY GRID (Hero Visual Card + Metadata + Filter Pills)
+       ========================================================================= */
+    .linear-category-nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin: 8px 0 28px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: none;
+    }
+
+    .linear-category-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .linear-cat-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted, #6B6864);
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .linear-cat-btn:hover {
+      color: var(--text-main, #1F1E1D);
+    }
+
+    .linear-cat-btn.active {
+      color: var(--text-main, #1F1E1D);
+      font-weight: 600;
+    }
+
+    body.theme-dark .linear-cat-btn.active {
+      color: #FFFFFF;
+    }
+
+    .linear-cat-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--text-main, #1F1E1D);
+      border-radius: 2px;
+    }
+
+    body.theme-dark .linear-cat-btn.active::after {
+      background: #FFFFFF;
+    }
+
+    /* 3-Column Linear Case Study Card Grid */
+    .linear-story-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      width: 100%;
+    }
+
+    @media (max-width: 960px) {
+      .linear-story-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+
+    .linear-story-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      cursor: pointer;
+      group: focus;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .linear-story-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Top Visual Banner */
+    .linear-story-banner {
+      width: 100%;
+      height: 200px;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+    }
+
+    .linear-story-card:hover .linear-story-banner {
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+      border-color: rgba(46, 125, 50, 0.3);
+    }
+
+    body.theme-dark .linear-story-banner {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    body.theme-dark .linear-story-card:hover .linear-story-banner {
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    /* Grayscale cinematic textures / geometric backdrops */
+    .story-bg-monochrome {
+      background: linear-gradient(135deg, #1A1C20 0%, #0D0E11 100%);
+    }
+
+    .story-bg-periwinkle {
+      background: linear-gradient(135deg, #DCE6F5 0%, #C8DAF2 100%);
+    }
+
+    body.theme-dark .story-bg-periwinkle {
+      background: linear-gradient(135deg, #142035 0%, #0D1626 100%);
+    }
+
+    .story-bg-emerald {
+      background: linear-gradient(135deg, #1B5E20 0%, #0E3812 100%);
+    }
+
+    .story-bg-indigo {
+      background: linear-gradient(135deg, #4338CA 0%, #312E81 100%);
+    }
+
+    .story-bg-charcoal {
+      background: linear-gradient(135deg, #27272A 0%, #18181B 100%);
+    }
+
+    .story-bg-slate {
+      background: linear-gradient(135deg, #334155 0%, #1E293B 100%);
+    }
+
+    /* Central Bold Monogram / Logo on Banner */
+    .linear-story-logo {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .story-bg-periwinkle .linear-story-logo {
+      color: #0E1626;
+    }
+
+    body.theme-dark .story-bg-periwinkle .linear-story-logo {
+      color: #E2E8F0;
+    }
+
+    .story-bg-monochrome .linear-story-logo,
+    .story-bg-emerald .linear-story-logo,
+    .story-bg-indigo .linear-story-logo,
+    .story-bg-charcoal .linear-story-logo,
+    .story-bg-slate .linear-story-logo {
+      color: #FFFFFF;
+    }
+
+    /* Ambient geometric wireframe behind logo */
+    .linear-story-ambient-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      stroke: currentColor;
+      pointer-events: none;
+      transition: transform 0.4s ease, opacity 0.3s ease;
+    }
+
+    .linear-story-card:hover .linear-story-ambient-svg {
+      opacity: 0.25;
+      transform: scale(1.04);
+    }
+
+    /* Content Under Banner */
+    .linear-story-headline {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-size: 16.5px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text-main, #1F1E1D);
+      letter-spacing: -0.015em;
+      margin-top: 4px;
+    }
+
+    body.theme-dark .linear-story-headline {
+      color: #F7F8F8;
+    }
+
+    .linear-story-desc {
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: var(--text-muted, #6B6864);
+    }
+
+    body.theme-dark .linear-story-desc {
+      color: #8A8F98;
+    }
+
+    .linear-story-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted, #6B6864);
+      transition: color 0.2s ease, transform 0.2s ease;
+      margin-top: 4px;
+    }
+
+    .linear-story-card:hover .linear-story-action {
+      color: var(--text-main, #1F1E1D);
+      transform: translateX(3px);
+    }
+
+    body.theme-dark .linear-story-card:hover .linear-story-action {
+      color: #FFFFFF;
+    }
+
+    .linear-story-action svg {
+      transition: transform 0.2s ease;
+    }
+
+    .linear-story-card:hover .linear-story-action svg {
+      transform: translateX(3px);
+    }
+
     /* =========================================================================
        LINEAR TESTIMONIAL-STYLE TSUMO CARDS (3-COLUMN HERO GRID + CONTINUOUS SLIDING MARQUEE)
        ========================================================================= */
@@ -5818,7 +6062,7 @@
         </div>
       </section>
 
-      <!-- SECTION 3: Zvidzidzo (Curriculum & Study Modules) -->
+      <!-- SECTION 3: Zvidzidzo (Curriculum & Study Modules - Linear Customer Story Style) -->
       <section class="landing-content-section reveal-on-scroll" id="curriculumSection">
         <div class="landing-section-header">
           <div class="landing-section-tag">
@@ -5830,52 +6074,148 @@
           </p>
         </div>
 
-        <div class="landing-cards-grid">
-          <!-- Card 1: Rondedzero -->
-          <div class="landing-feature-card">
-            <div class="landing-card-title">Rondedzero & Kunyora Zvakanaka</div>
-            <div class="landing-card-text">
-              Dzidza mhando dzerondedzero: rondedzero yezviitiko, tsananguro, gakava, nehurukuro yepamutemo. Masimbisirwo emanyorerwo nezvirungamutauro pasina kanganiso.
+        <!-- Linear Top Category Navigation Filter -->
+        <div class="linear-category-nav" role="tablist">
+          <button type="button" class="linear-cat-btn active" onclick="filterCurriculum('all', this)">Zvese (All)</button>
+          <button type="button" class="linear-cat-btn" onclick="filterCurriculum('rondedzero', this)">Rondedzero</button>
+          <button type="button" class="linear-cat-btn" onclick="filterCurriculum('girama', this)">Mipanda & Girama</button>
+          <button type="button" class="linear-cat-btn" onclick="filterCurriculum('nyaudzo', this)">Nyaudzosingwi</button>
+          <button type="button" class="linear-cat-btn" onclick="filterCurriculum('mabhuku', this)">Mabhuku neNhetembo</button>
+          <button type="button" class="linear-cat-btn" onclick="filterCurriculum('madimikira', this)">Madimikira</button>
+        </div>
+
+        <!-- 3-Column Linear Case Study Card Grid -->
+        <div class="linear-story-grid" id="curriculumGrid">
+          <!-- Story 1: Rondedzero -->
+          <div class="linear-story-card" data-cat="rondedzero" onclick="scrollToAuthSection()">
+            <div class="linear-story-banner story-bg-monochrome">
+              <svg class="linear-story-ambient-svg" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="38" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/>
+                <path d="M 20 50 L 80 50 M 50 20 L 50 80" stroke="currentColor" stroke-width="0.8"/>
+              </svg>
+              <div class="linear-story-logo">
+                <span>Rondedzero</span>
+              </div>
             </div>
-            <div class="landing-card-footer">
-              <span class="landing-badge accent">O-Level & A-Level</span>
-              <span style="cursor: pointer; color: var(--claude-accent); font-weight: 500;" onclick="scrollToAuthSection()">Dzidza Zvakawanda &rarr;</span>
+            <div class="linear-story-headline">Rondedzero neKunyora Zvakanaka</div>
+            <div class="linear-story-desc">Mhando dzerondedzero dzeZIMSEC: zviitiko, tsananguro, gakava, nehurukuro yepamutemo ine zvirungamutauro.</div>
+            <div class="linear-story-action">
+              <span>Dzidza chidzidzo</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </div>
           </div>
 
-          <!-- Card 2: Mipanda yeMazita -->
-          <div class="landing-feature-card">
-            <div class="landing-card-title">Mipanda yeMazita & Kuumbwa kwawo</div>
-            <div class="landing-card-text">
-              Nzira ina dzekuisa mazita mumipanda: zvivakashure zvakafanana (mu-, va-, chi-, zvi-), kureva zvakafanana, sungano yeushoma neuzhinji, nesungawirirano yakafanana.
+          <!-- Story 2: Mipanda yeMazita -->
+          <div class="linear-story-card" data-cat="girama" onclick="scrollToAuthSection()">
+            <div class="linear-story-banner story-bg-periwinkle">
+              <svg class="linear-story-ambient-svg" viewBox="0 0 100 100" fill="none">
+                <rect x="25" y="25" width="50" height="50" stroke="currentColor" stroke-width="1.2"/>
+                <rect x="35" y="35" width="30" height="30" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2"/>
+              </svg>
+              <div class="linear-story-logo">
+                <span>Mipanda</span>
+              </div>
             </div>
-            <div class="landing-card-footer">
-              <span class="landing-badge">Form 1 — Form 4</span>
-              <span style="cursor: pointer; color: var(--claude-accent); font-weight: 500;" onclick="scrollToAuthSection()">Dzidza Zvakawanda &rarr;</span>
-            </div>
-          </div>
-
-          <!-- Card 3: Nyaudzosingwi & Zvirungamutauro -->
-          <div class="landing-feature-card">
-            <div class="landing-card-title">Nyaudzosingwi & Pfungwa Dzakadzika</div>
-            <div class="landing-card-text">
-              Mazwi anotevedzera ruzha, mafambiro, nekuitika kwezvinhu zvakaita sekuti: bha, go, zete, pfepfepfe, piriviri. Mashandisirwo adzo mukuronga zvirevo zvine mutsindo.
-            </div>
-            <div class="landing-card-footer">
-              <span class="landing-badge">Grade 7 — Form 4</span>
-              <span style="cursor: pointer; color: var(--claude-accent); font-weight: 500;" onclick="scrollToAuthSection()">Dzidza Zvakawanda &rarr;</span>
+            <div class="linear-story-headline">Mipanda yeMazita neKuumbwa Kwawo</div>
+            <div class="linear-story-desc">Nzira 4 dzekuisa mazita mumipanda: zvivakashure (mu-, va-, chi-, zvi-), sungano yeushoma neuzhinji, nesungawirirano.</div>
+            <div class="linear-story-action">
+              <span>Dzidza chidzidzo</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </div>
           </div>
 
-          <!-- Card 4: Nhetembo & Nhoroondo -->
-          <div class="landing-feature-card">
-            <div class="landing-card-title">Mhenenguro yeMabhuku & Nhetembo</div>
-            <div class="landing-card-text">
-              Ongororo yezvinyorwa zvechinyakare nezvechizvino-zvino, nhoroondo dzevana vashona, madimikira eruvengo nerudo, nhetembo dzebvunzo dzeZIMSEC.
+          <!-- Story 3: Nyaudzosingwi -->
+          <div class="linear-story-card" data-cat="nyaudzo" onclick="scrollToAuthSection()">
+            <div class="linear-story-banner story-bg-emerald">
+              <svg class="linear-story-ambient-svg" viewBox="0 0 100 100" fill="none">
+                <polygon points="50,15 85,80 15,80" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="50" cy="55" r="10" stroke="currentColor" stroke-width="0.8"/>
+              </svg>
+              <div class="linear-story-logo">
+                <span>Nyaudzo</span>
+              </div>
             </div>
-            <div class="landing-card-footer">
-              <span class="landing-badge accent">Literature & Analysis</span>
-              <span style="cursor: pointer; color: var(--claude-accent); font-weight: 500;" onclick="scrollToAuthSection()">Dzidza Zvakawanda &rarr;</span>
+            <div class="linear-story-headline">Nyaudzosingwi nePfungwa Dzakadzika</div>
+            <div class="linear-story-desc">Mazwi anotevedzera ruzha, mafambiro, nekuitika kwezvinhu: bha, go, zete, pfepfepfe, piriviri nemashandisirwo awo.</div>
+            <div class="linear-story-action">
+              <span>Dzidza chidzidzo</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Story 4: Mabhuku neNhetembo -->
+          <div class="linear-story-card" data-cat="mabhuku" onclick="scrollToAuthSection()">
+            <div class="linear-story-banner story-bg-indigo">
+              <svg class="linear-story-ambient-svg" viewBox="0 0 100 100" fill="none">
+                <path d="M20 25 C40 15, 60 15, 80 25 L80 75 C60 65, 40 65, 20 75 Z" stroke="currentColor" stroke-width="1.2"/>
+                <line x1="50" y1="20" x2="50" y2="70" stroke="currentColor" stroke-width="1"/>
+              </svg>
+              <div class="linear-story-logo">
+                <span>Nhetembo</span>
+              </div>
+            </div>
+            <div class="linear-story-headline">Mhenenguro yeMabhuku neNhetembo</div>
+            <div class="linear-story-desc">Ongororo yemabhuku eZIMSEC, madingindira, zvidzidzo, hunhu hwevatambi, netsananguro yenhetembo dzeA-Level.</div>
+            <div class="linear-story-action">
+              <span>Dzidza chidzidzo</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Story 5: Madimikira -->
+          <div class="linear-story-card" data-cat="madimikira" onclick="scrollToAuthSection()">
+            <div class="linear-story-banner story-bg-charcoal">
+              <svg class="linear-story-ambient-svg" viewBox="0 0 100 100" fill="none">
+                <path d="M30 40 L50 20 L70 40 L50 60 Z" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="50" cy="75" r="5" stroke="currentColor" stroke-width="1"/>
+              </svg>
+              <div class="linear-story-logo">
+                <span>Madimikira</span>
+              </div>
+            </div>
+            <div class="linear-story-headline">Madimikira neZvirungamutauro</div>
+            <div class="linear-story-desc">Madimikira anopfuura 850+ anotsanangura unhu, mafambiro, usimbe, neushingi akarongeka ebvunzo dzeChiShona.</div>
+            <div class="linear-story-action">
+              <span>Dzidza chidzidzo</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Story 6: Nhoroondo neTsika -->
+          <div class="linear-story-card" data-cat="mabhuku" onclick="scrollToAuthSection()">
+            <div class="linear-story-banner story-bg-slate">
+              <svg class="linear-story-ambient-svg" viewBox="0 0 100 100" fill="none">
+                <!-- Zimbabwe Conical Tower Emblem -->
+                <polygon points="50,15 75,85 25,85" stroke="currentColor" stroke-width="1.2"/>
+                <line x1="35" y1="55" x2="65" y2="55" stroke="currentColor" stroke-width="0.8"/>
+              </svg>
+              <div class="linear-story-logo">
+                <span>Nhoroondo</span>
+              </div>
+            </div>
+            <div class="linear-story-headline">Nhoroondo neMagariro eZimbabwe</div>
+            <div class="linear-story-desc">Kutanga kwehumambo hweMasvingo eZimbabwe, madzitateguru, mitupo, nenzira dzekuremekedzana muChivanhu.</div>
+            <div class="linear-story-action">
+              <span>Dzidza chidzidzo</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </div>
           </div>
         </div>
@@ -12155,6 +12495,26 @@
         });
       }, { passive: true });
     })();
+
+    
+    function filterCurriculum(category, btnEl) {
+      if (btnEl) {
+        const parent = btnEl.parentElement;
+        if (parent) {
+          parent.querySelectorAll('.linear-cat-btn').forEach(b => b.classList.remove('active'));
+        }
+        btnEl.classList.add('active');
+      }
+
+      const cards = document.querySelectorAll('#curriculumGrid .linear-story-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-cat') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
 
     function filterTsumoList(category, btnEl) {
       if (btnEl) {
