@@ -25,6 +25,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SENTENCES_FILE = PROJECT_ROOT / "data" / "rag_knowledge_base" / "sentences.json"
 HTML_FILE = PROJECT_ROOT / "frontend" / "test_ui.html"
 ADMIN_HTML_FILE = PROJECT_ROOT / "frontend" / "admin.html"
+PRIVACY_HTML_FILE = PROJECT_ROOT / "frontend" / "privacy.html"
+TERMS_HTML_FILE = PROJECT_ROOT / "frontend" / "terms.html"
 
 # Load knowledge base sentences & configuration
 def load_dotenv():
@@ -1081,6 +1083,24 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Set-Cookie", f"ruzivo_csrf={csrf_token}; Path=/; SameSite=Strict")
             self.end_headers()
             self.wfile.write(ADMIN_HTML_FILE.read_bytes())
+            return
+
+        if self.path in ("/privacy", "/privacy.html"):
+            self.send_response(200)
+            self.send_security_headers()
+            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "public, max-age=3600")
+            self.end_headers()
+            self.wfile.write(PRIVACY_HTML_FILE.read_bytes())
+            return
+
+        if self.path in ("/terms", "/terms.html"):
+            self.send_response(200)
+            self.send_security_headers()
+            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "public, max-age=3600")
+            self.end_headers()
+            self.wfile.write(TERMS_HTML_FILE.read_bytes())
             return
 
         if self.path in ("/favicon.ico", "/favicon.png"):

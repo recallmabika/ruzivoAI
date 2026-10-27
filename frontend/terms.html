@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service - Ruzivo AI</title>
+  <meta name="description" content="Terms of Service for Ruzivo AI - Educational Shona AI platform terms, acceptable use, and intellectual property.">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FBFBFA;
+      --card-bg: #FFFFFF;
+      --text-main: #141413;
+      --text-muted: #595856;
+      --text-subtle: #8A8985;
+      --border: #E8E7E3;
+      --accent: #0284C7;
+      --accent-soft: rgba(2, 132, 199, 0.08);
+      --link: #0284C7;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151413;
+        --card-bg: #1F1E1C;
+        --text-main: #F4F4F0;
+        --text-muted: #B3B2AD;
+        --text-subtle: #7A7975;
+        --border: #2D2C28;
+        --accent: #38BDF8;
+        --accent-soft: rgba(56, 189, 248, 0.12);
+        --link: #38BDF8;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+      padding: 0 16px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    header.site-header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+    .brand span {
+      font-family: 'Raleway', sans-serif;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      font-size: 14px;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+    .policy-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 44px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    @media (max-width: 640px) {
+      .policy-card { padding: 24px 18px; }
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Raleway', sans-serif;
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .meta {
+      font-size: 13.5px;
+      color: var(--text-subtle);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .lang-switcher {
+      display: inline-flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .lang-btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .lang-btn.active {
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    h2 {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 32px 0 12px;
+      color: var(--text-main);
+    }
+    p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+    ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .callout {
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: 14.5px;
+      color: var(--text-main);
+    }
+    footer.site-footer {
+      margin-top: 50px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+    footer.site-footer a {
+      color: var(--link);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="site-header">
+      <a href="/" class="brand">
+        <img src="/assets/logo.png" alt="Ruzivo Logo">
+        <span>Ruzivo AI</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="mailto:support@ruzivo-ai.tech">Support</a>
+      </nav>
+    </header>
+
+    <main class="policy-card">
+      <div class="badge">Terms &amp; User Agreement</div>
+      <h1>Terms of Service</h1>
+      <div class="meta">
+        Last updated: October 27, 2026 &bull; Effective date: October 27, 2026
+      </div>
+
+      <div class="lang-switcher" role="tablist">
+        <button class="lang-btn active" id="btnEn" onclick="switchLang('en')">English</button>
+        <button class="lang-btn" id="btnSn" onclick="switchLang('sn')">ChiShona</button>
+      </div>
+
+      <!-- English Version -->
+      <section id="sectionEn">
+        <p>
+          Welcome to <strong>Ruzivo AI</strong> ("we", "us", "our"), available at <strong>https://www.ruzivo-ai.tech</strong> and <strong>https://ruzivo-ai.tech</strong>. By creating an account, browsing, or using our educational Shona AI platform, you agree to comply with and be bound by these Terms of Service.
+        </p>
+
+        <div class="callout">
+          <strong>Mission:</strong> Ruzivo AI is dedicated to advancing and preserving the indigenous Shona language through conversational AI, natural language processing, and rigorous curriculum integration.
+        </div>
+
+        <h2>1. Purpose of the Platform</h2>
+        <p>
+          Ruzivo AI is an interactive educational assistant trained on Zimbabwean educational material (Grade 7, Form 1–4, and Advanced Level Form 5–6 ZIMSEC curriculum), indigenous literature, proverbs (tsumo), idioms (madimikira), and cultural studies.
+        </p>
+
+        <h2>2. Acceptable Use Policy</h2>
+        <p>You agree to use Ruzivo AI responsibly and respectfully. You explicitly agree NOT to:</p>
+        <ul>
+          <li>Use the platform for any illegal, harassing, discriminatory, or harmful purpose.</li>
+          <li>Attempt to compromise the application security, including launching SQL injection attacks, cross-site scripting (XSS), credential stuffing, or brute-force requests.</li>
+          <li>Circumvent authentication, manipulate rate-limits, or scrape data without authorization.</li>
+          <li>Impersonate any person or educational entity.</li>
+        </ul>
+
+        <h2>3. Educational Disclaimer &amp; AI Accuracy</h2>
+        <p>
+          While Ruzivo AI leverages high-precision Retrieval-Augmented Generation (RAG) based on authentic Shona texts and verified dictionaries, generative artificial intelligence outputs may occasionally contain inaccuracies. Users, students, and educators are encouraged to critically cross-reference complex academic topics with prescribed syllabus texts.
+        </p>
+
+        <h2>4. User Accounts &amp; Security</h2>
+        <p>
+          You are responsible for maintaining the confidentiality of your login credentials. You agree to notify us immediately at <strong>support@ruzivo-ai.tech</strong> if you suspect any unauthorized access to your account.
+        </p>
+
+        <h2>5. Intellectual Property Rights</h2>
+        <p>
+          All trademarks, system architectures, design systems, logos, and custom code comprising Ruzivo AI are the intellectual property of the project creators and protected by applicable copyright and intellectual property laws.
+        </p>
+
+        <h2>6. Termination of Service</h2>
+        <p>
+          We reserve the right to suspend or terminate access for any user who violates these terms or engages in malicious cyber activity. You may also terminate your account at any time via the self-service account deletion feature or by emailing <strong>support@ruzivo-ai.tech</strong>.
+        </p>
+
+        <h2>7. Contact Information</h2>
+        <p>For questions or formal inquiries concerning these Terms of Service, please reach out to:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:support@ruzivo-ai.tech" style="color: var(--link);">support@ruzivo-ai.tech</a></li>
+          <li><strong>Website:</strong> <a href="https://www.ruzivo-ai.tech" style="color: var(--link);">https://www.ruzivo-ai.tech</a></li>
+          <li><strong>Location:</strong> Harare, Zimbabwe</li>
+        </ul>
+      </section>
+
+      <!-- Shona Version -->
+      <section id="sectionSn" style="display: none;">
+        <p>
+          Kugamuchirwa ku<strong>Ruzivo AI</strong> ("isu", "yedu"), inowanikwa pa<strong>https://www.ruzivo-ai.tech</strong> ne <strong>https://ruzivo-ai.tech</strong>. Nekugadzira akaundi kana kushandisa platform yedu yedzidzo yeChiShona, munobvumirana kutevedza mitemo iyi yeKushandisa.
+        </p>
+
+        <div class="callout">
+          <strong>Chinangwa:</strong> Ruzivo AI rwakagadzirwa nechinangwa chekuchengetedza nekusimudzira mutauro weChiShona nedzidzo yeZimbabwe kuburikidza neAI yemhando yepamusoro.
+        </div>
+
+        <h2>1. Basa reApplication</h2>
+        <p>
+          Ruzivo AI mubatsiri wedzidzo yemutauro weChiShona akadzidziswa pachishandiswa mabhuku eZIMSEC kubva kuGiredhi 7 kusvika kuAdvanced Level, tsumo, madimikira, rondedzero, netsika dzevanhu vatema.
+        </p>
+
+        <h2>2. Mitemo yeKuzvibata (Acceptable Use)</h2>
+        <p>Munobvumirana kushandisa Ruzivo netsika dzakanaka. Zvinorambidzwa zvachose:</p>
+        <ul>
+          <li>Kushandisa platform iyi kuparadzira mashoko eruvengo kana kutuka vamwe.</li>
+          <li>Kuedza kutyora security yekombiyuta (hacking, SQL injection, automated brute forcing).</li>
+          <li>Kuedza kupinda mumaakaundi evamwe vanhu pasina mvumo.</li>
+        </ul>
+
+        <h2>3. Huremu hweMhinduro dzeAI</h2>
+        <p>
+          Kunyange zvazvo Ruzivo rwuchishandisa dura remabhuku akasimbiswa, AI inogona kukanganisa pano neapo. Vadzidzi vanokurudzirwa kubvunzurudza pamwe chete nevadzidzisi vavo.
+        </p>
+
+        <h2>4. Mabatiro Atinoitwa</h2>
+        <p>Kana mune mibvunzo pamusoro pemitemo iyi, tapota tinyorerei pa:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:support@ruzivo-ai.tech" style="color: var(--link);">support@ruzivo-ai.tech</a></li>
+          <li><strong>Mambure:</strong> <a href="https://www.ruzivo-ai.tech" style="color: var(--link);">https://www.ruzivo-ai.tech</a></li>
+          <li><strong>Nzvimbo:</strong> Harare, Zimbabwe</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      &copy; 2026 Ruzivo AI &bull; Harare, Zimbabwe &bull; <a href="/privacy">Privacy Policy</a> &bull; <a href="mailto:support@ruzivo-ai.tech">support@ruzivo-ai.tech</a>
+    </footer>
+  </div>
+
+  <script>
+    function switchLang(lang) {
+      const en = document.getElementById('sectionEn');
+      const sn = document.getElementById('sectionSn');
+      const btnEn = document.getElementById('btnEn');
+      const btnSn = document.getElementById('btnSn');
+      if (lang === 'sn') {
+        en.style.display = 'none';
+        sn.style.display = 'block';
+        btnSn.classList.add('active');
+        btnEn.classList.remove('active');
+      } else {
+        sn.style.display = 'none';
+        en.style.display = 'block';
+        btnEn.classList.add('active');
+        btnSn.classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>
