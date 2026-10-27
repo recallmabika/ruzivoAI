@@ -6561,6 +6561,124 @@
       }
     }
 
+
+
+    /* ==========================================================================
+       LINEAR BRAND LOGO MARQUEE (PURE MONOCHROME, ZERO OUTLINES, SUBTLE HOVER)
+       ========================================================================== */
+    .landing-marquee-section {
+      width: 100%;
+      overflow: hidden;
+      margin: 48px 0 24px;
+      padding: 20px 0 32px;
+      position: relative;
+      user-select: none;
+    }
+
+    .landing-marquee-section::before,
+    .landing-marquee-section::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 140px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .landing-marquee-section::before {
+      left: 0;
+      background: linear-gradient(to right, #000000 0%, transparent 100%);
+    }
+
+    .landing-marquee-section::after {
+      right: 0;
+      background: linear-gradient(to left, #000000 0%, transparent 100%);
+    }
+
+    body:not(.theme-dark) .landing-marquee-section::before {
+      background: linear-gradient(to right, #FFFFFF 0%, transparent 100%);
+    }
+
+    body:not(.theme-dark) .landing-marquee-section::after {
+      background: linear-gradient(to left, #FFFFFF 0%, transparent 100%);
+    }
+
+    .marquee-track-container {
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .marquee-track {
+      display: flex;
+      align-items: center;
+      gap: 72px;
+      animation: linearMarqueeScroll 28s linear infinite;
+      flex-shrink: 0;
+      will-change: transform;
+    }
+
+    .landing-marquee-section:hover .marquee-track {
+      animation-play-state: paused;
+    }
+
+    @keyframes linearMarqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .linear-marquee-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #FFFFFF;
+      opacity: 0.85;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      cursor: default;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body:not(.theme-dark) .linear-marquee-item {
+      color: #0F1011;
+      opacity: 0.85;
+    }
+
+    .linear-marquee-item:hover {
+      opacity: 1;
+      transform: scale(1.03);
+    }
+
+    .linear-marquee-svg {
+      height: 22px;
+      width: auto;
+      max-width: 32px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .landing-marquee-section {
+        margin: 32px 0 16px;
+        padding: 16px 0;
+      }
+      .marquee-track {
+        gap: 48px;
+        animation-duration: 22s;
+      }
+      .linear-marquee-item {
+        font-size: 17px;
+      }
+      .landing-marquee-section::before,
+      .landing-marquee-section::after {
+        width: 60px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -6678,99 +6796,136 @@
         </div>
       </section>
 
-      <!-- SECTION: Technology & Ecosystem Logos Marquee -->
-      <section class="landing-marquee-section" aria-label="Ecosystem & Technology Partners">
-        <div class="marquee-label">Yakagadzirwa neKubatana neEcosystem yeAI yepasi rese</div>
+            <!-- Linear Pitch-Black Brand Logo Marquee -->
+      <section class="landing-marquee-section" aria-label="Teams using Ruzivo AI">
         <div class="marquee-track-container">
           <div class="marquee-track">
             <!-- Set 1 -->
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24" fill="none">
-                <path d="M16.924 9.617A5.5 5.5 0 0 0 7.076 9.617 6.002 6.002 0 0 0 1 15.5C1 18.538 3.462 21 6.5 21h11c3.038 0 5.5-2.462 5.5-5.5a6.002 6.002 0 0 0-6.076-5.883z" fill="#F9AB00" opacity="0.3"/>
-                <path d="M7.076 9.617a5.501 5.501 0 0 1 9.848 0A6.002 6.002 0 0 1 23 15.5c0 3.038-2.462 5.5-5.5 5.5h-11C3.462 21 1 18.538 1 15.5a6.002 6.002 0 0 1 6.076-5.883z" stroke="#F9AB00" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="8" cy="15.5" r="2" fill="#E37400"/>
-                <circle cx="16" cy="15.5" r="2" fill="#F9AB00"/>
-                <path d="M10 15.5h4" stroke="#E37400" stroke-width="1.8"/>
+            <!-- OpenAI -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.77.77 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 8.487a4.485 4.485 0 0 1 2.365-1.98v5.677a.78.78 0 0 0 .39.677l5.814 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 8.487zm16.597 3.855l-5.833-3.387L15.124 7.8a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.82V7.489a.076.076 0 0 1 .033-.062l4.838-2.791a4.5 4.5 0 0 1 6.67 4.03zM8.106 10.05l-2.02-1.169a.071.071 0 0 1-.038-.052V3.246a4.5 4.5 0 0 1 7.37-3.453l-.142.08-4.778 2.758a.795.795 0 0 0-.393.681zm1.096 1.965L12 10.428l2.798 1.587v3.175L12 16.777l-2.798-1.587z"/>
               </svg>
-              <span>Google Colab</span>
-            </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24">
-                <path fill="#20BEFF" d="M18.825 23.859c-.022.047-.06.082-.114.102-.053.02-.112.02-.162-.003l-7.391-3.414-3.565 3.412a.243.243 0 0 1-.173.044.25.25 0 0 1-.168-.112L4.053 19.34a.25.25 0 0 1-.053-.162c.002-.058.026-.112.067-.15l7.009-6.425L4.067 6.177a.25.25 0 0 1-.067-.15.25.25 0 0 1 .053-.162l3.2-4.549a.25.25 0 0 1 .168-.112.24.24 0 0 1 .173.044l3.565 3.412 7.391-3.414c.05-.023.109-.023.162-.003.054.02.092.055.114.102l1.988 4.225a.25.25 0 0 1-.013.238.25.25 0 0 1-.186.126l-7.25 1.543 4.27 4.549c.045.048.067.112.06.176a.25.25 0 0 1-.06.176l-4.27 4.549 7.25 1.543a.25.25 0 0 1 .186.126.25.25 0 0 1 .013.238l-1.988 4.225z"/>
-              </svg>
-              <span>Kaggle</span>
-            </div>
-            <div class="marquee-item">
-              <img src="/assets/logo.png" class="marquee-logo-img" alt="Ruzivo AI Logo">
-              <span>Ruzivo AI</span>
-            </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24">
-                <path fill="#FFD21E" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/>
-                <circle cx="8.5" cy="10" r="1.5" fill="#1E1E1E"/>
-                <circle cx="15.5" cy="10" r="1.5" fill="#1E1E1E"/>
-                <path d="M8 15s1.5 2.5 4 2.5 4-2.5 4-2.5" stroke="#1E1E1E" stroke-width="1.6" stroke-linecap="round"/>
-              </svg>
-              <span>Hugging Face</span>
-            </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24">
-                <path fill="#3776AB" d="M11.91 2c-5.07 0-4.75 2.2-4.75 2.2l.01 2.28h4.82v.69H5.15S2 6.8 2 11.93c0 5.14 2.75 4.96 2.75 4.96h1.64v-2.3s-.09-2.75 2.7-2.75h4.63s2.61.04 2.61-2.52V4.52S16.98 2 11.91 2zm-2.6 1.45a.94.94 0 1 1 0 1.88.94.94 0 0 1 0-1.88z"/>
-                <path fill="#FFD43B" d="M12.09 22c5.07 0 4.75-2.2 4.75-2.2l-.01-2.28h-4.82v-.69h6.84S22 17.2 22 12.07c0-5.14-2.75-4.96-2.75-4.96h-1.64v2.3s.09 2.75-2.7 2.75H10.28s-2.61-.04-2.61 2.52v4.79S7.02 22 12.09 22zm2.6-1.45a.94.94 0 1 1 0-1.88.94.94 0 0 1 0 1.88z"/>
-              </svg>
-              <span>Python 3.11</span>
-            </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2.5l7.5 4.33v8.67L12 19.83l-7.5-4.33V6.83L12 2.5z" stroke="#EE4C2C" stroke-width="1.8"/>
-                <path d="M13.5 6.5L12 10l-1.5-3.5L9 8l3 6 3-6-1.5-1.5z" fill="#EE4C2C"/>
-              </svg>
-              <span>PyTorch</span>
+              <span>OpenAI</span>
             </div>
 
-            <!-- Set 2 (Identical duplicate for seamless continuous infinite scroll) -->
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24" fill="none">
-                <path d="M16.924 9.617A5.5 5.5 0 0 0 7.076 9.617 6.002 6.002 0 0 0 1 15.5C1 18.538 3.462 21 6.5 21h11c3.038 0 5.5-2.462 5.5-5.5a6.002 6.002 0 0 0-6.076-5.883z" fill="#F9AB00" opacity="0.3"/>
-                <path d="M7.076 9.617a5.501 5.501 0 0 1 9.848 0A6.002 6.002 0 0 1 23 15.5c0 3.038-2.462 5.5-5.5 5.5h-11C3.462 21 1 18.538 1 15.5a6.002 6.002 0 0 1 6.076-5.883z" stroke="#F9AB00" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="8" cy="15.5" r="2" fill="#E37400"/>
-                <circle cx="16" cy="15.5" r="2" fill="#F9AB00"/>
-                <path d="M10 15.5h4" stroke="#E37400" stroke-width="1.8"/>
+            <!-- Vercel -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L24 22H0L12 2Z"/>
               </svg>
-              <span>Google Colab</span>
+              <span>Vercel</span>
             </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24">
-                <path fill="#20BEFF" d="M18.825 23.859c-.022.047-.06.082-.114.102-.053.02-.112.02-.162-.003l-7.391-3.414-3.565 3.412a.243.243 0 0 1-.173.044.25.25 0 0 1-.168-.112L4.053 19.34a.25.25 0 0 1-.053-.162c.002-.058.026-.112.067-.15l7.009-6.425L4.067 6.177a.25.25 0 0 1-.067-.15.25.25 0 0 1 .053-.162l3.2-4.549a.25.25 0 0 1 .168-.112.24.24 0 0 1 .173.044l3.565 3.412 7.391-3.414c.05-.023.109-.023.162-.003.054.02.092.055.114.102l1.988 4.225a.25.25 0 0 1-.013.238.25.25 0 0 1-.186.126l-7.25 1.543 4.27 4.549c.045.048.067.112.06.176a.25.25 0 0 1-.06.176l-4.27 4.549 7.25 1.543a.25.25 0 0 1 .186.126.25.25 0 0 1 .013.238l-1.988 4.225z"/>
+
+            <!-- Salesforce -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.38 8.14a5.45 5.45 0 0 0-4.78-2.8 5.6 5.6 0 0 0-2.31.5 6.7 6.7 0 0 0-6.19-1.34 6.74 6.74 0 0 0-5.32 5.17A5.36 5.36 0 0 0 .5 14.3a5.48 5.48 0 0 0 5.48 5.48h13.2A4.82 4.82 0 0 0 24 14.96a4.77 4.77 0 0 0-4.62-4.82z"/>
               </svg>
-              <span>Kaggle</span>
+              <span>Salesforce</span>
             </div>
-            <div class="marquee-item">
-              <img src="/assets/logo.png" class="marquee-logo-img" alt="Ruzivo AI Logo">
-              <span>Ruzivo AI</span>
-            </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24">
-                <path fill="#FFD21E" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/>
-                <circle cx="8.5" cy="10" r="1.5" fill="#1E1E1E"/>
-                <circle cx="15.5" cy="10" r="1.5" fill="#1E1E1E"/>
-                <path d="M8 15s1.5 2.5 4 2.5 4-2.5 4-2.5" stroke="#1E1E1E" stroke-width="1.6" stroke-linecap="round"/>
+
+            <!-- Figma -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                <path d="M6 18a3 3 0 0 0 3 3 3 3 0 0 0 3-3v-3H9a3 3 0 0 0-3 3z"/>
+                <path d="M6 6a3 3 0 0 1 3-3h3v6H9a3 3 0 0 1-3-3z"/>
+                <path d="M12 3h3a3 3 0 1 1 0 6h-3V3z"/>
+                <path d="M6 12a3 3 0 0 1 3-3h3v6H9a3 3 0 0 1-3-3z"/>
               </svg>
-              <span>Hugging Face</span>
+              <span>Figma</span>
             </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24">
-                <path fill="#3776AB" d="M11.91 2c-5.07 0-4.75 2.2-4.75 2.2l.01 2.28h4.82v.69H5.15S2 6.8 2 11.93c0 5.14 2.75 4.96 2.75 4.96h1.64v-2.3s-.09-2.75 2.7-2.75h4.63s2.61.04 2.61-2.52V4.52S16.98 2 11.91 2zm-2.6 1.45a.94.94 0 1 1 0 1.88.94.94 0 0 1 0-1.88z"/>
-                <path fill="#FFD43B" d="M12.09 22c5.07 0 4.75-2.2 4.75-2.2l-.01-2.28h-4.82v-.69h6.84S22 17.2 22 12.07c0-5.14-2.75-4.96-2.75-4.96h-1.64v2.3s.09 2.75-2.7 2.75H10.28s-2.61-.04-2.61 2.52v4.79S7.02 22 12.09 22zm2.6-1.45a.94.94 0 1 1 0-1.88.94.94 0 0 1 0 1.88z"/>
+
+            <!-- Cursor -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1.5L2.5 7V17L12 22.5L21.5 17V7L12 1.5ZM12 4.2L18.8 8.1L12 12.1L5.2 8.1L12 4.2ZM4.5 9.8L11 13.5V20L4.5 16.2V9.8ZM13 20V13.5L19.5 9.8V16.2L13 20Z"/>
               </svg>
-              <span>Python 3.11</span>
+              <span style="font-weight: 700; letter-spacing: 0.04em;">CURSOR</span>
             </div>
-            <div class="marquee-item">
-              <svg class="marquee-logo-img" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2.5l7.5 4.33v8.67L12 19.83l-7.5-4.33V6.83L12 2.5z" stroke="#EE4C2C" stroke-width="1.8"/>
-                <path d="M13.5 6.5L12 10l-1.5-3.5L9 8l3 6 3-6-1.5-1.5z" fill="#EE4C2C"/>
+
+            <!-- Coinbase -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10"/>
+                <rect x="9.5" y="9.5" width="5" height="5" rx="1.2" fill="#000000"/>
               </svg>
-              <span>PyTorch</span>
+              <span>coinbase</span>
+            </div>
+
+            <!-- Ramp -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 19h16v-2.5H9.5c-1.8 0-3.5-.8-4.5-2.2L4 19z"/>
+                <path d="M14.5 5H4v2.5h8.5c1.8 0 3.5.8 4.5 2.2l1-1.4C17.1 6.5 15.8 5 14.5 5z"/>
+                <circle cx="19.5" cy="14.5" r="2.5"/>
+              </svg>
+              <span>ramp &#x25E2;</span>
+            </div>
+
+            <!-- Set 2 (Seamless loop duplicate) -->
+            <!-- OpenAI -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.77.77 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 8.487a4.485 4.485 0 0 1 2.365-1.98v5.677a.78.78 0 0 0 .39.677l5.814 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 8.487zm16.597 3.855l-5.833-3.387L15.124 7.8a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.82V7.489a.076.076 0 0 1 .033-.062l4.838-2.791a4.5 4.5 0 0 1 6.67 4.03zM8.106 10.05l-2.02-1.169a.071.071 0 0 1-.038-.052V3.246a4.5 4.5 0 0 1 7.37-3.453l-.142.08-4.778 2.758a.795.795 0 0 0-.393.681zm1.096 1.965L12 10.428l2.798 1.587v3.175L12 16.777l-2.798-1.587z"/>
+              </svg>
+              <span>OpenAI</span>
+            </div>
+
+            <!-- Vercel -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L24 22H0L12 2Z"/>
+              </svg>
+              <span>Vercel</span>
+            </div>
+
+            <!-- Salesforce -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.38 8.14a5.45 5.45 0 0 0-4.78-2.8 5.6 5.6 0 0 0-2.31.5 6.7 6.7 0 0 0-6.19-1.34 6.74 6.74 0 0 0-5.32 5.17A5.36 5.36 0 0 0 .5 14.3a5.48 5.48 0 0 0 5.48 5.48h13.2A4.82 4.82 0 0 0 24 14.96a4.77 4.77 0 0 0-4.62-4.82z"/>
+              </svg>
+              <span>Salesforce</span>
+            </div>
+
+            <!-- Figma -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                <path d="M6 18a3 3 0 0 0 3 3 3 3 0 0 0 3-3v-3H9a3 3 0 0 0-3 3z"/>
+                <path d="M6 6a3 3 0 0 1 3-3h3v6H9a3 3 0 0 1-3-3z"/>
+                <path d="M12 3h3a3 3 0 1 1 0 6h-3V3z"/>
+                <path d="M6 12a3 3 0 0 1 3-3h3v6H9a3 3 0 0 1-3-3z"/>
+              </svg>
+              <span>Figma</span>
+            </div>
+
+            <!-- Cursor -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1.5L2.5 7V17L12 22.5L21.5 17V7L12 1.5ZM12 4.2L18.8 8.1L12 12.1L5.2 8.1L12 4.2ZM4.5 9.8L11 13.5V20L4.5 16.2V9.8ZM13 20V13.5L19.5 9.8V16.2L13 20Z"/>
+              </svg>
+              <span style="font-weight: 700; letter-spacing: 0.04em;">CURSOR</span>
+            </div>
+
+            <!-- Coinbase -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10"/>
+                <rect x="9.5" y="9.5" width="5" height="5" rx="1.2" fill="#000000"/>
+              </svg>
+              <span>coinbase</span>
+            </div>
+
+            <!-- Ramp -->
+            <div class="linear-marquee-item">
+              <svg class="linear-marquee-svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 19h16v-2.5H9.5c-1.8 0-3.5-.8-4.5-2.2L4 19z"/>
+                <path d="M14.5 5H4v2.5h8.5c1.8 0 3.5.8 4.5 2.2l1-1.4C17.1 6.5 15.8 5 14.5 5z"/>
+                <circle cx="19.5" cy="14.5" r="2.5"/>
+              </svg>
+              <span>ramp &#x25E2;</span>
             </div>
           </div>
         </div>
