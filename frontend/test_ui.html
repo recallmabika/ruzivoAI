@@ -3384,29 +3384,26 @@
        ========================================================================= */
     .linear-showcase-section {
       width: 100%;
-      background: var(--bg-sidebar, #FAFAFA);
+      background: transparent;
       color: var(--text-main, #1F1E1D);
-      border-radius: 24px;
-      padding: 70px 48px;
-      margin: 60px 0 30px;
+      border: none;
+      box-shadow: none;
+      padding: 40px 0 20px;
+      margin: 40px 0 20px;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border-subtle, #EAEAEA);
-      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     body.theme-dark .linear-showcase-section {
-      background: #08090A;
+      background: transparent;
+      box-shadow: none;
+      border: none;
       color: #F7F8F8;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     @media (max-width: 768px) {
       .linear-showcase-section {
-        padding: 40px 24px;
-        border-radius: 18px;
+        padding: 20px 0 10px;
+        margin: 20px 0 10px;
       }
     }
 
