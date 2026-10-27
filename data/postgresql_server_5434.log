@@ -1,0 +1,54 @@
+2026-10-27 00:25:48.875 SAST [30416] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-27 00:25:48.897 SAST [30416] LOG:  listening on IPv6 address "::1", port 5434
+2026-10-27 00:25:48.898 SAST [30416] LOG:  listening on IPv4 address "127.0.0.1", port 5434
+2026-10-27 00:25:49.101 SAST [21856] LOG:  database system was interrupted; last known up at 2026-10-26 23:26:59 SAST
+2026-10-27 00:25:57.316 SAST [21856] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-27 00:25:57.329 SAST [21856] LOG:  redo starts at 0/1A63E08
+2026-10-27 00:25:57.333 SAST [21856] LOG:  invalid record length at 0/1A64528: expected at least 24, got 0
+2026-10-27 00:25:57.333 SAST [21856] LOG:  redo done at 0/1A644F0 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-27 00:25:57.352 SAST [32716] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-27 00:25:57.411 SAST [32716] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.013 s, sync=0.018 s, total=0.065 s; sync files=3, longest=0.011 s, average=0.006 s; distance=1 kB, estimate=1 kB; lsn=0/1A64528, redo lsn=0/1A64528
+2026-10-27 00:25:57.613 SAST [30416] LOG:  database system is ready to accept connections
+2026-10-27 00:26:36.462 SAST [50108] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-27 00:26:36.484 SAST [50108] LOG:  listening on IPv6 address "::1", port 5434
+2026-10-27 00:26:36.484 SAST [50108] LOG:  listening on IPv4 address "127.0.0.1", port 5434
+2026-10-27 00:26:36.615 SAST [40536] LOG:  database system was interrupted; last known up at 2026-10-27 00:25:57 SAST
+2026-10-27 00:26:38.544 SAST [40536] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-27 00:26:38.561 SAST [40536] LOG:  invalid record length at 0/1A645A0: expected at least 24, got 0
+2026-10-27 00:26:38.561 SAST [40536] LOG:  redo is not required
+2026-10-27 00:26:38.707 SAST [3396] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-27 00:26:38.852 SAST [3396] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.012 s, total=0.272 s; sync files=2, longest=0.007 s, average=0.006 s; distance=0 kB, estimate=0 kB; lsn=0/1A645A0, redo lsn=0/1A645A0
+2026-10-27 00:26:38.981 SAST [50108] LOG:  database system is ready to accept connections
+2026-10-27 00:27:34.982 SAST [27848] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-27 00:27:34.997 SAST [27848] LOG:  listening on IPv6 address "::1", port 5434
+2026-10-27 00:27:34.997 SAST [27848] LOG:  listening on IPv4 address "127.0.0.1", port 5434
+2026-10-27 00:27:35.125 SAST [4648] LOG:  database system was interrupted; last known up at 2026-10-27 00:26:38 SAST
+2026-10-27 00:27:37.074 SAST [4648] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-27 00:27:37.086 SAST [4648] LOG:  invalid record length at 0/1A64618: expected at least 24, got 0
+2026-10-27 00:27:37.087 SAST [4648] LOG:  redo is not required
+2026-10-27 00:27:37.107 SAST [32964] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-27 00:27:37.170 SAST [32964] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.012 s, sync=0.007 s, total=0.067 s; sync files=2, longest=0.004 s, average=0.004 s; distance=0 kB, estimate=0 kB; lsn=0/1A64618, redo lsn=0/1A64618
+2026-10-27 00:27:37.248 SAST [27848] LOG:  database system is ready to accept connections
+2026-10-27 00:32:37.172 SAST [32964] LOG:  checkpoint starting: time
+2026-10-27 00:32:38.549 SAST [32964] LOG:  checkpoint complete: wrote 12 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.229 s, sync=0.102 s, total=1.377 s; sync files=11, longest=0.067 s, average=0.010 s; distance=2 kB, estimate=2 kB; lsn=0/1A64F28, redo lsn=0/1A64ED0
+2026-10-27 11:47:49.313 SAST [40148] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-27 11:47:49.319 SAST [40148] LOG:  listening on IPv6 address "::1", port 5434
+2026-10-27 11:47:49.320 SAST [40148] LOG:  listening on IPv4 address "127.0.0.1", port 5434
+2026-10-27 11:47:49.422 SAST [34396] LOG:  database system was interrupted; last known up at 2026-10-27 00:32:38 SAST
+2026-10-27 11:47:53.597 SAST [34396] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-27 11:47:53.611 SAST [34396] LOG:  redo starts at 0/1A64ED0
+2026-10-27 11:47:53.611 SAST [34396] LOG:  invalid record length at 0/1A64FD8: expected at least 24, got 0
+2026-10-27 11:47:53.612 SAST [34396] LOG:  redo done at 0/1A64FA0 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-27 11:47:53.630 SAST [45432] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-27 11:47:53.671 SAST [45432] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.004 s, total=0.044 s; sync files=2, longest=0.003 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/1A64FD8, redo lsn=0/1A64FD8
+2026-10-27 11:47:53.725 SAST [40148] LOG:  database system is ready to accept connections
+2026-10-27 11:52:53.684 SAST [45432] LOG:  checkpoint starting: time
+2026-10-27 11:52:53.859 SAST [45432] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.119 s, sync=0.007 s, total=0.176 s; sync files=2, longest=0.006 s, average=0.004 s; distance=2 kB, estimate=2 kB; lsn=0/1A65958, redo lsn=0/1A65900
+2026-10-27 12:52:54.048 SAST [45432] LOG:  checkpoint starting: time
+2026-10-27 12:52:54.920 SAST [45432] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.801 s, sync=0.014 s, total=0.874 s; sync files=8, longest=0.003 s, average=0.002 s; distance=12 kB, estimate=12 kB; lsn=0/1A68970, redo lsn=0/1A68918
+2026-10-27 13:07:54.973 SAST [45432] LOG:  checkpoint starting: time
+2026-10-27 13:07:55.443 SAST [45432] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.354 s, sync=0.011 s, total=0.504 s; sync files=4, longest=0.004 s, average=0.003 s; distance=2 kB, estimate=11 kB; lsn=0/1A693B0, redo lsn=0/1A69358
+2026-10-27 13:22:54.476 SAST [45432] LOG:  checkpoint starting: time
+2026-10-27 13:22:54.863 SAST [45432] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.326 s, sync=0.013 s, total=0.390 s; sync files=4, longest=0.004 s, average=0.004 s; distance=5 kB, estimate=10 kB; lsn=0/1A6A880, redo lsn=0/1A6A828
+2026-10-27 13:32:54.868 SAST [45432] LOG:  checkpoint starting: time
+2026-10-27 13:32:55.227 SAST [45432] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.330 s, sync=0.006 s, total=0.361 s; sync files=4, longest=0.003 s, average=0.002 s; distance=5 kB, estimate=9 kB; lsn=0/1A6BDA0, redo lsn=0/1A6BD48
