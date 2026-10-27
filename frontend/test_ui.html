@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaApiLoaded&render=explicit" async defer></script>
+  <script src="https://www.google.com/recaptcha/enterprise.js?onload=onRecaptchaApiLoaded&render=explicit" async defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -7801,13 +7801,14 @@
     let registerWidgetId = null;
 
     function renderRecaptchaWidgets() {
-      if (!window.grecaptcha || typeof window.grecaptcha.render !== 'function') {
+      const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
+      if (!g || typeof g.render !== 'function') {
         return;
       }
       try {
         const loginEl = document.getElementById('loginRecaptcha');
         if (loginEl && loginWidgetId === null && loginEl.children.length === 0) {
-          loginWidgetId = grecaptcha.render('loginRecaptcha', {
+          loginWidgetId = g.render('loginRecaptcha', {
             'sitekey': RECAPTCHA_SITE_KEY,
             'theme': 'light'
           });
@@ -7819,7 +7820,7 @@
       try {
         const regEl = document.getElementById('registerRecaptcha');
         if (regEl && registerWidgetId === null && regEl.children.length === 0) {
-          registerWidgetId = grecaptcha.render('registerRecaptcha', {
+          registerWidgetId = g.render('registerRecaptcha', {
             'sitekey': RECAPTCHA_SITE_KEY,
             'theme': 'light'
           });
@@ -7835,15 +7836,16 @@
 
     function getRecaptchaToken(action = 'LOGIN') {
       try {
-        if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
+        const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
+        if (g && typeof g.getResponse === 'function') {
           if (action === 'LOGIN' && loginWidgetId !== null) {
-            const resp = grecaptcha.getResponse(loginWidgetId);
+            const resp = g.getResponse(loginWidgetId);
             if (resp) return resp;
           } else if (action === 'REGISTER' && registerWidgetId !== null) {
-            const resp = grecaptcha.getResponse(registerWidgetId);
+            const resp = g.getResponse(registerWidgetId);
             if (resp) return resp;
           }
-          const defaultResp = grecaptcha.getResponse();
+          const defaultResp = g.getResponse();
           if (defaultResp) return defaultResp;
         }
       } catch (e) {
