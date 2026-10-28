@@ -7793,7 +7793,7 @@ window.switchHeroSlide = function(target) {
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
         
         <div>
-          <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="Email (e.g. zita@chikoro.ac.zw)" autocomplete="email" oninput="handleLinearEmailRealtimeValidate(this)">
+          <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="Email (e.g. zita@chikoro.ac.zw)" autocomplete="email" oninput="handleLinearEmailRealtimeValidate(this)" onkeyup="handleLinearEmailRealtimeValidate(this)">
         </div>
 
         <div>
@@ -10502,7 +10502,7 @@ window.switchHeroSlide = function(target) {
 
     function hasXssOrInjectionPayload(value) {
       if (!value) return false;
-      const payloadRegex = /(<\s*script\b[^>]*>|<\s*\/script\s*>|<\s*script|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\b.+\bFROM\b|\bINSERT\s+INTO\b|\bUPDATE\b.+\bSET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bOR\b.+[=<>'`]|\bAND\b.+[=<>'`]|--|\/\*|\*\/|;\s*SHUTDOWN|;\s*DROP)/i;
+      const payloadRegex = /(<\s*html\b|<\s*script\b[^>]*>|<\s*\/script\s*>|<\s*script\b|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\s+.+\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.+\s+SET\b|\bDELETE\b.+\bFROM\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bWHERE\s+.+=\s*.+|\bOR\s+['"]?\w+['"]?\s*=\s*['"]?\w+|\bAND\s+['"]?\w+['"]?\s*=\s*['"]?\w+|--|\/\*|\*\/|;\s*SHUTDOWN|;\s*DROP)/i;
       return payloadRegex.test(value);
     }
 
@@ -10671,15 +10671,17 @@ window.switchHeroSlide = function(target) {
     }
 
     function handleRealtimeEmailValidation(input) {
-      const val = input.value.trim();
+      const val = input.value;
       if (!val) {
         clearFieldValidationError('regEmail');
         return;
       }
       if (hasXssOrInjectionPayload(val)) {
-        setFieldValidationError('regEmail', 'regEmailError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).');
-      } else if (!isValidEmailFormat(val)) {
-        setFieldValidationError('regEmail', 'regEmailError', 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).');
+        setFieldValidationError('regEmail', 'regEmailError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).');
+      } else if (/\s/.test(val)) {
+        setFieldValidationError('regEmail', 'regEmailError', 'Kero yeEmail haifaniri kuve nezvipari/maspace.');
+      } else if (val.includes('@') && !isValidEmailFormat(val.trim())) {
+        setFieldValidationError('regEmail', 'regEmailError', 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).');
       } else {
         clearFieldValidationError('regEmail');
       }
@@ -10735,15 +10737,17 @@ window.switchHeroSlide = function(target) {
     }
 
     function handleRealtimeLoginEmailValidation(input) {
-      const val = input.value.trim();
+      const val = input.value;
       if (!val) {
         clearFieldValidationError('loginUsername');
         return;
       }
       if (hasXssOrInjectionPayload(val)) {
-        setFieldValidationError('loginUsername', 'loginUsernameError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).');
-      } else if (!isValidEmailFormat(val)) {
-        setFieldValidationError('loginUsername', 'loginUsernameError', 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).');
+        setFieldValidationError('loginUsername', 'loginUsernameError', 'Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).');
+      } else if (/\s/.test(val)) {
+        setFieldValidationError('loginUsername', 'loginUsernameError', 'Kero yeEmail haifaniri kuve nezvipari/maspace.');
+      } else if (val.includes('@') && !isValidEmailFormat(val.trim())) {
+        setFieldValidationError('loginUsername', 'loginUsernameError', 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).');
       } else {
         clearFieldValidationError('loginUsername');
       }
@@ -15046,23 +15050,36 @@ window.switchHeroSlide = function(target) {
       if (!input) return;
       const val = input.value;
       const errBox = document.getElementById('linearEmailStepError');
+      const submitBtn = document.getElementById('linearEmailSubmitBtn');
       if (!errBox) return;
 
       if (!val) {
         errBox.style.display = 'none';
         errBox.innerText = '';
         input.style.borderColor = '';
+        if (submitBtn) submitBtn.disabled = false;
         return;
       }
 
+      // 1. Critical Priority: Block SQL Injection, XSS, scripts, payload attacks instantly on every keystroke
       if (hasXssOrInjectionPayload(val)) {
         errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).';
         errBox.style.display = 'block';
         input.style.borderColor = '#DC2626';
+        if (submitBtn) submitBtn.disabled = true;
         return;
       }
 
-      // If user has typed an @ sign or is done typing, validate email format
+      // 2. Reject spaces immediately
+      if (/\s/.test(val)) {
+        errBox.innerText = 'Kero yeEmail haifaniri kuve nezvipari/maspace.';
+        errBox.style.display = 'block';
+        input.style.borderColor = '#DC2626';
+        if (submitBtn) submitBtn.disabled = true;
+        return;
+      }
+
+      // 3. Only check format if user is done typing or typed @
       if (val.includes('@') && !isValidEmailFormat(val.trim())) {
         errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).';
         errBox.style.display = 'block';
@@ -15074,6 +15091,7 @@ window.switchHeroSlide = function(target) {
       errBox.style.display = 'none';
       errBox.innerText = '';
       input.style.borderColor = '';
+      if (submitBtn) submitBtn.disabled = false;
     }
     window.handleLinearEmailRealtimeValidate = handleLinearEmailRealtimeValidate;
 
@@ -15371,16 +15389,42 @@ window.switchHeroSlide = function(target) {
 
     function handleLinearSignupEmailValidate(input) {
       const errBox = document.getElementById('linearSignupError');
+      const submitBtn = document.getElementById('linearSignupSubmitBtn');
       if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
-      if (!input || !input.value) return;
-      const val = input.value.trim();
-      if (hasXssOrInjectionPayload(val) && errBox) {
-        errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).';
-        errBox.style.display = 'block';
-      } else if (!isValidEmailFormat(val) && val.includes('@') && errBox) {
-        errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).';
-        errBox.style.display = 'block';
+      if (!input || !input.value) {
+        if (input) input.style.borderColor = '';
+        if (submitBtn) submitBtn.disabled = false;
+        return;
       }
+      const val = input.value;
+      if (hasXssOrInjectionPayload(val)) {
+        if (errBox) {
+          errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).';
+          errBox.style.display = 'block';
+        }
+        input.style.borderColor = '#DC2626';
+        if (submitBtn) submitBtn.disabled = true;
+        return;
+      }
+      if (/\s/.test(val)) {
+        if (errBox) {
+          errBox.innerText = 'Kero yeEmail haifaniri kuve nezvipari/maspace.';
+          errBox.style.display = 'block';
+        }
+        input.style.borderColor = '#DC2626';
+        if (submitBtn) submitBtn.disabled = true;
+        return;
+      }
+      if (val.includes('@') && !isValidEmailFormat(val.trim())) {
+        if (errBox) {
+          errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).';
+          errBox.style.display = 'block';
+        }
+        input.style.borderColor = '#DC2626';
+        return;
+      }
+      input.style.borderColor = '';
+      if (submitBtn) submitBtn.disabled = false;
     }
 
     // Real-time phone number sanitization and strict validation
