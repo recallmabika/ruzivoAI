@@ -3291,6 +3291,33 @@
       align-items: center;
     }
 
+    /* Hide "App" download link on small screens, mobile viewports, or when already running inside standalone app */
+    @media (max-width: 768px) {
+      .nav-mobile-app-btn,
+      #navMobileAppBtn {
+        display: none !important;
+      }
+      .linear-nav-actions {
+        gap: 8px !important;
+      }
+      .linear-nav-login-link {
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+      }
+      .linear-nav-signup-pill {
+        padding: 6px 14px !important;
+        font-size: 13px !important;
+        white-space: nowrap !important;
+      }
+    }
+
+    @media all and (display-mode: standalone) {
+      .nav-mobile-app-btn,
+      #navMobileAppBtn {
+        display: none !important;
+      }
+    }
+
     @media (max-width: 900px) {
       .auth-section-container {
         grid-template-columns: 1fr;
@@ -7965,8 +7992,8 @@ window.switchHeroSlide = function(target) {
         </nav>
 
         <div class="linear-nav-actions">
-          <button type="button" class="linear-nav-login-link" onclick="openMobileAppModal()" style="display: flex; align-items: center; gap: 5px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button type="button" class="linear-nav-login-link nav-mobile-app-btn" id="navMobileAppBtn" onclick="openMobileAppModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
               <path d="M12 18h.01"/>
             </svg>
@@ -15866,6 +15893,22 @@ window.switchHeroSlide = function(target) {
     window.openMobileAppModal = openMobileAppModal;
     window.closeMobileAppModal = closeMobileAppModal;
     window.showIosInstallGuide = showIosInstallGuide;
+
+    // Automatically hide the App download button if the user is already on a mobile phone, tablet, or standalone home screen app
+    function checkAndHideAppBtnOnMobile() {
+      const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 768);
+      if (isStandalone || isMobileDevice) {
+        const btn = document.getElementById('navMobileAppBtn');
+        if (btn) btn.style.setProperty('display', 'none', 'important');
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkAndHideAppBtnOnMobile);
+    } else {
+      checkAndHideAppBtnOnMobile();
+    }
+    window.addEventListener('resize', checkAndHideAppBtnOnMobile);
   </script>
 
 </body>
