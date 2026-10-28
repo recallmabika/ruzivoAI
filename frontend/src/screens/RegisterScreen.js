@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { register } from '../services/auth';
 
-const SQL_XSS_REGEX = /(<\s*script\b[^>]*>|<\s*\/script\s*>|<\s*script|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\s+.+\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.+\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bOR\s+['"]?\w+['"]?\s*=\s*['"]?\w+|\bAND\s+['"]?\w+['"]?\s*=\s*['"]?\w+|--|\/\*|\*\/|;\s*SHUTDOWN|;\s*DROP)/i;
+const SQL_XSS_REGEX = /(<\s*html\b|<\s*script\b[^>]*>|<\s*/\s*script\s*>|<\s*script\b|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\s+.+\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.+\s+SET\b|\bDELETE\b.+\bFROM\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bWHERE\s+.+=\s*.+|\bOR\s+[\x27\x22]?\w+[\x27\x22]?\s*=\s*[\x27\x22]?\w+|\bAND\s+[\x27\x22]?\w+[\x27\x22]?\s*=\s*[\x27\x22]?\w+|--|/\*|\*/|;\s*SHUTDOWN|;\s*DROP)/i;
 
 const RegisterScreen = ({ onRegisterSuccess, onNavigateLogin, onGuestLogin }) => {
   const insets = useSafeAreaInsets();
