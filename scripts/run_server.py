@@ -2734,6 +2734,75 @@ def send_ruzivo_sms(to_phone: str, message: str) -> tuple[bool, str]:
 
 
 
+def render_simple_otp_email(recipient_name: str, code: str, app_name: str = "Ruzivo AI") -> tuple[str, str]:
+    """
+    Renders a clean, elegant, minimal OTP verification email matching Africa's Talking style.
+    Returns: (plain_text_body, html_body)
+    """
+    first_name = (recipient_name or "").strip() or "there"
+    subject = f"Sign in to {app_name}: {code}"
+
+    # Plain text version
+    plain_text = (
+        f"Hi {first_name},\n\n"
+        f"Use this one-time password to sign in to {app_name}: {code}\n\n"
+        f"If you didn't request for a one-time password, your account may have been compromised and you should take a few steps to make sure your account is secure. To start, reset your password now: https://ruzivo-ai.tech/reset-password\n\n"
+        f"Regards,\n"
+        f"{app_name} Team\n"
+        f"Email: support@ruzivo-ai.tech\n"
+    )
+
+    # Clean, beautiful, responsive HTML matching the Africa's Talking minimal email layout
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in to {app_name}</title>
+</head>
+<body style="margin: 0; padding: 24px 16px; background-color: #F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1E293B;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 580px; margin: 0 auto; background: #FFFFFF; border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+    <tr>
+      <td style="padding: 32px 32px 28px 32px;">
+        <p style="font-size: 15px; line-height: 1.5; color: #1E293B; margin: 0 0 18px 0;">
+          Hi {first_name},
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #1E293B; margin: 0 0 24px 0;">
+          Use this one-time password to sign in to {app_name}: <strong style="color: #0F172A; font-size: 17px; font-weight: 700; letter-spacing: 0.5px;">{code}</strong>
+        </p>
+
+        <!-- Clean Highlighted Code Box -->
+        <div style="background-color: #F0F4F8; border-radius: 6px; padding: 16px 20px; margin: 0 0 24px 0; display: inline-block; min-width: 240px;">
+          <div style="font-size: 12px; color: #64748B; font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            Code Requested
+          </div>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', Consolas, Menlo, monospace; font-size: 26px; font-weight: 700; letter-spacing: 5px; color: #0F172A;">
+            {code}
+          </div>
+        </div>
+
+        <p style="font-size: 13.5px; line-height: 1.6; color: #475569; margin: 0 0 28px 0;">
+          If you didn't request for a one-time password, your account may have been compromised and you should take a few steps to make sure your account is secure. To start, <a href="https://ruzivo-ai.tech/reset-password" style="color: #0284C7; text-decoration: underline;">reset your password now</a>.
+        </p>
+
+        <p style="font-size: 14px; line-height: 1.5; color: #1E293B; margin: 0 0 4px 0;">
+          Regards,
+        </p>
+        <p style="font-size: 14px; line-height: 1.5; font-weight: 600; color: #1E293B; margin: 0 0 16px 0;">
+          {app_name} Team
+        </p>
+
+        <p style="font-size: 13px; line-height: 1.5; color: #64748B; margin: 0;">
+          Email: <a href="mailto:support@ruzivo-ai.tech" style="color: #0284C7; text-decoration: underline;">support@ruzivo-ai.tech</a>
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+    return plain_text, html
+
+
 def send_ruzivo_email(to_email: str, subject: str, content: str, html_content: str = None) -> bool:
 
     """Dispatches real email via Titan SMTP (SSL port 465 or TLS port 587)."""
@@ -2892,33 +2961,8 @@ def create_email_verification_code(email: str):
 
 
 
-    subject = "Ruzivo AI - Kodhi Yenyu Yekupinda (Login Verification Code)"
-
-    body = f"Mhoro,\n\nKodhi yako yekupinda muRuzivo AI ndeiyi:\n\n  {code}\n\nKodhi iyi inoshanda kwemaminitsi gumi (10 minutes).\nKana usiriwe wakakumbira kodhi iyi, unogona kurega kuteerera email ino.\n\nMakorokoto,\nRuzivo AI Team"
-
-    html_body = f"""
-
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-
-        <h2 style="color: #0F172A; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;">Ruzivo AI - Kodhi Yekupinda</h2>
-
-        <p style="color: #475569; font-size: 15px; line-height: 1.6;">Mhoro, shandisai kodhi inotevera kupinda muakaundi yenyu paRuzivo AI:</p>
-
-        <div style="text-align: center; margin: 28px 0; padding: 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px;">
-
-            <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #15803D;">{code}</span>
-
-        </div>
-
-        <p style="color: #64748B; font-size: 13px; line-height: 1.5;">Kodhi iyi inopera mushure memaminitsi 10. Kana usiriwe wakakumbira kodhi iyi, unogona kurega zvakadaro.</p>
-
-        <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;" />
-
-        <p style="color: #94A3B8; font-size: 11px;">Ruzivo AI Core &bull; support@ruzivo-ai.tech &bull; Titan Mail SMTP:465 SSL</p>
-
-    </div>
-
-    """
+    subject = f"Sign in to Ruzivo: {code}"
+    body, html_body = render_simple_otp_email(email.split('@')[0], code, "Ruzivo")
 
 
 
@@ -3098,33 +3142,9 @@ def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str, 
 
     else:
 
-        subject = "Ruzivo AI - Kodhi Yenyu Yekusimbisa Kupinda (Sign-in Verification Code)"
-
-        body = f"Mhoro,\n\nKodhi yako yekusimbisa kupinda muRuzivo AI ndeiyi:\n\n  {code}\n\nKodhi iyi inoshanda kwemaminitsi gumi (10 minutes).\nKana usiriwe wakakumbira kodhi iyi, unogona kurega zvakadaro.\n\nMakorokoto,\nRuzivo AI Team"
-
-        html_body = f"""
-
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-
-            <h2 style="color: #0F172A; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;">Ruzivo AI - Kodhi Yekusimbisa Kupinda</h2>
-
-            <p style="color: #475569; font-size: 15px; line-height: 1.6;">Mhoro, pasiwedhi yenyu yatambirwa zvakanaka. Shandisai kodhi inotevera kupedzisa kupinda muakaundi yenyu:</p>
-
-            <div style="text-align: center; margin: 28px 0; padding: 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px;">
-
-                <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #15803D;">{code}</span>
-
-            </div>
-
-            <p style="color: #64748B; font-size: 13px; line-height: 1.5;">Kodhi iyi inopera mushure memaminitsi 10.</p>
-
-            <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;" />
-
-            <p style="color: #94A3B8; font-size: 11px;">Ruzivo AI Security Core &bull; support@ruzivo-ai.tech &bull; Titan Mail SMTP:465 SSL</p>
-
-        </div>
-
-        """
+        subject = f"Sign in to Ruzivo: {code}"
+        display_name = actual_username or email.split('@')[0]
+        body, html_body = render_simple_otp_email(display_name, code, "Ruzivo")
 
         email_sent = send_ruzivo_email(email, subject, body, html_body)
 
@@ -4341,6 +4361,38 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             return
 
 
+
+        if self.path in ("/download/android", "/download/apk", "/assets/ruzivo.apk"):
+            apk_path = PROJECT_ROOT / "assets" / "ruzivo.apk"
+            if not apk_path.exists():
+                apk_path = PROJECT_ROOT / "frontend" / "assets" / "ruzivo.apk"
+            
+            if apk_path.exists():
+                self.send_response(200)
+                self.send_security_headers()
+                self.send_header("Content-Type", "application/vnd.android.package-archive")
+                self.send_header("Content-Disposition", 'attachment; filename="ruzivo.apk"')
+                self.send_header("Content-Length", str(apk_path.stat().st_size))
+                self.send_header("Cache-Control", "public, max-age=3600")
+                self.end_headers()
+                with open(apk_path, "rb") as af:
+                    self.wfile.write(af.read())
+                return
+            else:
+                self.send_response(302)
+                self.send_header("Location", "https://github.com/recallmabika/ruzivoAI/releases/latest")
+                self.end_headers()
+                return
+
+        if self.path in ("/download", "/download/"):
+            csrf_token = generate_csrf_token()
+            self.send_response(200)
+            self.send_security_headers()
+            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.send_header("Set-Cookie", f"ruzivo_csrf={csrf_token}; Path=/; SameSite=Strict")
+            self.end_headers()
+            self.wfile.write(HTML_FILE.read_bytes())
+            return
 
         if self.path in ("/privacy", "/privacy.html"):
 
