@@ -232,25 +232,7 @@ const LoginScreen = ({ onLoginSuccess, onNavigateRegister, onGuestLogin }) => {
                 </TouchableOpacity>
               </View>
 
-              {/* Dual 2FA Channel Picker: SMS (Phone default) or Email */}
-              <Text style={styles.fieldLabel}>Nzira yekutambira kodhi (2FA Channel):</Text>
-              <View style={styles.channelRow}>
-                <TouchableOpacity
-                  style={[styles.channelPill, channel === 'sms' && styles.channelPillActive]}
-                  onPress={() => setChannel('sms')}
-                >
-                  <Ionicons name="chatbox-ellipses-outline" size={16} color={channel === 'sms' ? '#2E7D32' : '#666666'} />
-                  <Text style={[styles.channelText, channel === 'sms' && styles.channelTextActive]}>SMS (Phone)</Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[styles.channelPill, channel === 'email' && styles.channelPillActive]}
-                  onPress={() => setChannel('email')}
-                >
-                  <Ionicons name="mail-outline" size={16} color={channel === 'email' ? '#2E7D32' : '#666666'} />
-                  <Text style={[styles.channelText, channel === 'email' && styles.channelTextActive]}>Email</Text>
-                </TouchableOpacity>
-              </View>
 
               {/* Submit Button */}
               <TouchableOpacity
@@ -277,6 +259,42 @@ const LoginScreen = ({ onLoginSuccess, onNavigateRegister, onGuestLogin }) => {
               <Text style={styles.cardSub}>
                 Takutumira kodhi ye 6-digits pa <Text style={{ fontWeight: 'bold' }}>{destinationDisplay}</Text>.
               </Text>
+
+              {/* Option to switch between SMS and Email on the code step */}
+              <View style={{ marginBottom: 16, padding: 12, backgroundColor: '#F9FAFB', borderRadius: 8, borderWidth: 1, borderColor: '#E5E7EB' }}>
+                <Text style={{ fontSize: 12, color: '#6B7280', marginBottom: 8, fontWeight: '500' }}>
+                  Haina kusvika? Sarudza imwe nzira yekutambira:
+                </Text>
+                <View style={styles.channelRow}>
+                  <TouchableOpacity
+                    style={[styles.channelPill, channel === 'sms' && styles.channelPillActive]}
+                    onPress={async () => {
+                      setChannel('sms');
+                      try {
+                        const res = await verifyPasswordAndSendCode(email.trim(), 'resend', 'sms');
+                        setDestinationDisplay(res.phone || 'foni yako');
+                      } catch (e) {}
+                    }}
+                  >
+                    <Ionicons name="chatbox-ellipses-outline" size={16} color={channel === 'sms' ? '#2E7D32' : '#666666'} />
+                    <Text style={[styles.channelText, channel === 'sms' && styles.channelTextActive]}>SMS (Phone)</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.channelPill, channel === 'email' && styles.channelPillActive]}
+                    onPress={async () => {
+                      setChannel('email');
+                      try {
+                        const res = await verifyPasswordAndSendCode(email.trim(), 'resend', 'email');
+                        setDestinationDisplay(res.email || email.trim());
+                      } catch (e) {}
+                    }}
+                  >
+                    <Ionicons name="mail-outline" size={16} color={channel === 'email' ? '#2E7D32' : '#666666'} />
+                    <Text style={[styles.channelText, channel === 'email' && styles.channelTextActive]}>Email</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
 
               {errorMsg ? (
                 <View style={styles.errorBanner}>
