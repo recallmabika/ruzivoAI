@@ -11569,11 +11569,16 @@ window.switchHeroSlide = function(target) {
 
     function handleLinearCodeInputFormat(input) {
       if (!input) return;
-      // Strip any non-digit characters smoothly
       const digits = input.value.replace(/\D/g, '').slice(0, 6);
       input.value = digits;
+      // Clear inline error when typing
+      const codeErr = document.getElementById('linearCodeStepError');
+      if (codeErr && codeErr.style.display !== 'none') {
+        codeErr.style.display = 'none';
+        codeErr.innerText = '';
+      }
+      input.style.borderColor = '';
       if (digits.length === 6) {
-        // Auto-focus submit button or auto-validate
         const btn = document.getElementById('linearCodeSubmitBtn');
         if (btn) btn.focus();
       }
@@ -15832,19 +15837,33 @@ window.switchHeroSlide = function(target) {
       if (e) e.preventDefault();
       const codeInput = document.getElementById('linearCodeInput');
       const submitBtn = document.getElementById('linearCodeSubmitBtn');
+      const codeErr = document.getElementById('linearCodeStepError');
+
+      if (codeErr) { codeErr.style.display = 'none'; codeErr.innerText = ''; }
+      if (codeInput) codeInput.style.borderColor = '';
+
       if (!codeInput) return;
       const codeVal = codeInput.value.trim();
-      if (!codeVal || codeVal.length < 4) {
-        showNotificationToast('Ndapota nyorai kodhi yakakwana ye 6-digits.', 'warning');
+
+      // Proper inline field validation directly beneath the input field (no annoying top popup)
+      if (!codeVal) {
+        if (codeErr) {
+          codeErr.innerText = 'Ndapota nyorai kodhi ye OTP.';
+          codeErr.style.display = 'block';
+        }
+        codeInput.style.borderColor = '#DC2626';
+        codeInput.focus();
         return;
       }
 
-      const codeErr = document.getElementById('linearCodeStepError');
-      if (codeErr) { codeErr.style.display = 'none'; codeErr.innerText = ''; }
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kupinda...</span>';
+      if (codeVal.length < 6) {
+        if (codeErr) {
+          codeErr.innerText = 'Ndapota nyorai kodhi yakakwana ye 6-digits.';
+          codeErr.style.display = 'block';
+        }
+        codeInput.style.borderColor = '#DC2626';
+        codeInput.focus();
+        return;
       }
 
       // Check reCAPTCHA challenge widget response if rendered
@@ -15854,14 +15873,18 @@ window.switchHeroSlide = function(target) {
         recaptchaToken = g.getResponse(linear2faWidgetId);
         if (!recaptchaToken) {
           if (codeErr) {
-            codeErr.innerText = 'Ndapota tenderai / tambai reCAPTCHA challenge musati mapedzisa (Please verify reCAPTCHA).';
+            codeErr.innerText = 'Ndapota tenderai / tambai reCAPTCHA challenge musati mapedzisa.';
             codeErr.style.display = 'block';
           }
-          showNotificationToast('Ndapota zadzisai reCAPTCHA challenge.', 'warning');
           return;
         }
       } else if (typeof getRecaptchaToken === 'function') {
         recaptchaToken = await getRecaptchaToken('LOGIN');
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kuongorora kodhi...</span>';
       }
 
       const username = currentLinearEmail.split('@')[0];
@@ -15887,15 +15910,25 @@ window.switchHeroSlide = function(target) {
           showNotificationToast('Makorokoto! Mapinda zvakanaka muRuzivo AI.', 'info');
           return;
         } else {
-          showNotificationToast(data.detail || 'Kodhi yamaisa haina kururama kana kuti yapera nguva.', 'warning');
+          const errDetail = data.detail || 'Kodhi yamaisa haina kururama kana kuti yapera nguva.';
+          if (codeErr) {
+            codeErr.innerText = errDetail;
+            codeErr.style.display = 'block';
+          }
+          codeInput.style.borderColor = '#DC2626';
+          codeInput.focus();
         }
       } catch (err) {
         console.warn("Verify code error:", err);
-        showNotificationToast('Kukanganisa pakupinda. Ndapota edzai zvakare.', 'warning');
+        if (codeErr) {
+          codeErr.innerText = 'Kukanganisa pasisitimu pakusimbisa kodhi. Ndapota edzai zvakare.';
+          codeErr.style.display = 'block';
+        }
+        codeInput.style.borderColor = '#DC2626';
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span>Enderera mberi neCode</span>';
+          submitBtn.innerHTML = '<span>Simbisa Kodhi</span>';
         }
       }
     }
