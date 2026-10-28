@@ -7349,17 +7349,12 @@
 
     /* Modern Styled 2FA Channel Switcher Card */
     .channel-switcher-card {
-      margin: 0 0 20px 0;
-      padding: 14px 16px;
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 12px;
-      text-align: left;
-    }
-
-    body.theme-dark .channel-switcher-card {
-      background: rgba(255, 255, 255, 0.03);
-      border-color: rgba(255, 255, 255, 0.1);
+      margin: 0 0 22px 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      text-align: center;
+      width: 100%;
     }
 
     .channel-pill-btn {
@@ -7367,15 +7362,24 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
-      padding: 9px 12px;
-      font-size: 13px;
+      gap: 8px;
+      padding: 11px 20px;
+      font-size: 14px;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: 9999px;
       cursor: pointer;
-      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-      border: 1.5px solid transparent;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: none !important;
       outline: none;
+      white-space: nowrap;
+    }
+
+    .channel-pill-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .channel-pill-btn:active {
+      transform: translateY(0);
     }
 
 
@@ -7909,17 +7913,16 @@ window.switchHeroSlide = function(target) {
 
       <!-- Option to switch delivery channel if not received or preferred -->
       <div class="channel-switcher-card">
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; display: flex; align-items: center; justify-content: space-between;">
-          <span>Nzira yekutambira kodhi:</span>
-          <span style="font-size: 11px; opacity: 0.75;">(Baya kuti uchinje)</span>
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">
+          Sarudza nzira yekutambira kodhi:
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 12px; justify-content: center;">
           <button type="button" id="btnResendSms" class="channel-pill-btn" onclick="resendLinearCodeToChannel('sms')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
             <span>SMS (Foni)</span>
           </button>
           <button type="button" id="btnResendEmail" class="channel-pill-btn" onclick="resendLinearCodeToChannel('email')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
             <span>Email</span>
           </button>
         </div>
@@ -15376,38 +15379,36 @@ window.switchHeroSlide = function(target) {
       const btnEmail = document.getElementById('btnResendEmail');
       const isDark = document.body.classList.contains('theme-dark');
 
-      const activeBg = isDark ? 'rgba(46, 125, 50, 0.22)' : '#E8F5E9';
-      const activeBorder = '#2E7D32';
-      const activeColor = isDark ? '#4ADE80' : '#1B5E20';
-
-      const inactiveBg = isDark ? 'rgba(255, 255, 255, 0.04)' : '#FFFFFF';
-      const inactiveBorder = isDark ? 'rgba(255, 255, 255, 0.12)' : '#CBD5E1';
-      const inactiveColor = isDark ? '#9CA3AF' : '#475569';
+      // SMS Color: Rich Royal Blue (#2563EB)
+      // Email Color: Vibrant Warm Gold / Amber Yellow (#F59E0B / #D97706)
+      // Inactive: Elegant dark/neutral solid (#E5E7EB / in dark: #262626) matching the image style
+      const inactiveBg = isDark ? '#262626' : '#F1F5F9';
+      const inactiveColor = isDark ? '#9CA3AF' : '#64748B';
 
       if (activeChannel === 'sms') {
         if (btnSms) {
-          btnSms.style.background = activeBg;
-          btnSms.style.border = `1.5px solid ${activeBorder}`;
-          btnSms.style.color = activeColor;
-          btnSms.style.boxShadow = '0 1px 3px rgba(46, 125, 50, 0.15)';
+          btnSms.style.background = '#2563EB'; // Solid Royal Blue
+          btnSms.style.color = '#FFFFFF';
+          btnSms.style.border = 'none';
+          btnSms.style.boxShadow = '0 3px 10px rgba(37, 99, 235, 0.28)';
         }
         if (btnEmail) {
           btnEmail.style.background = inactiveBg;
-          btnEmail.style.border = `1px solid ${inactiveBorder}`;
           btnEmail.style.color = inactiveColor;
+          btnEmail.style.border = 'none';
           btnEmail.style.boxShadow = 'none';
         }
       } else {
         if (btnEmail) {
-          btnEmail.style.background = activeBg;
-          btnEmail.style.border = `1.5px solid ${activeBorder}`;
-          btnEmail.style.color = activeColor;
-          btnEmail.style.boxShadow = '0 1px 3px rgba(46, 125, 50, 0.15)';
+          btnEmail.style.background = '#D97706'; // Rich Warm Gold / Amber Yellow
+          btnEmail.style.color = '#FFFFFF';
+          btnEmail.style.border = 'none';
+          btnEmail.style.boxShadow = '0 3px 10px rgba(217, 119, 6, 0.28)';
         }
         if (btnSms) {
           btnSms.style.background = inactiveBg;
-          btnSms.style.border = `1px solid ${inactiveBorder}`;
           btnSms.style.color = inactiveColor;
+          btnSms.style.border = 'none';
           btnSms.style.boxShadow = 'none';
         }
       }
