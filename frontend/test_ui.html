@@ -6548,22 +6548,22 @@
     /* Orbit Stage & Simple Clean Dashed Lines - Scaled Up */
     .kinetic-orbit-stage {
       position: relative;
-      width: 440px;
-      height: 440px;
+      width: 450px;
+      height: 450px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .kinetic-rotating-emblem {
-      width: 300px;
-      height: 300px;
+      width: 340px;
+      height: 340px;
       object-fit: contain;
       z-index: 3;
       animation: kineticEmblemSpin 28s linear infinite;
       filter: none !important;
       transition: transform 0.3s ease;
-      opacity: 0.95;
+      opacity: 0.98;
     }
 
     /* Floating Heartbeat Center Label */
@@ -6583,7 +6583,7 @@
 
     .kinetic-center-heartbeat .center-ruzivo-title {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      font-size: 38px;
+      font-size: 42px;
       font-weight: 700;
       letter-spacing: 0.28em;
       color: var(--text-main);
@@ -6671,10 +6671,10 @@
     }
 
     .ring-outer {
-      width: 420px;
-      height: 420px;
+      width: 430px;
+      height: 430px;
       animation: kineticRingRotate 52s linear infinite reverse;
-      border: 1px dashed rgba(255, 255, 255, 0.09);
+      border: 1px dashed rgba(255, 255, 255, 0.12);
     }
 
     body:not(.theme-dark) .ring-outer {
@@ -7478,23 +7478,20 @@
         box-sizing: border-box !important;
       }
       .kinetic-orbit-stage {
-        width: 320px !important;
-        height: 320px !important;
+        width: 330px !important;
+        height: 330px !important;
       }
-      .ring-inner {
-        width: 240px !important;
-        height: 240px !important;
-      }
+      .ring-inner,
       .ring-middle {
         display: none !important;
       }
       .ring-outer {
-        width: 305px !important;
-        height: 305px !important;
+        width: 315px !important;
+        height: 315px !important;
       }
       .kinetic-rotating-emblem {
-        width: 220px !important;
-        height: 220px !important;
+        width: 250px !important;
+        height: 250px !important;
       }
       .kinetic-center-heartbeat .center-ruzivo-title {
         font-size: 24px !important;
@@ -8165,7 +8162,6 @@ window.switchHeroSlide = function(target) {
                 <div class="kinetic-orbit-stage" aria-hidden="true">
                   <div class="kinetic-glow-pulse"></div>
                   <div class="kinetic-dashed-ring ring-outer"></div>
-                  <div class="kinetic-dashed-ring ring-inner"></div>
                   <img src="assets/logo.png" alt="Ruzivo AI Kinetic Emblem" class="kinetic-rotating-emblem">
                   <!-- Floating Heartbeat Centerpiece -->
                   <div class="kinetic-center-heartbeat">
