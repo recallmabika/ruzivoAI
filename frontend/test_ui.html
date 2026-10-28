@@ -6548,22 +6548,22 @@
     /* Orbit Stage & Simple Clean Dashed Lines - Scaled Up */
     .kinetic-orbit-stage {
       position: relative;
-      width: 390px;
-      height: 390px;
+      width: 440px;
+      height: 440px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .kinetic-rotating-emblem {
-      width: 230px;
-      height: 230px;
+      width: 300px;
+      height: 300px;
       object-fit: contain;
       z-index: 3;
       animation: kineticEmblemSpin 28s linear infinite;
       filter: none !important;
       transition: transform 0.3s ease;
-      opacity: 0.88;
+      opacity: 0.95;
     }
 
     /* Floating Heartbeat Center Label */
@@ -6583,7 +6583,7 @@
 
     .kinetic-center-heartbeat .center-ruzivo-title {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      font-size: 32px;
+      font-size: 38px;
       font-weight: 700;
       letter-spacing: 0.28em;
       color: var(--text-main);
@@ -6649,8 +6649,8 @@
     }
 
     .ring-inner {
-      width: 270px;
-      height: 270px;
+      width: 340px;
+      height: 340px;
       animation: kineticRingRotate 24s linear infinite reverse;
       border: 1px dashed rgba(255, 255, 255, 0.2);
     }
@@ -6671,8 +6671,8 @@
     }
 
     .ring-outer {
-      width: 380px;
-      height: 380px;
+      width: 420px;
+      height: 420px;
       animation: kineticRingRotate 52s linear infinite reverse;
       border: 1px dashed rgba(255, 255, 255, 0.09);
     }
@@ -7478,24 +7478,23 @@
         box-sizing: border-box !important;
       }
       .kinetic-orbit-stage {
-        width: 300px !important;
-        height: 300px !important;
+        width: 320px !important;
+        height: 320px !important;
       }
       .ring-inner {
-        width: 200px !important;
-        height: 200px !important;
+        width: 240px !important;
+        height: 240px !important;
       }
       .ring-middle {
-        width: 250px !important;
-        height: 250px !important;
+        display: none !important;
       }
       .ring-outer {
-        width: 295px !important;
-        height: 295px !important;
+        width: 305px !important;
+        height: 305px !important;
       }
       .kinetic-rotating-emblem {
-        width: 175px !important;
-        height: 175px !important;
+        width: 220px !important;
+        height: 220px !important;
       }
       .kinetic-center-heartbeat .center-ruzivo-title {
         font-size: 24px !important;
@@ -8166,7 +8165,6 @@ window.switchHeroSlide = function(target) {
                 <div class="kinetic-orbit-stage" aria-hidden="true">
                   <div class="kinetic-glow-pulse"></div>
                   <div class="kinetic-dashed-ring ring-outer"></div>
-                  <div class="kinetic-dashed-ring ring-middle"></div>
                   <div class="kinetic-dashed-ring ring-inner"></div>
                   <img src="assets/logo.png" alt="Ruzivo AI Kinetic Emblem" class="kinetic-rotating-emblem">
                   <!-- Floating Heartbeat Centerpiece -->
@@ -16033,7 +16031,7 @@ window.switchHeroSlide = function(target) {
         </div>
 
         <div style="margin-bottom: 14px;">
-          <a href="/download/android" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 12px 16px; background: #2E7D32; color: #FFFFFF; font-size: 13.5px; font-weight: 600; border-radius: 10px; text-decoration: none; border: 1px solid #256629; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(46, 125, 50, 0.2);" onmouseover="this.style.background='#256629'" onmouseout="this.style.background='#2E7D32'">
+          <a href="/download/android" download="ruzivo.apk" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 12px 16px; background: #2E7D32; color: #FFFFFF; font-size: 13.5px; font-weight: 600; border-radius: 10px; text-decoration: none; border: 1px solid #256629; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(46, 125, 50, 0.2);" onmouseover="this.style.background='#256629'" onmouseout="this.style.background='#2E7D32'">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
