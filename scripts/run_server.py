@@ -1035,16 +1035,70 @@ def register_user(username: str, email: str, password: str, role: str = "student
 
                 user_id = cursor.fetchone()[0]
 
-                token = secrets.token_hex(24)
-
-                cursor.execute("INSERT INTO sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
-
-                return True, token
+                return True, (user_id, username)
 
     finally:
 
         conn.close()
 
+
+
+
+def dispatch_registration_verification(user_id: int, email: str, phone: str = "", username: str = "") -> dict:
+    """Generates a 6-digit OTP code and sends via SMS (if phone provided) and/or Email."""
+    code = str(secrets.randbelow(900000) + 100000)
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s", (user_id,))
+                cursor.execute("""
+                    INSERT INTO verification_codes (user_id, code, purpose)
+                    VALUES (%s, %s, 'registration_verify')
+                """, (user_id, code))
+    finally:
+        conn.close()
+
+    channel_used = "email"
+    sms_sent = False
+    display_name = username or email.split('@')[0]
+
+    # If phone was provided during sign up, dispatch via SMS
+    if phone:
+        sms_text = f"Ruzivo AI: Kodhi yako yekusimbisa akaundi ndeiyi: {code}. Inopera mumaminitsi gumi."
+        sms_sent, res_msg = send_ruzivo_sms(phone, sms_text)
+        if sms_sent:
+            channel_used = "sms"
+
+    # Also dispatch via Email
+    subject = f"Confirm your Ruzivo account: {code}"
+    body, html_body = render_simple_otp_email(display_name, code, "Ruzivo")
+    email_sent = send_ruzivo_email(email, subject, body, html_body)
+
+    masked_email = email
+    if '@' in email:
+        parts = email.split('@')
+        masked_name = parts[0][0] + '***' + (parts[0][-1] if len(parts[0]) > 1 else '')
+        masked_email = f"{masked_name}@{parts[1]}"
+
+    masked_phone = ""
+    if phone:
+        clean_p = phone.strip()
+        masked_phone = f"{clean_p[:4]}***{clean_p[-3:] if len(clean_p)>3 else ''}"
+
+    target_dest = masked_phone if (channel_used == "sms" and masked_phone) else masked_email
+    return {
+        "require_code": True,
+        "email": masked_email,
+        "raw_email": email,
+        "phone": masked_phone,
+        "has_phone": bool(phone),
+        "channel": channel_used,
+        "email_sent": email_sent,
+        "sms_sent": sms_sent,
+        "username": username,
+        "message": f"Kodhi ye 6-digits yatumirwa pa {target_dest}."
+    }
 
 
 def authenticate_user(username: str, password: str):
@@ -1475,7 +1529,7 @@ def verify_email_login_code(email: str, code: str):
 
                     JOIN verification_codes vc ON u.id = vc.user_id
 
-                    WHERE LOWER(u.email) = LOWER(%s) AND vc.code = %s AND vc.purpose IN ('email_login', 'sms_login')
+                    WHERE LOWER(u.email) = LOWER(%s) AND vc.code = %s AND vc.purpose IN ('email_login', 'sms_login', 'registration_verify')
 
                     ORDER BY vc.created_at DESC LIMIT 1
 
@@ -3756,17 +3810,10 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
                 return
 
+            user_id, actual_uname = result
+            verify_info = dispatch_registration_verification(user_id, email, phone, actual_uname)
 
-
-            self.send_json_response(200, {
-
-                "access_token": result,
-
-                "token_type": "bearer",
-
-                "username": username
-
-            })
+            self.send_json_response(200, verify_info)
 
             return
 

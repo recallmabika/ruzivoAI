@@ -15670,7 +15670,30 @@ window.switchHeroSlide = function(target) {
           })
         });
         const data = await resp.json();
-        if (resp.ok && data.access_token) {
+        if (resp.ok && data.require_code) {
+          // Store email for code verification
+          currentLinearEmail = email;
+          currentLinear2faChannel = data.channel || (phone ? 'sms' : 'email');
+          update2faChannelButtonStyles(currentLinear2faChannel);
+
+          const headingEl = document.getElementById('linearCodeHeading');
+          const promptText = document.getElementById('linearCodePromptText');
+          const destDisplay = document.getElementById('linearSentDestinationDisplay');
+
+          const destination = currentLinear2faChannel === 'sms' ? (data.phone || phone) : (data.email || email);
+          if (headingEl) {
+            headingEl.innerText = currentLinear2faChannel === 'sms' ? 'Simbisa Foni Yenyu (SMS)' : 'Simbisa Email Yenyu';
+          }
+          if (promptText) {
+            promptText.innerHTML = `Takutumira kodhi ye 6-digits yekusimbisa akaundi pa <span id="linearSentDestinationDisplay" style="color: inherit; font-weight: 600;">${destination}</span>.`;
+          } else if (destDisplay) {
+            destDisplay.innerText = destination;
+          }
+
+          showNotificationToast(data.message || `Kodhi ye 6-digits yatumirwa pa ${destination}`, 'info');
+          clearAuthFormFields();
+          switchLinearStep('code');
+        } else if (resp.ok && data.access_token) {
           localStorage.setItem('ruzivo_auth_token', data.access_token);
           localStorage.setItem('ruzivo_username', data.username || `${firstName} ${lastName}`);
           sessionStorage.removeItem('ruzivo_guest_mode');
