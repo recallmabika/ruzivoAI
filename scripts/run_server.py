@@ -5651,6 +5651,13 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
             data = parsed_json
 
+            recaptcha_token = str(data.get("recaptcha_token", "")).strip()
+            if recaptcha_token:
+                rc_valid, rc_msg = verify_recaptcha_token(recaptcha_token, expected_action="LOGIN", remote_ip=client_ip)
+                if not rc_valid:
+                    self.send_json_response(400, {"detail": "Google reCAPTCHA verification failed. Please complete the security challenge."})
+                    return
+
             email = str(data.get("email", "")).strip()
 
             code = str(data.get("code", "")).strip()

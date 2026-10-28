@@ -7772,21 +7772,46 @@ window.switchHeroSlide = function(target) {
       </div>
     </div>
 
-    <!-- STEP 2: Email Input Step -->
-    <div class="linear-auth-box" id="linearStepEmail" style="display: none;">
+    <!-- STEP 2: Email and Password Input Step (Combined with Dual 2FA selection: Phone SMS default or Email) -->
+    <div class="linear-auth-box" id="linearStepEmail" style="display: none; max-width: 380px;">
       <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading" id="linearEmailStepHeading">Nyorai email yenyu</h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 20px 0; line-height: 1.5;">
-        Pindai neemail yenyu yekuchikoro kana yemunhu pachake:
+      <h2 class="linear-auth-heading" id="linearEmailStepHeading">Pinda muRuzivo</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 16px 0; line-height: 1.5;">
+        Nyorai email yenyu pamwe ne pasiwedhi kuti mupinde:
       </p>
 
-      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearEmailSubmit(event)">
+      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearEmailSubmit(event)" style="gap: 10px;">
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
-        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" autocomplete="email" oninput="handleLinearEmailRealtimeValidate(this)">
-        <div id="linearEmailStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
+        
+        <div>
+          <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="Email (e.g. zita@chikoro.ac.zw)" autocomplete="email" oninput="handleLinearEmailRealtimeValidate(this)">
+        </div>
+
+        <div>
+          <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Password" autocomplete="current-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="document.getElementById('linearEmailStepError').style.display='none';">
+        </div>
+
+        <!-- Dual 2FA Channel Picker: Phone SMS (Default) or Email -->
+        <div style="text-align: left; margin: 2px 0 4px 0;">
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">
+            Sarudzai nzira yekutambira kodhi (2FA Channel):
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <label id="linearChannelSmsLabel" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid #2E7D32; border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 600; background: rgba(46, 125, 50, 0.08); transition: all 0.15s ease;">
+              <input type="radio" name="linear2faChannel" value="sms" checked onchange="handleLinear2faChannelChange(this.value)" style="accent-color: #2E7D32;">
+              <span>SMS (Phone)</span>
+            </label>
+            <label id="linearChannelEmailLabel" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 500; background: transparent; transition: all 0.15s ease;">
+              <input type="radio" name="linear2faChannel" value="email" onchange="handleLinear2faChannelChange(this.value)" style="accent-color: #2E7D32;">
+              <span>Email</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="linearEmailStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -4px; text-align: left; padding: 0 4px;"></div>
         
         <button type="submit" class="linear-btn-google" id="linearEmailSubmitBtn" style="background: #2E7D32; border-color: #256629;">
-          <span>Enderera mberi</span>
+          <span>Pinda muAkaundi</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
@@ -7795,50 +7820,6 @@ window.switchHeroSlide = function(target) {
 
       <button type="button" class="linear-back-link" onclick="switchLinearStep('choice')">
         Dzokera pakupinda
-      </button>
-    </div>
-
-    <!-- STEP 3: Password Input Step (Anti Copy/Paste, Clears on wrong attempt) -->
-    <div class="linear-auth-box" id="linearStepPassword" style="display: none;">
-      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading">Nyorai pasiwedhi</h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 20px 0; line-height: 1.5;">
-        Pasiwedhi yeakaundi pa <span id="linearPasswordEmailDisplay" style="color: inherit; font-weight: 600;"></span>:
-      </p>
-
-      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearPasswordSubmit(event)">
-        <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
-        <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Nyorai pasiwedhi" autocomplete="current-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="document.getElementById('linearPasswordStepError').style.display='none';">
-        
-        <!-- Dual 2FA Channel Picker: Email or SMS -->
-        <div style="text-align: left; margin: 4px 0 8px 0;">
-          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">
-            Sarudzai nzira yekutambira kodhi (2FA Channel):
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <label id="linearChannelEmailLabel" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid #2E7D32; border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 600; background: rgba(46, 125, 50, 0.08); transition: all 0.15s ease;">
-              <input type="radio" name="linear2faChannel" value="email" checked onchange="handleLinear2faChannelChange(this.value)" style="accent-color: #2E7D32;">
-              <span>Email</span>
-            </label>
-            <label id="linearChannelSmsLabel" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 500; background: transparent; transition: all 0.15s ease;">
-              <input type="radio" name="linear2faChannel" value="sms" onchange="handleLinear2faChannelChange(this.value)" style="accent-color: #2E7D32;">
-              <span>SMS (Phone)</span>
-            </label>
-          </div>
-        </div>
-
-        <div id="linearPasswordStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -4px; text-align: left; padding: 0 4px;"></div>
-        
-        <button type="submit" class="linear-btn-google" id="linearPasswordSubmitBtn" style="background: #2E7D32; border-color: #256629;">
-          <span>Simbisa Pasiwedhi</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </form>
-
-      <button type="button" class="linear-back-link" onclick="switchLinearStep('email')">
-        Dzokera ku email
       </button>
     </div>
 
@@ -7853,13 +7834,17 @@ window.switchHeroSlide = function(target) {
 
       <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearCodeSubmit(event)">
         <input type="text" inputmode="numeric" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" autocomplete="one-time-code" oninput="handleLinearCodeInputFormat(this)">
+        
+        <!-- Google reCAPTCHA Challenge Widget Container -->
+        <div id="linear2faRecaptcha" style="margin: 8px 0; display: flex; justify-content: center; min-height: 78px;"></div>
+        
         <div id="linearCodeStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         <button type="submit" class="linear-btn-google" id="linearCodeSubmitBtn" style="background: #2E7D32; border-color: #256629;">
-          Enderera mberi neCode
+          <span>Enderera mberi neCode</span>
         </button>
       </form>
 
-      <button type="button" class="linear-back-link" onclick="switchLinearStep('password')">
+      <button type="button" class="linear-back-link" onclick="switchLinearStep('email')">
         Dzokera pakupinda
       </button>
     </div>
@@ -14943,7 +14928,10 @@ window.switchHeroSlide = function(target) {
       if (stepCode) {
         stepCode.style.display = (step === 'code') ? 'flex' : 'none';
         if (step === 'code') {
-          setTimeout(() => document.getElementById('linearCodeInput')?.focus(), 100);
+          setTimeout(() => {
+            document.getElementById('linearCodeInput')?.focus();
+            renderLinear2faRecaptcha();
+          }, 100);
         }
       }
       if (stepSignup) {
@@ -15026,15 +15014,18 @@ window.switchHeroSlide = function(target) {
     }
     window.handleLinearEmailRealtimeValidate = handleLinearEmailRealtimeValidate;
 
-    // Step 1: User enters email, moves to password step
+    // Step 1: User submits Email + Password + selected 2FA Channel
     async function handleLinearEmailSubmit(e) {
       if (e) e.preventDefault();
       const emailInput = document.getElementById('linearEmailInput');
+      const passInput = document.getElementById('linearPasswordInput');
+      const submitBtn = document.getElementById('linearEmailSubmitBtn');
       const errBox = document.getElementById('linearEmailStepError');
       if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
 
-      if (!emailInput) return;
+      if (!emailInput || !passInput) return;
       const emailVal = emailInput.value.trim();
+      const passVal = passInput.value;
 
       if (!emailVal) {
         if (errBox) { errBox.innerText = 'Ndapota nyorai email yenyu.'; errBox.style.display = 'block'; }
@@ -15051,13 +15042,82 @@ window.switchHeroSlide = function(target) {
         emailInput.style.borderColor = '#DC2626';
         return;
       }
+      if (!passVal) {
+        if (errBox) { errBox.innerText = 'Ndapota nyorai pasiwedhi yenyu.'; errBox.style.display = 'block'; }
+        passInput.style.borderColor = '#DC2626';
+        return;
+      }
 
       currentLinearEmail = emailVal;
-      const passEmailDisplay = document.getElementById('linearPasswordEmailDisplay');
-      if (passEmailDisplay) passEmailDisplay.innerText = currentLinearEmail;
 
-      // Advance directly to password step
-      switchLinearStep('password');
+      // 2FA channel selection: SMS by default, or Email
+      const channelEl = document.querySelector('input[name="linear2faChannel"]:checked');
+      const selectedChannel = channelEl ? channelEl.value : 'sms';
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kuongorora pasiwedhi...</span>';
+      }
+
+      try {
+        const csrfToken = await ensureCsrfToken();
+        const recaptchaToken = (typeof getRecaptchaToken === 'function') ? await getRecaptchaToken('LOGIN') : '';
+        const resp = await fetch('/auth/verify-password-and-send-code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({
+            email: currentLinearEmail,
+            password: passVal,
+            channel: selectedChannel,
+            csrf_token: csrfToken,
+            recaptcha_token: recaptchaToken
+          })
+        });
+        const data = await resp.json();
+
+        if (resp.ok) {
+          const headingEl = document.getElementById('linearCodeHeading');
+          const destDisplay = document.getElementById('linearSentDestinationDisplay');
+          if (selectedChannel === 'sms') {
+            if (headingEl) headingEl.innerText = 'Tarisa foni yako (SMS)';
+            if (destDisplay) destDisplay.innerText = data.phone || 'foni yako';
+            showNotificationToast(data.message || 'Kodhi ye 6-digits yatumirwa neSMS pa ' + (data.phone || 'foni yenyu'), 'info');
+          } else {
+            if (headingEl) headingEl.innerText = 'Tarisa email yako';
+            if (destDisplay) destDisplay.innerText = data.email || currentLinearEmail;
+            showNotificationToast(data.message || 'Kodhi ye 6-digits yatumirwa pa ' + currentLinearEmail, 'info');
+          }
+          // Clear password input immediately for security
+          passInput.value = '';
+          switchLinearStep('code');
+        } else {
+          // Password incorrect or locked out: clear password input immediately
+          passInput.value = '';
+          passInput.focus();
+          const msg = data.detail || 'Pasiwedhi haina kururama. Edzai zvakare.';
+          if (errBox) {
+            errBox.innerText = msg;
+            errBox.style.display = 'block';
+          }
+          showNotificationToast(msg, 'warning');
+        }
+      } catch (err) {
+        console.warn("Login password error:", err);
+        passInput.value = '';
+        passInput.focus();
+        if (errBox) {
+          errBox.innerText = 'Kukanganisa pasisitimu. Ndapota edzai zvakare.';
+          errBox.style.display = 'block';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>Pinda muAkaundi</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+        }
+      }
     }
 
     // Format & restrict 6-digit code to numbers only
@@ -15069,6 +15129,25 @@ window.switchHeroSlide = function(target) {
       if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
     }
     window.handleLinearCodeInputFormat = handleLinearCodeInputFormat;
+
+    let linear2faWidgetId = null;
+
+    function renderLinear2faRecaptcha() {
+      const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
+      if (!g || typeof g.render !== 'function') return;
+      const el = document.getElementById('linear2faRecaptcha');
+      if (el && linear2faWidgetId === null && el.children.length === 0) {
+        try {
+          linear2faWidgetId = g.render('linear2faRecaptcha', {
+            'sitekey': RECAPTCHA_SITE_KEY,
+            'theme': 'light'
+          });
+        } catch (e) {
+          console.warn('linear2faRecaptcha render warning:', e);
+        }
+      }
+    }
+    window.renderLinear2faRecaptcha = renderLinear2faRecaptcha;
 
     function handleLinear2faChannelChange(val) {
       const emailLabel = document.getElementById('linearChannelEmailLabel');
@@ -15436,6 +15515,23 @@ window.switchHeroSlide = function(target) {
         submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kupinda...</span>';
       }
 
+      // Check reCAPTCHA challenge widget response if rendered
+      let recaptchaToken = '';
+      const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
+      if (g && linear2faWidgetId !== null && typeof g.getResponse === 'function') {
+        recaptchaToken = g.getResponse(linear2faWidgetId);
+        if (!recaptchaToken) {
+          if (codeErr) {
+            codeErr.innerText = 'Ndapota tenderai / tambai reCAPTCHA challenge musati mapedzisa (Please verify reCAPTCHA).';
+            codeErr.style.display = 'block';
+          }
+          showNotificationToast('Ndapota zadzisai reCAPTCHA challenge.', 'warning');
+          return;
+        }
+      } else if (typeof getRecaptchaToken === 'function') {
+        recaptchaToken = await getRecaptchaToken('LOGIN');
+      }
+
       const username = currentLinearEmail.split('@')[0];
       try {
         const resp = await fetch('/auth/verify-code', {
@@ -15443,7 +15539,8 @@ window.switchHeroSlide = function(target) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: currentLinearEmail,
-            code: codeVal
+            code: codeVal,
+            recaptcha_token: recaptchaToken
           })
         });
         const data = await resp.json();
