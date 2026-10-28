@@ -15,13 +15,22 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { register } from '../services/auth';
 
-const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
+const SQL_XSS_REGEX = /(<\s*script\b[^>]*>|<\s*\/script\s*>|<\s*script|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\s+.+\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.+\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bOR\s+['"]?\w+['"]?\s*=\s*['"]?\w+|\bAND\s+['"]?\w+['"]?\s*=\s*['"]?\w+|--|\/\*|\*\/|;\s*SHUTDOWN|;\s*DROP)/i;
+
+const RegisterScreen = ({ onRegisterSuccess, onNavigateLogin, onGuestLogin }) => {
   const insets = useSafeAreaInsets();
-  const [username, setUsername] = useState('');
+  
+  // Step-by-step required fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // UI states
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -43,39 +52,82 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
     };
   }, []);
 
-  const validateForm = () => {
-    if (!username.trim()) {
-      return 'Ndapota sarudza zita rako (Username).';
+  // Real-time pure name validation
+  const handleNameChange = (text, setter, label) => {
+    setter(text);
+    if (/[0-9]/.test(text)) {
+      showError(`${label} harifaniri kuve nenhamba (No numbers in name).`);
+    } else if (/[^a-zA-Z\s'-]/.test(text)) {
+      showError(`${label} harifaniri kuve nezviratidzo zvakasiyana (No symbols in name).`);
+    } else if (SQL_XSS_REGEX.test(text)) {
+      showError('Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).');
+    } else {
+      if (errorMsg.includes(label) || errorMsg.includes('injection blocked')) showError('');
     }
-    if (username.trim().length < 3) {
-      return 'Zita rako rinofanira kuve nemabhii anodarika maviri (at least 3 characters).';
+  };
+
+  // Real-time phone sanitization: only digits and leading +
+  const handlePhoneChange = (text) => {
+    let cleaned = text.replace(/[^0-9+\s\-()]/g, '');
+    if (cleaned.indexOf('+') > 0) {
+      cleaned = cleaned[0] + cleaned.slice(1).replace(/\+/g, '');
     }
-    if (!email.trim() || !email.includes('@')) {
-      return 'Ndapota isa email ine format chaiyo (Valid Email).';
+    setPhone(cleaned);
+    if (text !== cleaned) {
+      showError('Nhamba yefoni inongobvumidza manhamba chete (Numbers and + only).');
+    } else {
+      if (errorMsg.includes('Nhamba yefoni')) showError('');
     }
-    if (!password.trim()) {
-      return 'Ndapota sarudza pasiwedhi yakasimba.';
-    }
-    if (password.length < 6) {
-      return 'Pasiwedhi inofanira kuve nemabhii kana manhamba 6 kana kudarika.';
-    }
-    if (password !== confirmPassword) {
-      return 'Mapasiwedhi haasi kuenderana (Passwords do not match).';
-    }
-    return null;
+  };
+
+  // Password complexity check
+  const evaluateComplexity = (pwd) => {
+    const val = pwd || '';
+    const lenMet = val.length >= 8 && val.length <= 24;
+    const upperMet = /[A-Z]/.test(val);
+    const lowerMet = /[a-z]/.test(val);
+    const numMet = /[0-9]/.test(val);
+    const specialMet = /[^a-zA-Z0-9]/.test(val);
+    return { isValid: lenMet && upperMet && lowerMet && numMet && specialMet, lenMet, upperMet, lowerMet, numMet, specialMet };
   };
 
   const handleRegister = async () => {
     showError('');
-    const validationError = validateForm();
-    if (validationError) {
-      showError(validationError);
+    if (!firstName.trim() || !lastName.trim()) {
+      showError('Ndapota zadzai First name pamwe ne Last name.');
+      return;
+    }
+    if (!email.trim() || !email.includes('@') || !email.includes('.')) {
+      showError('Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).');
+      return;
+    }
+    if (SQL_XSS_REGEX.test(email) || SQL_XSS_REGEX.test(firstName) || SQL_XSS_REGEX.test(lastName)) {
+      showError('Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).');
+      return;
+    }
+    const pwdRes = evaluateComplexity(password);
+    if (!pwdRes.isValid) {
+      showError('Pasiwedhi inofanira kuve pakati pe 8 ne 24 mavara, iine vara guru, vara diki, nhamba, nechiratidzo (!@#$).');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showError('Mapasiwedhi haasi kuenderana (Passwords do not match).');
       return;
     }
 
     setLoading(true);
     try {
-      await onRegister(username.trim(), email.trim(), password.trim());
+      const res = await register({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password: password,
+        confirmPassword: confirmPassword
+      });
+      if (onRegisterSuccess) {
+        onRegisterSuccess(res.username || `${firstName} ${lastName}`.trim());
+      }
     } catch (e) {
       const err = e?.response?.data?.detail || 'Kunyoresa hakuna kubudirira. Edza zvakare kana kutarisa server.';
       showError(err);
@@ -85,6 +137,8 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
       setLoading(false);
     }
   };
+
+  const pwdReqs = evaluateComplexity(password);
 
   return (
     <KeyboardAvoidingView
@@ -105,52 +159,79 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
             resizeMode="contain"
           />
           <Text style={styles.title}>Ruzivo AI</Text>
-          <Text style={styles.subtitle}>Gadzira Akaunti Yenyu yeChiShona</Text>
+          <Text style={styles.subtitle}>Mubatsiri weMutauro weChiShona</Text>
         </View>
 
         {/* Card Form */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Kuvhura Akaunti (Sign Up)</Text>
-          <Text style={styles.cardSub}>Nyoresa ruzivo rwako kuti unyorese hurukuro dzose zvakanaka</Text>
+          <Text style={styles.cardTitle}>Gadzira Akaundi (Sign Up)</Text>
+          <Text style={styles.cardSub}>Zadzai tsanangudzo dzenyu pazasi:</Text>
 
           {errorMsg ? (
             <View style={styles.errorBanner}>
               <Ionicons name="alert-circle" size={18} color="#DC2626" />
               <Text style={styles.errorText}>{errorMsg}</Text>
-              <TouchableOpacity onPress={() => showError('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name="close" size={18} color="#DC2626" />
-              </TouchableOpacity>
             </View>
           ) : null}
 
-          {/* Username */}
-          <Text style={styles.fieldLabel}>Zita rako (Username)</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color="#666666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. recall"
-              placeholderTextColor="#999999"
-              value={username}
-              onChangeText={(t) => { setUsername(t); showError(''); }}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+          {/* First Name & Last Name */}
+          <View style={styles.row}>
+            <View style={styles.col}>
+              <Text style={styles.fieldLabel}>First Name</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Zita"
+                  placeholderTextColor="#999999"
+                  value={firstName}
+                  onChangeText={(t) => handleNameChange(t, setFirstName, 'First name')}
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            <View style={styles.col}>
+              <Text style={styles.fieldLabel}>Last Name</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mutupo"
+                  placeholderTextColor="#999999"
+                  value={lastName}
+                  onChangeText={(t) => handleNameChange(t, setLastName, 'Last name')}
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
           </View>
 
           {/* Email */}
-          <Text style={styles.fieldLabel}>Email Yako</Text>
+          <Text style={styles.fieldLabel}>Email</Text>
           <View style={styles.inputContainer}>
             <Ionicons name="mail-outline" size={20} color="#666666" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="e.g. recall@gmail.com"
+              placeholder="e.g. zita@chikoro.ac.zw"
               placeholderTextColor="#999999"
               value={email}
-              onChangeText={(t) => { setEmail(t); showError(''); }}
-              keyboardType="email-address"
+              onChangeText={(t) => { setEmail(t); setErrorMsg(''); }}
               autoCapitalize="none"
               autoCorrect={false}
+              keyboardType="email-address"
+            />
+          </View>
+
+          {/* Phone (Optional) */}
+          <Text style={styles.fieldLabel}>Phone (Optional, e.g. +263771234567)</Text>
+          <View style={styles.inputContainer}>
+            <Ionicons name="call-outline" size={20} color="#666666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="+263771234567"
+              placeholderTextColor="#999999"
+              value={phone}
+              onChangeText={handlePhoneChange}
+              keyboardType="phone-pad"
             />
           </View>
 
@@ -160,13 +241,14 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
             <Ionicons name="lock-closed-outline" size={20} color="#666666" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Mabhii 6 kana kudarika"
+              placeholder="••••••••"
               placeholderTextColor="#999999"
               value={password}
-              onChangeText={(t) => { setPassword(t); showError(''); }}
+              onChangeText={(t) => { setPassword(t); setErrorMsg(''); }}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
+              contextMenuHidden={true}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
               <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666666" />
@@ -176,17 +258,37 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
           {/* Confirm Password */}
           <Text style={styles.fieldLabel}>Dzokorora Pasiwedhi (Confirm Password)</Text>
           <View style={styles.inputContainer}>
-            <Ionicons name="shield-checkmark-outline" size={20} color="#666666" style={styles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color="#666666" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Isa pasiwedhi zvakare"
+              placeholder="••••••••"
               placeholderTextColor="#999999"
               value={confirmPassword}
-              onChangeText={(t) => { setConfirmPassword(t); showError(''); }}
+              onChangeText={(t) => { setConfirmPassword(t); setErrorMsg(''); }}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
+              contextMenuHidden={true}
             />
+          </View>
+
+          {/* Password checklist */}
+          <View style={styles.pwdBox}>
+            <Text style={[styles.pwdItem, pwdReqs.lenMet ? styles.pwdItemMet : styles.pwdItemUnmet]}>
+              {pwdReqs.lenMet ? '✓' : '•'} Mavara ari pakati pe 8 ne 24
+            </Text>
+            <Text style={[styles.pwdItem, pwdReqs.upperMet ? styles.pwdItemMet : styles.pwdItemUnmet]}>
+              {pwdReqs.upperMet ? '✓' : '•'} Vara guru (A-Z)
+            </Text>
+            <Text style={[styles.pwdItem, pwdReqs.lowerMet ? styles.pwdItemMet : styles.pwdItemUnmet]}>
+              {pwdReqs.lowerMet ? '✓' : '•'} Vara diki (a-z)
+            </Text>
+            <Text style={[styles.pwdItem, pwdReqs.numMet ? styles.pwdItemMet : styles.pwdItemUnmet]}>
+              {pwdReqs.numMet ? '✓' : '•'} Nhamba (0-9)
+            </Text>
+            <Text style={[styles.pwdItem, pwdReqs.specialMet ? styles.pwdItemMet : styles.pwdItemUnmet]}>
+              {pwdReqs.specialMet ? '✓' : '•'} Chiratidzo (!@#$%^&*)
+            </Text>
           </View>
 
           {/* Submit Button */}
@@ -196,36 +298,23 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <View style={styles.btnContent}>
-                <Text style={styles.primaryButtonText}>Nyoresa Akaunti</Text>
-                <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
+              <View style={styles.buttonContent}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text style={[styles.primaryButtonText, { marginLeft: 8 }]}>Kugadzira akaundi...</Text>
               </View>
+            ) : (
+              <Text style={styles.primaryButtonText}>Gadzira Akaundi</Text>
             )}
           </TouchableOpacity>
 
-          {/* Toggle to Login */}
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>Wakatonyoresa kare?</Text>
+          {/* Toggle Login */}
+          <View style={styles.registerToggleRow}>
+            <Text style={styles.registerToggleText}>Wakatonyoresa kare?</Text>
             <TouchableOpacity onPress={onNavigateLogin}>
-              <Text style={styles.switchLink}>Pinda pano</Text>
+              <Text style={styles.registerToggleLink}> Pinda</Text>
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Guest fallback option */}
-        {onGuestLogin && (
-          <TouchableOpacity onPress={onGuestLogin} style={styles.guestButton}>
-            <Ionicons name="sparkles-outline" size={18} color="#2E7D32" style={{ marginRight: 6 }} />
-            <Text style={styles.guestText}>Enderera mberi seMuenzi (Continue as Guest)</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Footer */}
-        <Text style={styles.footerNote}>
-          Ruzivo AI • Dzidzo neKuchengetedza ChiShona
-        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -234,70 +323,49 @@ const RegisterScreen = ({ onRegister, onNavigateLogin, onGuestLogin }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F6F2',
+    backgroundColor: '#F7F8F8',
   },
   scrollContent: {
-    flexGrow: 1,
+    padding: 24,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+    flexGrow: 1,
   },
   brandContainer: {
     alignItems: 'center',
     marginBottom: 20,
   },
   logoImage: {
-    width: 68,
-    height: 68,
-    marginBottom: 12,
-  },
-  logoBadge: {
     width: 64,
     height: 64,
-    borderRadius: 18,
-    backgroundColor: '#2E7D32',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  logoText: {
-    color: '#FFFFFF',
-    fontSize: 32,
-    fontWeight: '800',
+    marginBottom: 10,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1B1B1B',
-    letterSpacing: -0.5,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#141413',
   },
   subtitle: {
     fontSize: 13,
-    color: '#555555',
-    marginTop: 4,
-    fontWeight: '500',
+    color: '#666666',
+    marginTop: 2,
   },
   card: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 24,
-    shadowColor: '#000000',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
-    shadowRadius: 14,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#E8E5DF',
+    shadowRadius: 16,
+    elevation: 3,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#1B1B1B',
+    color: '#141413',
     marginBottom: 4,
   },
   cardSub: {
@@ -306,25 +374,29 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 18,
   },
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  col: {
+    flex: 1,
+  },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     backgroundColor: '#FEE2E2',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 8,
     marginBottom: 14,
+    gap: 8,
   },
   errorText: {
-    flex: 1,
     color: '#DC2626',
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 12,
+    flex: 1,
   },
   fieldLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#333333',
     marginBottom: 6,
@@ -333,87 +405,78 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: '#D8D4CC',
-    borderRadius: 12,
-    backgroundColor: '#FAF9F6',
-    paddingHorizontal: 12,
-    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 9999,
+    paddingHorizontal: 14,
+    height: 46,
+    marginBottom: 10,
+    backgroundColor: '#FAFAFA',
   },
   inputIcon: {
     marginRight: 8,
   },
   input: {
     flex: 1,
-    height: 48,
-    fontSize: 15,
-    color: '#1B1B1B',
+    fontSize: 14,
+    color: '#141413',
+    height: '100%',
   },
   eyeBtn: {
     padding: 6,
   },
+  pwdBox: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 8,
+    gap: 4,
+  },
+  pwdItem: {
+    fontSize: 11.5,
+  },
+  pwdItemMet: {
+    color: '#16A34A',
+    fontWeight: '600',
+  },
+  pwdItemUnmet: {
+    color: '#64748B',
+  },
   primaryButton: {
     backgroundColor: '#2E7D32',
-    borderRadius: 12,
-    height: 50,
-    justifyContent: 'center',
+    height: 48,
+    borderRadius: 9999,
     alignItems: 'center',
-    marginTop: 18,
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+    justifyContent: 'center',
+    marginTop: 10,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
-  btnContent: {
+  buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 18,
-    gap: 6,
-  },
-  switchText: {
-    fontSize: 13.5,
-    color: '#666666',
-  },
-  switchLink: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#2E7D32',
-  },
-  guestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 18,
-    paddingVertical: 13,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#C8E6C9',
-    backgroundColor: '#FFFFFF',
-  },
-  guestText: {
-    color: '#2E7D32',
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontWeight: '600',
   },
-  footerNote: {
-    textAlign: 'center',
-    fontSize: 11.5,
-    color: '#888888',
-    marginTop: 20,
+  registerToggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 18,
+  },
+  registerToggleText: {
+    fontSize: 13,
+    color: '#666666',
+  },
+  registerToggleLink: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2E7D32',
   },
 });
 

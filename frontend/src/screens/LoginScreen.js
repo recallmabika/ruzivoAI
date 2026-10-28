@@ -17,14 +17,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getCustomServerUrl, saveCustomServerUrl } from '../utils/storage';
 import { DEFAULT_HOST, DEFAULT_PORT } from '../services/api';
+import { verifyPasswordAndSendCode, verifyCode } from '../services/auth';
 
-const LoginScreen = ({ onLogin, onNavigateRegister, onGuestLogin }) => {
+const SQL_XSS_REGEX = /(<\s*script\b[^>]*>|<\s*\/script\s*>|<\s*script|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\s+.+\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.+\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bOR\s+['"]?\w+['"]?\s*=\s*['"]?\w+|\bAND\s+['"]?\w+['"]?\s*=\s*['"]?\w+|--|\/\*|\*\/|;\s*SHUTDOWN|;\s*DROP)/i;
+
+const LoginScreen = ({ onLoginSuccess, onNavigateRegister, onGuestLogin }) => {
   const insets = useSafeAreaInsets();
-  const [username, setUsername] = useState('');
+  
+  // Step state: 'credentials' -> 'code'
+  const [step, setStep] = useState('credentials');
+  
+  // Form fields
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [channel, setChannel] = useState('sms'); // 'sms' (default) or 'email'
+  const [code, setCode] = useState('');
+  
+  // UI states
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [destinationDisplay, setDestinationDisplay] = useState('');
+  
+  // Server config
   const [serverUrl, setServerUrl] = useState(`http://${DEFAULT_HOST}:${DEFAULT_PORT}`);
   const [showServerInput, setShowServerInput] = useState(false);
   const [serverSavedMsg, setServerSavedMsg] = useState('');
@@ -63,17 +78,80 @@ const LoginScreen = ({ onLogin, onNavigateRegister, onGuestLogin }) => {
     };
   }, []);
 
-  const handleLogin = async () => {
+  // Real-time Email check
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (SQL_XSS_REGEX.test(text)) {
+      showError('Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).');
+    } else {
+      if (errorMsg.includes('injection blocked')) showError('');
+    }
+  };
+
+  // Real-time Code check: numeric only, max 6
+  const handleCodeChange = (text) => {
+    const cleaned = text.replace(/[^0-9]/g, '').slice(0, 6);
+    setCode(cleaned);
+    setErrorMsg('');
+  };
+
+  // Step 1: Submit Credentials
+  const handleCredentialsSubmit = async () => {
     showError('');
-    if (!username.trim() || !password.trim()) {
-      showError('Ndapota isa email/zita ne pasiwedhi yako');
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      showError('Ndapota nyorai email yenyu.');
       return;
     }
+    if (SQL_XSS_REGEX.test(trimmedEmail)) {
+      showError('Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).');
+      return;
+    }
+    if (!trimmedEmail.includes('@') || !trimmedEmail.includes('.')) {
+      showError('Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).');
+      return;
+    }
+    if (!password) {
+      showError('Ndapota nyorai pasiwedhi yenyu.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await onLogin(username.trim(), password.trim());
+      const res = await verifyPasswordAndSendCode(trimmedEmail, password, channel);
+      // Clear password immediately on success for security
+      setPassword('');
+      const dest = channel === 'sms' ? (res.phone || 'foni yako') : (res.email || trimmedEmail);
+      setDestinationDisplay(dest);
+      setStep('code');
     } catch (e) {
-      const err = e?.response?.data?.detail || 'Zita kana pasiwedhi hazvina kururama. Tarisa kana server yakabatidzwa.';
+      // Clear password on error
+      setPassword('');
+      const err = e?.response?.data?.detail || 'Pasiwedhi kana email haina kururama. Edzai zvakare.';
+      showError(err);
+      if (Platform.OS === 'web') window.alert(err);
+      else Alert.alert('Kukanganisa', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: Confirm 6-Digit Code
+  const handleCodeSubmit = async () => {
+    showError('');
+    if (code.length < 4) {
+      showError('Ndapota nyorai kodhi yakakwana ye 6-digits.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await verifyCode(email.trim(), code);
+      if (onLoginSuccess) {
+        onLoginSuccess(res.username || email.trim());
+      }
+    } catch (e) {
+      const err = e?.response?.data?.detail || 'Kodhi yamaisa haina kururama kana kuti yapera nguva.';
       showError(err);
       if (Platform.OS === 'web') window.alert(err);
       else Alert.alert('Kukanganisa', err);
@@ -106,116 +184,186 @@ const LoginScreen = ({ onLogin, onNavigateRegister, onGuestLogin }) => {
 
         {/* Card Form */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Pinda muAkaunti (Log In)</Text>
-          <Text style={styles.cardSub}>Nyora zita rako nepasiwedhi kuti utange hurukuro</Text>
+          {step === 'credentials' ? (
+            <>
+              <Text style={styles.cardTitle}>Pinda muRuzivo (Sign In)</Text>
+              <Text style={styles.cardSub}>Nyorai email pamwe ne pasiwedhi yenyu:</Text>
 
-          {errorMsg ? (
-            <View style={styles.errorBanner}>
-              <Ionicons name="alert-circle" size={18} color="#DC2626" />
-              <Text style={styles.errorText}>{errorMsg}</Text>
-              <TouchableOpacity onPress={() => showError('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name="close" size={18} color="#DC2626" />
-              </TouchableOpacity>
-            </View>
-          ) : null}
+              {errorMsg ? (
+                <View style={styles.errorBanner}>
+                  <Ionicons name="alert-circle" size={18} color="#DC2626" />
+                  <Text style={styles.errorText}>{errorMsg}</Text>
+                </View>
+              ) : null}
 
-          {/* Username / Email field */}
-          <Text style={styles.fieldLabel}>Zita rako kana Email</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color="#666666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. recall kana recall@gmail.com"
-              placeholderTextColor="#999999"
-              value={username}
-              onChangeText={(t) => { setUsername(t); showError(''); }}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          {/* Password field */}
-          <Text style={styles.fieldLabel}>Pasiwedhi (Password)</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#666666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor="#999999"
-              value={password}
-              onChangeText={(t) => { setPassword(t); setErrorMsg(''); }}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
-              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666666" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity
-            style={[styles.primaryButton, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <View style={styles.btnContent}>
-                <Text style={styles.primaryButtonText}>Pinda muAkaunti</Text>
-                <Ionicons name="arrow-forward" size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
+              {/* Email field */}
+              <Text style={styles.fieldLabel}>Email</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="mail-outline" size={20} color="#666666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. zita@chikoro.ac.zw"
+                  placeholderTextColor="#999999"
+                  value={email}
+                  onChangeText={handleEmailChange}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                />
               </View>
-            )}
-          </TouchableOpacity>
 
-          {/* Toggle to Register */}
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>Hausati wava neakaunti?</Text>
+              {/* Password field */}
+              <Text style={styles.fieldLabel}>Pasiwedhi (Password)</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color="#666666" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="#999999"
+                  value={password}
+                  onChangeText={(t) => { setPassword(t); setErrorMsg(''); }}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  contextMenuHidden={true} // Blocks copy, paste, select-all
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
+                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#666666" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Dual 2FA Channel Picker: SMS (Phone default) or Email */}
+              <Text style={styles.fieldLabel}>Nzira yekutambira kodhi (2FA Channel):</Text>
+              <View style={styles.channelRow}>
+                <TouchableOpacity
+                  style={[styles.channelPill, channel === 'sms' && styles.channelPillActive]}
+                  onPress={() => setChannel('sms')}
+                >
+                  <Ionicons name="chatbox-ellipses-outline" size={16} color={channel === 'sms' ? '#2E7D32' : '#666666'} />
+                  <Text style={[styles.channelText, channel === 'sms' && styles.channelTextActive]}>SMS (Phone)</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.channelPill, channel === 'email' && styles.channelPillActive]}
+                  onPress={() => setChannel('email')}
+                >
+                  <Ionicons name="mail-outline" size={16} color={channel === 'email' ? '#2E7D32' : '#666666'} />
+                  <Text style={[styles.channelText, channel === 'email' && styles.channelTextActive]}>Email</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Submit Button */}
+              <TouchableOpacity
+                style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                onPress={handleCredentialsSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <View style={styles.buttonContent}>
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <Text style={[styles.primaryButtonText, { marginLeft: 8 }]}>Kuongorora pasiwedhi...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.primaryButtonText}>Pinda muAkaundi</Text>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              {/* STEP 2: 6-Digit Code */}
+              <Text style={styles.cardTitle}>
+                {channel === 'sms' ? 'Tarisa foni yako (SMS)' : 'Tarisa email yako'}
+              </Text>
+              <Text style={styles.cardSub}>
+                Takutumira kodhi ye 6-digits pa <Text style={{ fontWeight: 'bold' }}>{destinationDisplay}</Text>.
+              </Text>
+
+              {errorMsg ? (
+                <View style={styles.errorBanner}>
+                  <Ionicons name="alert-circle" size={18} color="#DC2626" />
+                  <Text style={styles.errorText}>{errorMsg}</Text>
+                </View>
+              ) : null}
+
+              <Text style={styles.fieldLabel}>Kodhi ye 6-Digits</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="key-outline" size={20} color="#666666" style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, styles.codeInput]}
+                  placeholder="000000"
+                  placeholderTextColor="#999999"
+                  value={code}
+                  onChangeText={handleCodeChange}
+                  keyboardType="numeric"
+                  maxLength={6}
+                  autoFocus={true}
+                />
+              </View>
+
+              {/* Submit Code Button */}
+              <TouchableOpacity
+                style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                onPress={handleCodeSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <View style={styles.buttonContent}>
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <Text style={[styles.primaryButtonText, { marginLeft: 8 }]}>Kupinda...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.primaryButtonText}>Simbisa Kodhi</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.backLink}
+                onPress={() => { setStep('credentials'); setCode(''); setErrorMsg(''); }}
+              >
+                <Text style={styles.backLinkText}>Dzokera pakupinda</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* Toggle Register */}
+          <View style={styles.registerToggleRow}>
+            <Text style={styles.registerToggleText}>Hausati wava neakaundi?</Text>
             <TouchableOpacity onPress={onNavigateRegister}>
-              <Text style={styles.switchLink}>Nyoresa pano</Text>
+              <Text style={styles.registerToggleLink}> Gadzira Akaundi</Text>
             </TouchableOpacity>
           </View>
-        {/* Server IP Setup for Mobile / iOS devices */}
+        </View>
+
+        {/* Server Config Toggle */}
         <TouchableOpacity
+          style={styles.serverToggle}
           onPress={() => setShowServerInput(!showServerInput)}
-          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 12 }}
         >
-          <Ionicons name="hardware-chip-outline" size={14} color="#78716C" style={{ marginRight: 6 }} />
-          <Text style={{ fontSize: 12, color: '#78716C', fontWeight: '500' }}>
-            {showServerInput ? 'Viga Zvirongwa zveServer' : 'Chinja Server Address / IP'}
+          <Ionicons name="settings-outline" size={15} color="#888888" />
+          <Text style={styles.serverToggleText}>
+            {showServerInput ? 'Viga server settings' : 'Server settings'}
           </Text>
         </TouchableOpacity>
 
         {showServerInput && (
-          <View style={{ backgroundColor: '#FFFFFF', padding: 14, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#E8E5DF' }}>
-            <Text style={{ fontSize: 11.5, fontWeight: '600', color: '#444444', marginBottom: 4 }}>Server URL (WiFi IP yePC):</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <TextInput
-                style={{ flex: 1, backgroundColor: '#F7F6F2', borderWidth: 1, borderColor: '#E0DDD5', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, fontSize: 13, color: '#1B1B1B' }}
-                value={serverUrl}
-                onChangeText={setServerUrl}
-                placeholder="http://192.168.137.28:8080"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                onPress={handleSaveServer}
-                style={{ backgroundColor: '#2E7D32', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8 }}
-              >
-                <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600' }}>Chengeta</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.serverCard}>
+            <Text style={styles.serverLabel}>Custom Backend URL:</Text>
+            <TextInput
+              style={styles.serverInput}
+              value={serverUrl}
+              onChangeText={setServerUrl}
+              placeholder="http://192.168.1.X:8080"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
             {serverSavedMsg ? (
-              <Text style={{ fontSize: 11, color: '#16A34A', marginTop: 6, fontWeight: '500' }}>{serverSavedMsg}</Text>
+              <Text style={styles.serverSuccessMsg}>{serverSavedMsg}</Text>
             ) : null}
+            <TouchableOpacity style={styles.serverSaveBtn} onPress={handleSaveServer}>
+              <Text style={styles.serverSaveBtnText}>Chengetedza Server</Text>
+            </TouchableOpacity>
           </View>
         )}
-
-        {/* Footer */}
-        <Text style={styles.footerNote}>
-          Ruzivo AI • Dzidzo neKuchengetedza ChiShona
-        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -224,186 +372,229 @@ const LoginScreen = ({ onLogin, onNavigateRegister, onGuestLogin }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F6F2',
+    backgroundColor: '#F7F8F8',
   },
   scrollContent: {
-    flexGrow: 1,
+    padding: 24,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 24,
+    flexGrow: 1,
   },
   brandContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   logoImage: {
-    width: 68,
-    height: 68,
-    marginBottom: 12,
-  },
-  logoBadge: {
     width: 64,
     height: 64,
-    borderRadius: 18,
-    backgroundColor: '#2E7D32',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  logoText: {
-    color: '#FFFFFF',
-    fontSize: 32,
-    fontWeight: '800',
+    marginBottom: 10,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1B1B1B',
-    letterSpacing: -0.5,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#141413',
   },
   subtitle: {
     fontSize: 13,
-    color: '#555555',
-    marginTop: 4,
-    fontWeight: '500',
+    color: '#666666',
+    marginTop: 2,
   },
   card: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 24,
-    shadowColor: '#000000',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
-    shadowRadius: 14,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#E8E5DF',
+    shadowRadius: 16,
+    elevation: 3,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#1B1B1B',
+    color: '#141413',
     marginBottom: 4,
   },
   cardSub: {
     fontSize: 13,
     color: '#666666',
-    marginBottom: 18,
+    marginBottom: 16,
     lineHeight: 18,
   },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     backgroundColor: '#FEE2E2',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
     padding: 10,
-    borderRadius: 10,
-    marginBottom: 16,
+    borderRadius: 8,
+    marginBottom: 14,
+    gap: 8,
   },
   errorText: {
-    flex: 1,
     color: '#DC2626',
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 12,
+    flex: 1,
   },
   fieldLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#333333',
     marginBottom: 6,
-    marginTop: 8,
+    marginTop: 6,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: '#D8D4CC',
-    borderRadius: 12,
-    backgroundColor: '#FAF9F6',
-    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 9999,
+    paddingHorizontal: 14,
+    height: 46,
     marginBottom: 10,
+    backgroundColor: '#FAFAFA',
   },
   inputIcon: {
     marginRight: 8,
   },
   input: {
     flex: 1,
-    height: 48,
-    fontSize: 15,
-    color: '#1B1B1B',
+    fontSize: 14,
+    color: '#141413',
+    height: '100%',
+  },
+  codeInput: {
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    letterSpacing: 6,
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   eyeBtn: {
     padding: 6,
   },
+  channelRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+  },
+  channelPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    borderRadius: 9999,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+  },
+  channelPillActive: {
+    borderColor: '#2E7D32',
+    backgroundColor: 'rgba(46, 125, 50, 0.08)',
+  },
+  channelText: {
+    fontSize: 12,
+    color: '#666666',
+    fontWeight: '500',
+  },
+  channelTextActive: {
+    color: '#2E7D32',
+    fontWeight: '700',
+  },
   primaryButton: {
     backgroundColor: '#2E7D32',
-    borderRadius: 12,
-    height: 50,
-    justifyContent: 'center',
+    height: 48,
+    borderRadius: 9999,
     alignItems: 'center',
-    marginTop: 18,
-    shadowColor: '#2E7D32',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+    justifyContent: 'center',
+    marginTop: 6,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
-  btnContent: {
+  buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    gap: 6,
-  },
-  switchText: {
-    fontSize: 13.5,
-    color: '#666666',
-  },
-  switchLink: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#2E7D32',
-  },
-  guestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 18,
-    paddingVertical: 13,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#C8E6C9',
-    backgroundColor: '#FFFFFF',
-  },
-  guestText: {
-    color: '#2E7D32',
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontWeight: '600',
   },
-  footerNote: {
-    textAlign: 'center',
-    fontSize: 11.5,
+  backLink: {
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  backLinkText: {
+    color: '#666666',
+    fontSize: 13,
+  },
+  registerToggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 18,
+  },
+  registerToggleText: {
+    fontSize: 13,
+    color: '#666666',
+  },
+  registerToggleLink: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2E7D32',
+  },
+  serverToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 20,
+  },
+  serverToggleText: {
+    fontSize: 12,
     color: '#888888',
-    marginTop: 24,
+  },
+  serverCard: {
+    marginTop: 10,
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  serverLabel: {
+    fontSize: 12,
+    color: '#666666',
+    marginBottom: 6,
+  },
+  serverInput: {
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 38,
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  serverSuccessMsg: {
+    color: '#16A34A',
+    fontSize: 11,
+    marginBottom: 6,
+  },
+  serverSaveBtn: {
+    backgroundColor: '#1E293B',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  serverSaveBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
 
