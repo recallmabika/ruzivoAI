@@ -7780,9 +7780,9 @@ window.switchHeroSlide = function(target) {
         Pindai neemail yenyu yekuchikoro kana yemunhu pachake:
       </p>
 
-      <form class="linear-auth-actions-stack" onsubmit="handleLinearEmailSubmit(event)">
+      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearEmailSubmit(event)">
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
-        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" required autocomplete="email">
+        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" autocomplete="email" oninput="document.getElementById('linearEmailStepError').style.display='none';">
         <div id="linearEmailStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         
         <button type="submit" class="linear-btn-google" id="linearEmailSubmitBtn" style="background: #2E7D32; border-color: #256629;">
@@ -7806,9 +7806,9 @@ window.switchHeroSlide = function(target) {
         Pasiwedhi yeakaundi pa <span id="linearPasswordEmailDisplay" style="color: inherit; font-weight: 600;"></span>:
       </p>
 
-      <form class="linear-auth-actions-stack" onsubmit="handleLinearPasswordSubmit(event)">
+      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearPasswordSubmit(event)">
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
-        <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Nyorai pasiwedhi" required autocomplete="current-password" oncopy="return false;" onpaste="return false;" oncut="return false;">
+        <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Nyorai pasiwedhi" autocomplete="current-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="document.getElementById('linearPasswordStepError').style.display='none';">
         <div id="linearPasswordStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         
         <button type="submit" class="linear-btn-google" id="linearPasswordSubmitBtn" style="background: #2E7D32; border-color: #256629;">
@@ -7833,8 +7833,8 @@ window.switchHeroSlide = function(target) {
         Ndapota tarisa email pa <span id="linearSentEmailDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
       </p>
 
-      <form class="linear-auth-actions-stack" onsubmit="handleLinearCodeSubmit(event)">
-        <input type="text" inputmode="numeric" pattern="[0-9]*" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" required autocomplete="one-time-code" oninput="handleLinearCodeInputFormat(this)">
+      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearCodeSubmit(event)">
+        <input type="text" inputmode="numeric" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" autocomplete="one-time-code" oninput="handleLinearCodeInputFormat(this)">
         <div id="linearCodeStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         <button type="submit" class="linear-btn-google" id="linearCodeSubmitBtn" style="background: #2E7D32; border-color: #256629;">
           Enderera mberi neCode
@@ -7854,20 +7854,20 @@ window.switchHeroSlide = function(target) {
         Zadzai tsanangudzo dzenyu pazasi kuti mugadzire akaundi itsva:
       </p>
 
-      <form class="linear-auth-actions-stack" onsubmit="handleLinearSignupSubmit(event)" style="gap: 10px;">
+      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearSignupSubmit(event)" style="gap: 10px;">
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <div>
-            <input type="text" class="linear-auth-input" id="linearSignupFirstName" placeholder="First name" required autocomplete="given-name" oninput="handleLinearSignupNameValidate(this)">
+            <input type="text" class="linear-auth-input" id="linearSignupFirstName" placeholder="First name" autocomplete="given-name" oninput="handleLinearSignupNameValidate(this)">
           </div>
           <div>
-            <input type="text" class="linear-auth-input" id="linearSignupLastName" placeholder="Last name" required autocomplete="family-name" oninput="handleLinearSignupNameValidate(this)">
+            <input type="text" class="linear-auth-input" id="linearSignupLastName" placeholder="Last name" autocomplete="family-name" oninput="handleLinearSignupNameValidate(this)">
           </div>
         </div>
 
         <div>
-          <input type="email" class="linear-auth-input" id="linearSignupEmail" placeholder="Email (e.g. zita@chikoro.ac.zw)" required autocomplete="email" oninput="handleLinearSignupEmailValidate(this)">
+          <input type="email" class="linear-auth-input" id="linearSignupEmail" placeholder="Email (e.g. zita@chikoro.ac.zw)" autocomplete="email" oninput="handleLinearSignupEmailValidate(this)">
         </div>
 
         <div>
@@ -7876,11 +7876,11 @@ window.switchHeroSlide = function(target) {
         </div>
 
         <div>
-          <input type="password" class="linear-auth-input" id="linearSignupPassword" placeholder="Password" required autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="handleLinearSignupPasswordValidate(this)">
+          <input type="password" class="linear-auth-input" id="linearSignupPassword" placeholder="Password" autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="handleLinearSignupPasswordValidate(this)">
         </div>
 
         <div>
-          <input type="password" class="linear-auth-input" id="linearSignupConfirmPassword" placeholder="Confirm Password" required autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="handleLinearSignupConfirmValidate()">
+          <input type="password" class="linear-auth-input" id="linearSignupConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="handleLinearSignupConfirmValidate()">
         </div>
 
         <!-- Live Password Complexity Checklist -->
