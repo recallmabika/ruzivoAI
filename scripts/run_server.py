@@ -2294,30 +2294,34 @@ COMMON_ENGLISH_WORDS = {
 
 
 def is_strictly_non_shona(text: str) -> bool:
-
     cleaned = text.strip().lower()
-
     words = [w for w in re.findall(r'\b[a-zA-Z]+\b', cleaned)]
-
     if not words:
-
         return False
-
-    # Explicit single-word/short English greetings or commands
-
-    if len(words) <= 3 and any(w in {'hello', 'hi', 'hey', 'heyy', 'heyyy', 'morning', 'good', 'thanks', 'help', 'what', 'how', 'why', 'who', 'translate', 'explain'} for w in words):
-
+    
+    strong_eng = {
+        'hello', 'hi', 'hey', 'heyy', 'heyyy', 'morning', 'afternoon', 'evening',
+        'good', 'thanks', 'thank', 'help', 'what', 'how', 'why', 'who', 'where',
+        'when', 'which', 'whose', 'is', 'are', 'am', 'was', 'were', 'been',
+        'can', 'could', 'would', 'should', 'will', 'do', 'does', 'did', 'done',
+        'please', 'tell', 'translate', 'explain', 'write', 'generate', 'create',
+        'you', 'your', 'my', 'me', 'we', 'us', 'they', 'them', 'this', 'that',
+        'english', 'shona', 'speak', 'talk', 'answer', 'question'
+    }
+    
+    strong_count = sum(1 for w in words if w in strong_eng)
+    # If 1 strong English word in a very short message (1 to 4 words), e.g. "Hello", "How are you", "Who are you"
+    if len(words) <= 4 and strong_count >= 1:
         return True
-
+    # If 2 or more strong English words anywhere
+    if strong_count >= 2:
+        return True
+    
+    # Check general english dictionary overlap ratio
     eng_matches = sum(1 for w in words if w in COMMON_ENGLISH_WORDS)
-
     if len(words) > 0 and (eng_matches / len(words)) >= 0.25:
-
         return True
-
     return False
-
-
 
 def check_complex_math(query: str):
 
@@ -2457,7 +2461,7 @@ def generate_shona_response(query: str, context: str, api_key: str, custom_memor
 
         "   - Never conflate the two: do not dump the creator's backstory when the user only asked for your name!\n"
 
-        "4. LANGUAGE POLICY: Your primary language of communication is ChiShona. You fully comprehend inputs in either ChiShona or English. Always respond helpfully in authentic, high-quality ChiShona. If the user explicitly asks you to explain something in English or asks technical/help questions in English, you can provide a polite, natural explanation while maintaining your core identity as Ruzivo AI.\n"
+        "4. STRICT CHISHONA LANGUAGE POLICY: You ONLY communicate, process, and respond in pure ChiShona. You MUST NEVER answer questions in English or process queries in English, under ANY circumstances. If a user asks a question in English or asks you to speak/translate/explain into English, you MUST STRICTLY REFUSE in ChiShona: 'Tine hurombo, Ruzivo AI runotaura nekugadzirisa mibvunzo yakanyorwa neChiShona chete. Ndapota nyorai mubvunzo wenyu neChiShona kuti ndikwanise kukubatsirai.'\n"
 
         "5. MATHEMATICS POLICY: You ONLY solve very simple primary school level arithmetic (basic addition, subtraction, multiplication, and division with small numbers, e.g., '5 + 3', '10 - 4', '6 * 2', '20 / 5'). If asked to solve ANY complex mathematics (algebra, calculus, trigonometry, quadratic equations, matrices, roots, logarithms, statistics, geometry, or multi-step formulas), you MUST REFUSE politely in 1 short ChiShona sentence: 'Tine hurombo, Ruzivo AI rakagadzirirwa masvomhu akareruka epuraimari chete (kuwedzera, kubvisa, kuwanza, nekupatsanura kwenhamba diki). Handikwanisi kugadzirisa masvomhu akaomarara.'\n"
 
@@ -3617,9 +3621,10 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
             if not username and first_name:
 
-                base_u = re.sub(r'[^a-zA-Z0-9_]', '', f"{first_name}_{last_name}".strip('_')) or "user"
+                clean_fn = re.sub(r'[^a-zA-Z\s]', '', first_name).strip()
+                clean_ln = re.sub(r'[^a-zA-Z\s]', '', last_name).strip()
+                username = f"{clean_fn} {clean_ln}".strip() or "Mushandisi"
 
-                username = base_u
 
 
 
@@ -3671,7 +3676,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
 
-            if re.search(r"[^a-zA-Z\s'-]", username):
+            if re.search(r"[^a-zA-Z0-9\s'_-]", username):
 
                 self.send_json_response(400, {"detail": "Zita harifaniri kuve nezviratidzo zvakasiyana (No special characters allowed in names)."})
 
@@ -4426,6 +4431,13 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
                 }
 
+            elif is_strictly_non_shona(query):
+                # Zero English processing policy - deliberate pause so rejection doesn't blink
+                time.sleep(2.0)
+                response_payload = {
+                    "response": "Tine hurombo, Ruzivo AI runotaura nekugadzirisa mibvunzo yakanyorwa neChiShona chete. Ndapota nyorai mubvunzo wenyu neChiShona kuti ndikwanise kukubatsirai.",
+                    "context": None
+                }
             else:
 
                 q_lower = query.lower()
