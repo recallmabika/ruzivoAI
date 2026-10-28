@@ -7644,7 +7644,9 @@ window.switchHeroSlide = function(target) {
       window.switchLinearStep = function(step) {
         var stepChoice = document.getElementById('linearStepChoice');
         var stepEmail = document.getElementById('linearStepEmail');
+        var stepPassword = document.getElementById('linearStepPassword');
         var stepCode = document.getElementById('linearStepCode');
+        var stepSignup = document.getElementById('linearStepSignup');
 
         if (stepChoice) stepChoice.style.display = (step === 'choice') ? 'flex' : 'none';
         if (stepEmail) {
@@ -7652,6 +7654,15 @@ window.switchHeroSlide = function(target) {
           if (step === 'email') {
             setTimeout(function() {
               var inp = document.getElementById('linearEmailInput');
+              if (inp) inp.focus();
+            }, 100);
+          }
+        }
+        if (stepPassword) {
+          stepPassword.style.display = (step === 'password') ? 'flex' : 'none';
+          if (step === 'password') {
+            setTimeout(function() {
+              var inp = document.getElementById('linearPasswordInput');
               if (inp) inp.focus();
             }, 100);
           }
@@ -7665,15 +7676,32 @@ window.switchHeroSlide = function(target) {
             }, 100);
           }
         }
+        if (stepSignup) {
+          stepSignup.style.display = (step === 'signup') ? 'flex' : 'none';
+          if (step === 'signup') {
+            setTimeout(function() {
+              var inp = document.getElementById('linearSignupFirstName');
+              if (inp) inp.focus();
+            }, 100);
+          }
+        }
       };
 
       window.toggleLinearMode = function(targetMode) {
         window.currentLinearMode = targetMode;
         window.updateLinearModeUI();
+        if (targetMode === 'signup') {
+          window.switchLinearStep('signup');
+        } else {
+          window.switchLinearStep('choice');
+        }
       };
 
       window.openLinearAuthModal = function(mode) {
         window.currentLinearMode = mode || 'login';
+        if (typeof window.clearAuthFormFields === 'function') {
+          window.clearAuthFormFields();
+        }
         var overlay = document.getElementById('linearAuthOverlay');
         if (overlay) {
           overlay.classList.add('is-open');
@@ -7681,7 +7709,11 @@ window.switchHeroSlide = function(target) {
           overlay.style.setProperty('z-index', '100010', 'important');
         }
         window.updateLinearModeUI();
-        window.switchLinearStep('choice');
+        if (window.currentLinearMode === 'signup') {
+          window.switchLinearStep('signup');
+        } else {
+          window.switchLinearStep('choice');
+        }
       };
 
       window.closeLinearAuthModal = function() {
@@ -7689,6 +7721,9 @@ window.switchHeroSlide = function(target) {
         if (overlay) {
           overlay.classList.remove('is-open');
           overlay.style.setProperty('display', 'none', 'important');
+        }
+        if (typeof window.clearAuthFormFields === 'function') {
+          window.clearAuthFormFields();
         }
       };
 
@@ -7746,11 +7781,12 @@ window.switchHeroSlide = function(target) {
       </p>
 
       <form class="linear-auth-actions-stack" onsubmit="handleLinearEmailSubmit(event)">
+        <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
         <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" required autocomplete="email">
-        <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Password (Optional)" autocomplete="current-password" style="display: none;">
+        <div id="linearEmailStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         
         <button type="submit" class="linear-btn-google" id="linearEmailSubmitBtn" style="background: #2E7D32; border-color: #256629;">
-          <span>Enderera mberi neEmail</span>
+          <span>Enderera mberi</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
@@ -7758,27 +7794,130 @@ window.switchHeroSlide = function(target) {
       </form>
 
       <button type="button" class="linear-back-link" onclick="switchLinearStep('choice')">
-        &larr; Dzokera pakupinda
+        Dzokera pakupinda
       </button>
     </div>
 
-    <!-- STEP 3: Check Your Email / Enter Code Step -->
+    <!-- STEP 3: Password Input Step (Anti Copy/Paste, Clears on wrong attempt) -->
+    <div class="linear-auth-box" id="linearStepPassword" style="display: none;">
+      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
+      <h2 class="linear-auth-heading">Nyorai pasiwedhi</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 20px 0; line-height: 1.5;">
+        Pasiwedhi yeakaundi pa <span id="linearPasswordEmailDisplay" style="color: inherit; font-weight: 600;"></span>:
+      </p>
+
+      <form class="linear-auth-actions-stack" onsubmit="handleLinearPasswordSubmit(event)">
+        <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
+        <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Nyorai pasiwedhi" required autocomplete="current-password" oncopy="return false;" onpaste="return false;" oncut="return false;">
+        <div id="linearPasswordStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
+        
+        <button type="submit" class="linear-btn-google" id="linearPasswordSubmitBtn" style="background: #2E7D32; border-color: #256629;">
+          <span>Simbisa Pasiwedhi</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      <button type="button" class="linear-back-link" onclick="switchLinearStep('email')">
+        Dzokera ku email
+      </button>
+    </div>
+
+    <!-- STEP 4: Check Your Email / Enter 6-digit Code Step -->
     <div class="linear-auth-box" id="linearStepCode" style="display: none;">
       <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
       <h2 class="linear-auth-heading" style="margin-bottom: 10px;">Tarisa email yako</h2>
       <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 24px 0; line-height: 1.5;">
-        Takutumira kabhodhi kekupinda mubhokisi retsamba.<br>
+        Takutumira kodhi ye 6-digits yekusimbisa.<br>
         Ndapota tarisa email pa <span id="linearSentEmailDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
       </p>
 
       <form class="linear-auth-actions-stack" onsubmit="handleLinearCodeSubmit(event)">
         <input type="text" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" required autocomplete="one-time-code">
-        <button type="submit" class="linear-btn-google">
+        <div id="linearCodeStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
+        <button type="submit" class="linear-btn-google" id="linearCodeSubmitBtn" style="background: #2E7D32; border-color: #256629;">
           Enderera mberi neCode
         </button>
       </form>
 
-      <button type="button" class="linear-back-link" onclick="switchLinearStep('email')">
+      <button type="button" class="linear-back-link" onclick="switchLinearStep('password')">
+        Dzokera pakupinda
+      </button>
+    </div>
+
+    <!-- STEP 5: Manual / Step-by-Step Sign Up Form -->
+    <div class="linear-auth-box" id="linearStepSignup" style="display: none; max-width: 380px;">
+      <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
+      <h2 class="linear-auth-heading" style="margin-bottom: 6px;">Gadzira Akaundi</h2>
+      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 16px 0; line-height: 1.4;">
+        Zadzai tsanangudzo dzenyu pazasi kuti mugadzire akaundi itsva:
+      </p>
+
+      <form class="linear-auth-actions-stack" onsubmit="handleLinearSignupSubmit(event)" style="gap: 10px;">
+        <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>
+            <input type="text" class="linear-auth-input" id="linearSignupFirstName" placeholder="First name" required autocomplete="given-name" oninput="handleLinearSignupNameValidate(this)">
+          </div>
+          <div>
+            <input type="text" class="linear-auth-input" id="linearSignupLastName" placeholder="Last name" required autocomplete="family-name" oninput="handleLinearSignupNameValidate(this)">
+          </div>
+        </div>
+
+        <div>
+          <input type="email" class="linear-auth-input" id="linearSignupEmail" placeholder="Email (e.g. zita@chikoro.ac.zw)" required autocomplete="email" oninput="handleLinearSignupEmailValidate(this)">
+        </div>
+
+        <div>
+          <input type="tel" class="linear-auth-input" id="linearSignupPhone" placeholder="Phone (Optional, e.g. +263771234567)" autocomplete="tel">
+        </div>
+
+        <div>
+          <input type="password" class="linear-auth-input" id="linearSignupPassword" placeholder="Password" required autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="handleLinearSignupPasswordValidate(this)">
+        </div>
+
+        <div>
+          <input type="password" class="linear-auth-input" id="linearSignupConfirmPassword" placeholder="Confirm Password" required autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="handleLinearSignupConfirmValidate()">
+        </div>
+
+        <!-- Live Password Complexity Checklist -->
+        <div class="pwd-requirements-box" id="linearSignupPwdReqBox" style="text-align: left; margin: 4px 0;">
+          <div class="pwd-req-item" id="linearReqLen">
+            <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
+            <span>Mavara ari pakati pe 8 ne 24</span>
+          </div>
+          <div class="pwd-req-item" id="linearReqUpper">
+            <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
+            <span>Vara guru (A-Z)</span>
+          </div>
+          <div class="pwd-req-item" id="linearReqLower">
+            <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
+            <span>Vara diki (a-z)</span>
+          </div>
+          <div class="pwd-req-item" id="linearReqNum">
+            <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
+            <span>Nhamba (0-9)</span>
+          </div>
+          <div class="pwd-req-item" id="linearReqSpecial">
+            <span class="pwd-req-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg></span>
+            <span>Chiratidzo (e.g. !@#$%^&*)</span>
+          </div>
+        </div>
+
+        <div id="linearSignupError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -2px; text-align: left; padding: 0 4px;"></div>
+
+        <button type="submit" class="linear-btn-google" id="linearSignupSubmitBtn" style="background: #2E7D32; border-color: #256629; margin-top: 4px;">
+          <span>Gadzira Akaundi</span>
+        </button>
+      </form>
+
+      <div class="linear-auth-footer-text" style="margin-top: 14px;">
+        Makatonyoresa kare? <a onclick="toggleLinearMode('login')">Pinda</a>
+      </div>
+
+      <button type="button" class="linear-back-link" onclick="switchLinearStep('choice')" style="margin-top: 10px;">
         Dzokera pakupinda
       </button>
     </div>
@@ -11563,6 +11702,9 @@ window.switchHeroSlide = function(target) {
       localStorage.removeItem('ruzivo_auth_token');
       localStorage.removeItem('ruzivo_username');
       sessionStorage.removeItem('ruzivo_guest_mode');
+      if (typeof clearAuthFormFields === 'function') {
+        clearAuthFormFields();
+      }
       initWebAuth();
     }
 
@@ -14714,19 +14856,57 @@ window.switchHeroSlide = function(target) {
       }
     }
 
-        // Explicitly bind auth triggers to window so inline onclick handlers always resolve
+        // Clear all auth inputs on logout, modal open/close, or failed login
+    function clearAuthFormFields() {
+      const fieldIds = [
+        'linearEmailInput',
+        'linearPasswordInput',
+        'linearCodeInput',
+        'linearSignupFirstName',
+        'linearSignupLastName',
+        'linearSignupEmail',
+        'linearSignupPhone',
+        'linearSignupPassword',
+        'linearSignupConfirmPassword'
+      ];
+      fieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      // Clear error containers
+      ['linearEmailStepError', 'linearPasswordStepError', 'linearCodeStepError', 'linearSignupError'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerText = '';
+          el.style.display = 'none';
+        }
+      });
+      // Reset signup password checklist
+      updateLinearSignupPasswordRequirements('');
+    }
+    window.clearAuthFormFields = clearAuthFormFields;
+
+    // Explicitly bind auth triggers to window so inline onclick handlers always resolve
     window.openLinearAuthModal = openLinearAuthModal;
     window.closeLinearAuthModal = closeLinearAuthModal;
     window.toggleLinearMode = toggleLinearMode;
     window.switchLinearStep = switchLinearStep;
     window.handleLinearGoogleAuth = handleLinearGoogleAuth;
     window.handleLinearEmailSubmit = handleLinearEmailSubmit;
+    window.handleLinearPasswordSubmit = handleLinearPasswordSubmit;
     window.handleLinearCodeSubmit = handleLinearCodeSubmit;
+    window.handleLinearSignupSubmit = handleLinearSignupSubmit;
+    window.handleLinearSignupNameValidate = handleLinearSignupNameValidate;
+    window.handleLinearSignupEmailValidate = handleLinearSignupEmailValidate;
+    window.handleLinearSignupPasswordValidate = handleLinearSignupPasswordValidate;
+    window.handleLinearSignupConfirmValidate = handleLinearSignupConfirmValidate;
 
     function switchLinearStep(step) {
       const stepChoice = document.getElementById('linearStepChoice');
       const stepEmail = document.getElementById('linearStepEmail');
+      const stepPassword = document.getElementById('linearStepPassword');
       const stepCode = document.getElementById('linearStepCode');
+      const stepSignup = document.getElementById('linearStepSignup');
 
       if (stepChoice) stepChoice.style.display = (step === 'choice') ? 'flex' : 'none';
       if (stepEmail) {
@@ -14735,10 +14915,22 @@ window.switchHeroSlide = function(target) {
           setTimeout(() => document.getElementById('linearEmailInput')?.focus(), 100);
         }
       }
+      if (stepPassword) {
+        stepPassword.style.display = (step === 'password') ? 'flex' : 'none';
+        if (step === 'password') {
+          setTimeout(() => document.getElementById('linearPasswordInput')?.focus(), 100);
+        }
+      }
       if (stepCode) {
         stepCode.style.display = (step === 'code') ? 'flex' : 'none';
         if (step === 'code') {
           setTimeout(() => document.getElementById('linearCodeInput')?.focus(), 100);
+        }
+      }
+      if (stepSignup) {
+        stepSignup.style.display = (step === 'signup') ? 'flex' : 'none';
+        if (step === 'signup') {
+          setTimeout(() => document.getElementById('linearSignupFirstName')?.focus(), 100);
         }
       }
 
@@ -14779,52 +14971,300 @@ window.switchHeroSlide = function(target) {
       }
     }
 
+    // Step 1: User enters email, moves to password step
     async function handleLinearEmailSubmit(e) {
       if (e) e.preventDefault();
       const emailInput = document.getElementById('linearEmailInput');
-      const submitBtn = document.getElementById('linearEmailSubmitBtn');
+      const errBox = document.getElementById('linearEmailStepError');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+
       if (!emailInput) return;
       const emailVal = emailInput.value.trim();
-      if (!emailVal || !emailVal.includes('@')) {
-        showNotificationToast('Ndapota nyorai email yakakwana.', 'warning');
+
+      if (!emailVal) {
+        if (errBox) { errBox.innerText = 'Ndapota nyorai email yenyu.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (hasXssOrInjectionPayload(emailVal)) {
+        if (errBox) { errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!isValidEmailFormat(emailVal)) {
+        if (errBox) { errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).'; errBox.style.display = 'block'; }
         return;
       }
 
       currentLinearEmail = emailVal;
-      const displayElem = document.getElementById('linearSentEmailDisplay');
-      if (displayElem) displayElem.innerText = currentLinearEmail;
+      const passEmailDisplay = document.getElementById('linearPasswordEmailDisplay');
+      if (passEmailDisplay) passEmailDisplay.innerText = currentLinearEmail;
+
+      // Advance directly to password step
+      switchLinearStep('password');
+    }
+
+    // Step 2: User enters password, backend verifies and sends 6-digit 2FA code to email
+    async function handleLinearPasswordSubmit(e) {
+      if (e) e.preventDefault();
+      const passInput = document.getElementById('linearPasswordInput');
+      const submitBtn = document.getElementById('linearPasswordSubmitBtn');
+      const errBox = document.getElementById('linearPasswordStepError');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+
+      if (!passInput) return;
+      const passVal = passInput.value;
+
+      if (!passVal) {
+        if (errBox) { errBox.innerText = 'Ndapota nyorai pasiwedhi yenyu.'; errBox.style.display = 'block'; }
+        return;
+      }
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Kutumira...';
+        submitBtn.innerHTML = '<span>Kuongorora pasiwedhi...</span>';
       }
 
       try {
-        const resp = await fetch('/auth/request-code', {
+        const csrfToken = await ensureCsrfToken();
+        const recaptchaToken = (typeof getRecaptchaToken === 'function') ? await getRecaptchaToken('LOGIN') : '';
+        const resp = await fetch('/auth/verify-password-and-send-code', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: currentLinearEmail })
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({
+            email: currentLinearEmail,
+            password: passVal,
+            csrf_token: csrfToken,
+            recaptcha_token: recaptchaToken
+          })
         });
         const data = await resp.json();
+
         if (resp.ok) {
-          if (data.email_sent) {
-            showNotificationToast('Kodhi yekupinda yatumirwa ku email yenyu pa ' + currentLinearEmail, 'info');
-          } else {
-            showNotificationToast('Kodhi yagadzirwa. Tarisai email yenyu kana kupinza kodhi.', 'info');
-          }
+          const displayElem = document.getElementById('linearSentEmailDisplay');
+          if (displayElem) displayElem.innerText = currentLinearEmail;
+          showNotificationToast('Pasiwedhi yasimbiswa. Kodhi ye 6-digits yatumirwa pa ' + currentLinearEmail, 'info');
+          // Clear password input immediately for security
+          passInput.value = '';
           switchLinearStep('code');
-          return;
         } else {
-          showNotificationToast(data.detail || 'Kutadza kutumira kodhi. Edzai zvakare.', 'warning');
+          // Password incorrect or locked out: clear password input immediately
+          passInput.value = '';
+          passInput.focus();
+          const msg = data.detail || 'Pasiwedhi haina kururama. Edzai zvakare.';
+          if (errBox) {
+            errBox.innerText = msg;
+            errBox.style.display = 'block';
+          }
+          showNotificationToast(msg, 'warning');
         }
       } catch (err) {
-        console.warn("Request code error:", err);
-        showNotificationToast('Kodhi yatumirwa pa ' + currentLinearEmail, 'info');
-        switchLinearStep('code');
+        console.warn("Password verification error:", err);
+        passInput.value = '';
+        passInput.focus();
+        if (errBox) {
+          errBox.innerText = 'Kukanganisa pasisitimu. Ndapota edzai zvakare.';
+          errBox.style.display = 'block';
+        }
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerText = 'Enderera mberi';
+          submitBtn.innerHTML = `<span>Simbisa Pasiwedhi</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+        }
+      }
+    }
+
+    // Step-by-Step Sign Up Live Validations & Handler
+    function updateLinearSignupPasswordRequirements(val) {
+      const res = evaluatePasswordComplexity(val);
+      const circleSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle></svg>`;
+      const checkSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="16 9 10.5 14.5 8 12"></polyline></svg>`;
+      const crossSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+
+      function updateItem(itemId, met) {
+        const item = document.getElementById(itemId);
+        if (!item) return;
+        const icon = item.querySelector('.pwd-req-icon');
+        if (!val) {
+          item.className = 'pwd-req-item';
+          if (icon) icon.innerHTML = circleSvg;
+        } else if (met) {
+          item.className = 'pwd-req-item met';
+          if (icon) icon.innerHTML = checkSvg;
+        } else {
+          item.className = 'pwd-req-item unmet';
+          if (icon) icon.innerHTML = crossSvg;
+        }
+      }
+
+      updateItem('linearReqLen', res.lenMet);
+      updateItem('linearReqUpper', res.upperMet);
+      updateItem('linearReqLower', res.lowerMet);
+      updateItem('linearReqNum', res.numMet);
+      updateItem('linearReqSpecial', res.specialMet);
+      return res;
+    }
+
+    function handleLinearSignupNameValidate(input) {
+      const errBox = document.getElementById('linearSignupError');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+      if (!input || !input.value) return;
+      const check = validateRealName(input.value);
+      if (!check.isValid && errBox) {
+        errBox.innerText = check.message;
+        errBox.style.display = 'block';
+      }
+    }
+
+    function handleLinearSignupEmailValidate(input) {
+      const errBox = document.getElementById('linearSignupError');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+      if (!input || !input.value) return;
+      const val = input.value.trim();
+      if (hasXssOrInjectionPayload(val) && errBox) {
+        errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).';
+        errBox.style.display = 'block';
+      } else if (!isValidEmailFormat(val) && val.includes('@') && errBox) {
+        errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).';
+        errBox.style.display = 'block';
+      }
+    }
+
+    function handleLinearSignupPasswordValidate(input) {
+      const val = input ? input.value : '';
+      updateLinearSignupPasswordRequirements(val);
+      handleLinearSignupConfirmValidate();
+    }
+
+    function handleLinearSignupConfirmValidate() {
+      const pass = document.getElementById('linearSignupPassword')?.value || '';
+      const conf = document.getElementById('linearSignupConfirmPassword')?.value || '';
+      const errBox = document.getElementById('linearSignupError');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+      if (conf && pass !== conf && errBox) {
+        errBox.innerText = 'Mapasiwedhi haasi kuenderana (Passwords do not match).';
+        errBox.style.display = 'block';
+      }
+    }
+
+    async function handleLinearSignupSubmit(e) {
+      if (e) e.preventDefault();
+      const firstName = (document.getElementById('linearSignupFirstName')?.value || '').trim();
+      const lastName = (document.getElementById('linearSignupLastName')?.value || '').trim();
+      const email = (document.getElementById('linearSignupEmail')?.value || '').trim();
+      const phone = (document.getElementById('linearSignupPhone')?.value || '').trim();
+      const password = document.getElementById('linearSignupPassword')?.value || '';
+      const confirmPassword = document.getElementById('linearSignupConfirmPassword')?.value || '';
+      const errBox = document.getElementById('linearSignupError');
+      const submitBtn = document.getElementById('linearSignupSubmitBtn');
+
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+
+      // Validate First Name
+      const fnCheck = validateRealName(firstName);
+      if (!fnCheck.isValid) {
+        if (errBox) { errBox.innerText = 'First name: ' + fnCheck.message; errBox.style.display = 'block'; }
+        return;
+      }
+
+      // Validate Last Name
+      const lnCheck = validateRealName(lastName);
+      if (!lnCheck.isValid) {
+        if (errBox) { errBox.innerText = 'Last name: ' + lnCheck.message; errBox.style.display = 'block'; }
+        return;
+      }
+
+      // Validate Email
+      if (hasXssOrInjectionPayload(email)) {
+        if (errBox) { errBox.innerText = 'Email ine njodzi yekupaza sisitimu (XSS blocked).'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!isValidEmailFormat(email)) {
+        if (errBox) { errBox.innerText = 'Kero yeEmail haisi pachokwadi.'; errBox.style.display = 'block'; }
+        return;
+      }
+
+      // Validate Phone (optional, but validate characters if provided)
+      if (phone) {
+        if (hasXssOrInjectionPayload(phone) || /[^0-9+\s\-()]/.test(phone)) {
+          if (errBox) { errBox.innerText = 'Nhamba yefoni haisi pachokwadi (Invalid phone format).'; errBox.style.display = 'block'; }
+          return;
+        }
+      }
+
+      // Validate Password complexity
+      const pwdRes = evaluatePasswordComplexity(password);
+      if (!pwdRes.isValid) {
+        let msg = 'Pasiwedhi inofanira kutevedza mitemo yese iri mubhokisi.';
+        if (password.length < 8 || password.length > 24) msg = 'Pasiwedhi inofanira kuve nemavara ari pakati pe 8 ne 24.';
+        else if (!pwdRes.upperMet) msg = 'Isa vara guru (A-Z).';
+        else if (!pwdRes.lowerMet) msg = 'Isa vara diki (a-z).';
+        else if (!pwdRes.numMet) msg = 'Isa nhamba (0-9).';
+        else if (!pwdRes.specialMet) msg = 'Isa chiratidzo chinosarudzika (e.g. !@#$%^&*).';
+        if (errBox) { errBox.innerText = msg; errBox.style.display = 'block'; }
+        return;
+      }
+
+      // Validate Confirm Password
+      if (password !== confirmPassword) {
+        if (errBox) { errBox.innerText = 'Mapasiwedhi haasi kuenderana.'; errBox.style.display = 'block'; }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Kugadzira akaundi...</span>';
+      }
+
+      try {
+        const csrfToken = await ensureCsrfToken();
+        const recaptchaToken = (typeof getRecaptchaToken === 'function') ? await getRecaptchaToken('REGISTER') : '';
+        const resp = await fetch('/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+            password: password,
+            confirm_password: confirmPassword,
+            csrf_token: csrfToken,
+            recaptcha_token: recaptchaToken
+          })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.access_token) {
+          localStorage.setItem('ruzivo_auth_token', data.access_token);
+          localStorage.setItem('ruzivo_username', data.username || `${firstName} ${lastName}`);
+          sessionStorage.removeItem('ruzivo_guest_mode');
+          clearAuthFormFields();
+          closeLinearAuthModal();
+          const authOv = document.getElementById('authOverlay');
+          if (authOv) authOv.style.display = 'none';
+          if (typeof updateUserProfileUI === 'function') {
+            updateUserProfileUI(data.username || `${firstName} ${lastName}`, email);
+          }
+          showNotificationToast('Makorokoto! Akaundi yenyu yagadzirwa zvakanaka.', 'info');
+        } else {
+          const msg = data.detail || 'Kukanganisa pakugadzira akaundi.';
+          if (errBox) { errBox.innerText = msg; errBox.style.display = 'block'; }
+          showNotificationToast(msg, 'warning');
+        }
+      } catch (err) {
+        console.warn("Register error:", err);
+        if (errBox) {
+          errBox.innerText = 'Kukanganisa pasisitimu. Ndapota edzai zvakare.';
+          errBox.style.display = 'block';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Gadzira Akaundi</span>';
         }
       }
     }

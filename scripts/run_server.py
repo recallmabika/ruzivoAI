@@ -193,9 +193,15 @@ def init_auth_db():
                         email TEXT UNIQUE NOT NULL,
                         password_hash TEXT NOT NULL,
                         role TEXT DEFAULT 'student',
+                        first_name TEXT DEFAULT '',
+                        last_name TEXT DEFAULT '',
+                        phone TEXT DEFAULT '',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
+                cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT DEFAULT ''")
+                cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT DEFAULT ''")
+                cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''")
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS sessions (
                         token TEXT PRIMARY KEY,
@@ -490,9 +496,12 @@ def sanitize_text_field(value: str, max_len: int = 500) -> str:
     cleaned = value.replace("\x00", "").strip()
     return cleaned[:max_len]
 
-def register_user(username: str, email: str, password: str, role: str = "student"):
+def register_user(username: str, email: str, password: str, role: str = "student", first_name: str = "", last_name: str = "", phone: str = ""):
     username = username.strip()
     email = email.strip()
+    first_name = first_name.strip()
+    last_name = last_name.strip()
+    phone = phone.strip()
     conn = get_pg_connection()
     try:
         with conn:
@@ -506,8 +515,8 @@ def register_user(username: str, email: str, password: str, role: str = "student
                 
                 pw_h = hash_pw(password)
                 cursor.execute(
-                    "INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s) RETURNING id",
-                    (username, email, pw_h, role)
+                    "INSERT INTO users (username, email, password_hash, role, first_name, last_name, phone) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                    (username, email, pw_h, role, first_name, last_name, phone)
                 )
                 user_id = cursor.fetchone()[0]
                 token = secrets.token_hex(24)
@@ -683,6 +692,69 @@ def verify_email_login_code(email: str, code: str):
                 return True, (token, username, role or "student")
     finally:
         conn.close()
+
+def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str) -> tuple[bool, any]:
+    """Verifies user password and dispatches a 6-digit confirmation code to their email."""
+    email = email.strip()
+    password = password.strip()
+    if not email or not password:
+        return False, "Email pamwe ne pasiwedhi zvinodiwa."
+    
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT id, password_hash, username, role FROM users WHERE LOWER(email) = LOWER(%s)",
+                    (email,)
+                )
+                row = cursor.fetchone()
+                if not row:
+                    return False, "Email kana pasiwedhi haina kururama."
+                user_id, pw_h, actual_username, role = row
+                is_valid, needs_rehash = verify_pw(password, pw_h)
+                if not is_valid:
+                    return False, "Pasiwedhi yamaisa haina kururama."
+                if needs_rehash:
+                    cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hash_pw(password), user_id))
+
+                code = str(secrets.randbelow(900000) + 100000)
+                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s AND purpose = 'email_login'", (user_id,))
+                cursor.execute("""
+                    INSERT INTO verification_codes (user_id, code, purpose)
+                    VALUES (%s, %s, 'email_login')
+                """, (user_id, code))
+    finally:
+        conn.close()
+
+    subject = "Ruzivo AI - Kodhi Yenyu Yekusimbisa Kupinda (Sign-in Verification Code)"
+    body = f"Mhoro,\n\nKodhi yako yekusimbisa kupinda muRuzivo AI ndeiyi:\n\n  {code}\n\nKodhi iyi inoshanda kwemaminitsi gumi (10 minutes).\nKana usiriwe wakakumbira kodhi iyi, unogona kurega zvakadaro.\n\nMakorokoto,\nRuzivo AI Team"
+    html_body = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #0F172A; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;">Ruzivo AI - Kodhi Yekusimbisa Kupinda</h2>
+        <p style="color: #475569; font-size: 15px; line-height: 1.6;">Mhoro, pasiwedhi yenyu yatambirwa zvakanaka. Shandisai kodhi inotevera kupedzisa kupinda muakaundi yenyu:</p>
+        <div style="text-align: center; margin: 28px 0; padding: 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px;">
+            <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #15803D;">{code}</span>
+        </div>
+        <p style="color: #64748B; font-size: 13px; line-height: 1.5;">Kodhi iyi inopera mushure memaminitsi 10.</p>
+        <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;" />
+        <p style="color: #94A3B8; font-size: 11px;">Ruzivo AI Security Core &bull; support@ruzivo-ai.tech &bull; Titan Mail SMTP:465 SSL</p>
+    </div>
+    """
+    email_sent = send_ruzivo_email(email, subject, body, html_body)
+
+    masked_email = email
+    if '@' in email:
+        parts = email.split('@')
+        masked_name = parts[0][0] + '***' + (parts[0][-1] if len(parts[0]) > 1 else '')
+        masked_email = f"{masked_name}@{parts[1]}"
+
+    return True, {
+        "email": masked_email,
+        "email_sent": email_sent,
+        "require_code": True,
+        "message": "Pasiwedhi yakarurama. Kodhi ye 6-digits yatumirwa ku email yenyu."
+    }
 
 def authenticate_or_register_oauth(email: str, name: str, provider: str = "google"):
     email = email.strip()
@@ -1642,17 +1714,29 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json_response(400, {"detail": "Google reCAPTCHA yakundikana kusimbisa kuti uri munhu (Bot check failed)."})
                     return
 
-            username = str(data.get("username", "")).strip()
+            first_name = str(data.get("first_name", "")).strip()
+            last_name = str(data.get("last_name", "")).strip()
+            phone = str(data.get("phone", "")).strip()
             email = str(data.get("email", "")).strip()
             password = str(data.get("password", "")).strip()
+            confirm_password = str(data.get("confirm_password", "")).strip()
+            username = str(data.get("username", "")).strip()
 
-            if contains_xss_or_injection(username) or contains_xss_or_injection(email):
+            if not username and first_name:
+                base_u = re.sub(r'[^a-zA-Z0-9_]', '', f"{first_name}_{last_name}".strip('_')) or "user"
+                username = base_u
+
+            if contains_xss_or_injection(username) or contains_xss_or_injection(email) or contains_xss_or_injection(first_name) or contains_xss_or_injection(last_name) or contains_xss_or_injection(phone):
                 print(f"[SECURITY] Blocked XSS/Injection payload in /auth/register from IP {client_ip}")
                 self.send_json_response(400, {"detail": "Zvinonyorwa zvaita sezvine njodzi yekupaza sisitimu (XSS / Injection attempt blocked)."})
                 return
 
-            if not username or not email or not password:
-                self.send_json_response(400, {"detail": "Zadzai mabhokisi ose anodiwa."})
+            if not first_name or not last_name or not email or not password:
+                self.send_json_response(400, {"detail": "Zadzai First name, Last name, Email, pamwe ne Pasiwedhi."})
+                return
+
+            if confirm_password and password != confirm_password:
+                self.send_json_response(400, {"detail": "Mapasiwedhi haasi kuenderana (Passwords do not match)."})
                 return
 
             if re.search(r'[0-9]', username):
@@ -1695,7 +1779,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response(400, {"detail": "Pasiwedhi inoda chiratidzo chakasiyana (special character e.g. !@#$%^&*)."})
                 return
 
-            success, result = register_user(username, email, password)
+            success, result = register_user(username, email, password, "student", first_name, last_name, phone)
             if not success:
                 self.send_json_response(400, {"detail": result})
                 return
@@ -1799,6 +1883,70 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
         # 3. OAuth (Google / Apple) endpoint
         
         # Request verification code for email login
+                # Verify password and send 2FA code step
+        if self.path in ("/auth/verify-password-and-send-code", "/auth/verify-password-and-send-code/"):
+            data = parsed_json
+            email = str(data.get("email", "")).strip()
+            password = str(data.get("password", "")).strip()
+
+            # Anti-bot Honeypot check
+            honeypot = str(data.get("website_url", "") or data.get("hp_field", "")).strip()
+            if honeypot:
+                self.send_json_response(400, {"detail": "Bot / Honeypot detected."})
+                return
+
+            if contains_xss_or_injection(email):
+                self.send_json_response(400, {"detail": "XSS / Injection attempt blocked."})
+                return
+
+            # Brute-force lockout check
+            allowed, retry_sec = check_brute_force_lockout(client_ip, email)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {
+                        "detail": f"Makaedza kupinda kakawandisa. Akaundi yambovharwa kwemasekondi {retry_sec} kudzivirira matsotsi.",
+                        "retry_after": retry_sec
+                    },
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+
+            recaptcha_token = str(data.get("recaptcha_token", "")).strip()
+            if recaptcha_token:
+                rc_valid, rc_msg = verify_recaptcha_token(recaptcha_token, expected_action="LOGIN", remote_ip=client_ip)
+                if not rc_valid:
+                    self.send_json_response(400, {"detail": "Google reCAPTCHA verification failed."})
+                    return
+
+            success, res = verify_password_and_dispatch_2fa(email, password, client_ip)
+            if not success:
+                rem, locked_for = record_failed_login(client_ip, email)
+                if locked_for > 0:
+                    self.send_json_response(
+                        429,
+                        {
+                            "detail": f"Makaedza kupinda kakawandisa (5/5). Akaundi yambovharwa kwemaminitsi 5 ({locked_for}s).",
+                            "retry_after": locked_for,
+                            "clear_password": True
+                        },
+                        extra_headers={"Retry-After": locked_for}
+                    )
+                else:
+                    self.send_json_response(
+                        401,
+                        {
+                            "detail": f"{res} (Mune mikana {rem} yasara).",
+                            "attempts_remaining": rem,
+                            "clear_password": True
+                        }
+                    )
+                return
+
+            reset_failed_login(client_ip, email)
+            self.send_json_response(200, res)
+            return
+
         if self.path in ("/auth/request-code", "/auth/request-code/"):
             allowed, retry_sec = check_rate_limit(client_ip, "auth_request_code", max_requests=10, window_seconds=300)
             if not allowed:
