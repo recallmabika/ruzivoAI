@@ -7782,7 +7782,7 @@ window.switchHeroSlide = function(target) {
 
       <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearEmailSubmit(event)">
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
-        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" autocomplete="email" oninput="document.getElementById('linearEmailStepError').style.display='none';">
+        <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" autocomplete="email" oninput="handleLinearEmailRealtimeValidate(this)">
         <div id="linearEmailStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         
         <button type="submit" class="linear-btn-google" id="linearEmailSubmitBtn" style="background: #2E7D32; border-color: #256629;">
@@ -10481,8 +10481,8 @@ window.switchHeroSlide = function(target) {
 
     function hasXssOrInjectionPayload(value) {
       if (!value) return false;
-      const xssRegex = /(<script\b[^>]*>|javascript\s*:|onerror\s*=|onload\s*=|onmouseover\s*=|onclick\s*=|onfocus\s*=|<iframe\b|<object\b|<embed\b|<svg\b|document\.cookie|eval\s*\()/i;
-      return xssRegex.test(value);
+      const payloadRegex = /(<\s*script\b[^>]*>|<\s*\/script\s*>|<\s*script|<\s*(iframe|object|embed|svg|img|style|link|body|meta|base|form|input)\b|javascript\s*:|vbscript\s*:|data\s*:\s*text\/html|on(error|load|mouseover|click|focus|blur|change|submit|keydown|keyup|keypress)\s*=|document\.(cookie|location|write)|eval\s*\(|alert\s*\(|prompt\s*\(|confirm\s*\(|\bUNION\s+(ALL\s+)?SELECT\b|\bSELECT\b.+\bFROM\b|\bINSERT\s+INTO\b|\bUPDATE\b.+\bSET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|VIEW|COLUMN)\b|\bALTER\s+TABLE\b|\bEXEC(\s+XP_)?\b|\bOR\b.+[=<>'`]|\bAND\b.+[=<>'`]|--|\/\*|\*\/|;\s*SHUTDOWN|;\s*DROP)/i;
+      return payloadRegex.test(value);
     }
 
     let loginLockoutInterval = null;
@@ -14990,6 +14990,42 @@ window.switchHeroSlide = function(target) {
       }
     }
 
+    // Real-time email keystroke validator (Blocks SQL Injection, XSS, scripts, and format errors live)
+    function handleLinearEmailRealtimeValidate(input) {
+      if (!input) return;
+      const val = input.value;
+      const errBox = document.getElementById('linearEmailStepError');
+      if (!errBox) return;
+
+      if (!val) {
+        errBox.style.display = 'none';
+        errBox.innerText = '';
+        input.style.borderColor = '';
+        return;
+      }
+
+      if (hasXssOrInjectionPayload(val)) {
+        errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).';
+        errBox.style.display = 'block';
+        input.style.borderColor = '#DC2626';
+        return;
+      }
+
+      // If user has typed an @ sign or is done typing, validate email format
+      if (val.includes('@') && !isValidEmailFormat(val.trim())) {
+        errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@chikoro.ac.zw).';
+        errBox.style.display = 'block';
+        input.style.borderColor = '#DC2626';
+        return;
+      }
+
+      // Valid state
+      errBox.style.display = 'none';
+      errBox.innerText = '';
+      input.style.borderColor = '';
+    }
+    window.handleLinearEmailRealtimeValidate = handleLinearEmailRealtimeValidate;
+
     // Step 1: User enters email, moves to password step
     async function handleLinearEmailSubmit(e) {
       if (e) e.preventDefault();
@@ -15002,14 +15038,17 @@ window.switchHeroSlide = function(target) {
 
       if (!emailVal) {
         if (errBox) { errBox.innerText = 'Ndapota nyorai email yenyu.'; errBox.style.display = 'block'; }
+        emailInput.style.borderColor = '#DC2626';
         return;
       }
       if (hasXssOrInjectionPayload(emailVal)) {
-        if (errBox) { errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (XSS blocked).'; errBox.style.display = 'block'; }
+        if (errBox) { errBox.innerText = 'Zvinonyorwa zvine njodzi yekupaza sisitimu (SQL / XSS injection blocked).'; errBox.style.display = 'block'; }
+        emailInput.style.borderColor = '#DC2626';
         return;
       }
       if (!isValidEmailFormat(emailVal)) {
         if (errBox) { errBox.innerText = 'Kero yeEmail haisi pachokwadi (e.g. zita@gmail.com).'; errBox.style.display = 'block'; }
+        emailInput.style.borderColor = '#DC2626';
         return;
       }
 
