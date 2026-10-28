@@ -4271,34 +4271,39 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
             # If a Google ID Token (credential) is supplied, verify it directly via Google's tokeninfo API
+            access_token_param = str(data.get("access_token", "")).strip()
 
-            if credential and provider == "google":
-
+            # 1. If Google Access Token is supplied from OAuth popup, fetch userinfo from Google
+            if access_token_param and provider == "google":
                 try:
-
-                    verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={quote_plus(credential)}"
-
-                    req = urllib.request.Request(verify_url, headers={"User-Agent": "Ruzivo-Auth-Server/1.0"})
-
-                    with urllib.request.urlopen(req, timeout=5) as g_resp:
-
+                    userinfo_url = f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={quote_plus(access_token_param)}"
+                    req = urllib.request.Request(userinfo_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+                    with urllib.request.urlopen(req, timeout=8) as g_resp:
                         if g_resp.getcode() == 200:
-
                             g_data = json.loads(g_resp.read().decode("utf-8"))
-
                             verified_email = g_data.get("email")
-
                             if verified_email:
-
                                 email = verified_email.strip()
-
                                 name = g_data.get("name") or g_data.get("given_name") or name or email.split("@")[0]
-
+                                print(f"[OAuth] Verified Google user via Access Token: {email} ({name})")
                 except Exception as g_err:
+                    print(f"[OAuth] Google userinfo verification error: {g_err}")
 
+            # 2. If a Google ID Token (credential) is supplied, verify it via Google's tokeninfo API
+            elif credential and provider == "google":
+                try:
+                    verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={quote_plus(credential)}"
+                    req = urllib.request.Request(verify_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+                    with urllib.request.urlopen(req, timeout=8) as g_resp:
+                        if g_resp.getcode() == 200:
+                            g_data = json.loads(g_resp.read().decode("utf-8"))
+                            verified_email = g_data.get("email")
+                            if verified_email:
+                                email = verified_email.strip()
+                                name = g_data.get("name") or g_data.get("given_name") or name or email.split("@")[0]
+                                print(f"[OAuth] Verified Google user via ID Token: {email} ({name})")
+                except Exception as g_err:
                     print(f"[OAuth] Google token verification fallback: {g_err}")
-
-
 
             if contains_xss_or_injection(email) or contains_xss_or_injection(name):
 

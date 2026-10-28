@@ -11460,6 +11460,25 @@ window.switchHeroSlide = function(target) {
     }
 
     const GOOGLE_CLIENT_ID = "1031580468211-3jjn56i6ncsk9urivmo6glkjdu0780n2.apps.googleusercontent.com";
+    // Listen for OAuth token in URL hash if redirected back
+    (function checkOAuthHash() {
+      try {
+        if (window.location.hash && window.location.hash.includes('access_token=')) {
+          const params = new URLSearchParams(window.location.hash.substring(1));
+          const token = params.get('access_token');
+          if (token) {
+            window.history.replaceState(null, null, window.location.pathname);
+            if (window.opener && typeof window.opener.handleGoogleAccessTokenSuccess === 'function') {
+              window.opener.handleGoogleAccessTokenSuccess(token);
+              window.close();
+            } else if (typeof handleGoogleAccessTokenSuccess === 'function') {
+              handleGoogleAccessTokenSuccess(token);
+            }
+          }
+        }
+      } catch (e) {}
+    })();
+
     const RECAPTCHA_SITE_KEY = "6LeQQwMuAAAAACyZi2_yKpfyG11ZFv6YDPALMn9X";
     let loginWidgetId = null;
     let registerWidgetId = null;
@@ -11628,78 +11647,8 @@ window.switchHeroSlide = function(target) {
     }
 
     async function loginWithGoogle() {
-      const activeCard = document.getElementById('loginCard').style.display !== 'none' ? 'login' : 'register';
-      const errElem = document.getElementById(activeCard === 'login' ? 'loginError' : 'registerError');
-      if (errElem) errElem.style.display = 'none';
-
-      // 1. Try real Google Identity Services if available
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        try {
-          initGoogleAuthClient();
-          google.accounts.id.prompt((notification) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              console.log('Google prompt not displayed/skipped, opening fallback dialog.');
-              openGoogleFallbackModal(activeCard);
-            }
-          });
-          return;
-        } catch(err) {
-          console.warn('Google GIS prompt failed, using fallback:', err);
-        }
-      }
-
-      // 2. Fallback modal dialog
-      openGoogleFallbackModal(activeCard);
-    }
-
-    async function openGoogleFallbackModal(activeCard) {
-      const googleEmail = await showCustomInputModal({
-        title: 'Pinda neGoogle (Google Account)',
-        desc: 'Nyora email yako yeGoogle kuti upinde kana kunyoresa akaundi yenyu:',
-        placeholder: 'muenzaniso@gmail.com',
-        defaultValue: localStorage.getItem('ruzivo_last_email') || '',
-        btnText: 'Pinda neGoogle'
-      });
-
-      if (!googleEmail) return;
-
-      const trimmed = googleEmail.trim();
-      if (!trimmed.includes('@')) {
-        showAuthBanner(activeCard === 'login' ? 'loginError' : 'registerError', 'Ndapota nyorai email chaiyo yeGoogle.');
-        return;
-      }
-
-      localStorage.setItem('ruzivo_last_email', trimmed);
-      const namePart = trimmed.split('@')[0];
-
-      try {
-        const resp = await fetch('/auth/oauth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: trimmed,
-            name: namePart,
-            provider: 'google'
-          })
-        });
-
-        const data = await resp.json();
-        if (!resp.ok) {
-          throw new Error(data.detail || 'Kukanganisa pakupinda neGoogle.');
-        }
-
-        localStorage.setItem('ruzivo_auth_token', data.access_token);
-        localStorage.setItem('ruzivo_username', data.username || namePart);
-        sessionStorage.removeItem('ruzivo_guest_mode');
-
-        currentUser = data.username || namePart;
-        if (typeof updateUserProfileUI === 'function') updateUserProfileUI(currentUser, trimmed);
-        if (typeof closeLinearAuthModal === 'function') closeLinearAuthModal();
-        const authOv = document.getElementById('authOverlay');
-        if (authOv) authOv.style.display = 'none';
-        showNotificationToast('Mapinda zvakanaka neGoogle!', 'info');
-      } catch (err) {
-        showAuthBanner(activeCard === 'login' ? 'loginError' : 'registerError', err.message || 'Hatina kukwanisa kupinda neGoogle.');
+      if (typeof handleLinearGoogleAuth === 'function') {
+        handleLinearGoogleAuth();
       }
     }
 
@@ -15048,35 +14997,85 @@ window.switchHeroSlide = function(target) {
       }
     }
 
+    let googleTokenClient = null;
+
     function handleLinearGoogleAuth() {
-      // 1. If Google Identity Services library is loaded, prompt Google One-Tap
-      if (window.google && window.google.accounts && window.google.accounts.id) {
+      // Direct official Google OAuth2 Token / Account Chooser Popup
+      if (window.google && window.google.accounts && window.google.accounts.oauth2) {
         try {
-          if (typeof initGoogleAuthClient === 'function') {
-            initGoogleAuthClient();
-          }
-          google.accounts.id.prompt((notification) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              if (typeof openGoogleFallbackModal === 'function') {
-                openGoogleFallbackModal('login');
+          if (!googleTokenClient) {
+            googleTokenClient = google.accounts.oauth2.initTokenClient({
+              client_id: GOOGLE_CLIENT_ID,
+              scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email openid',
+              callback: async (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                  await handleGoogleAccessTokenSuccess(tokenResponse.access_token);
+                } else if (tokenResponse && tokenResponse.error) {
+                  console.warn('Google auth error:', tokenResponse);
+                  showNotificationToast('Kupinda neGoogle kwakanganiswa kana kukanzurwa.', 'warning');
+                }
               }
-            }
-          });
+            });
+          }
+          googleTokenClient.requestAccessToken({ prompt: 'select_account' });
           return;
-        } catch (e) {
-          console.warn("GIS prompt fallback:", e);
+        } catch (err) {
+          console.warn('OAuth2 token client error:', err);
         }
       }
-      
-      // 2. Open high-contrast authentic Claude/Linear modal dialog
-      if (typeof openGoogleFallbackModal === 'function') {
-        openGoogleFallbackModal('login');
-      } else if (typeof loginWithGoogle === 'function') {
-        loginWithGoogle();
-      } else {
-        showNotificationToast('Connecting with Google...', 'info');
+
+      // If GIS oauth2 is still loading or unavailable, launch standard Google OAuth popup window
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}&redirect_uri=${encodeURIComponent(window.location.origin + '/sign-up')}&response_type=token&scope=${encodeURIComponent('openid email profile')}&prompt=select_account`;
+      const w = 500, h = 600;
+      const left = (screen.width / 2) - (w / 2);
+      const top = (screen.height / 2) - (h / 2);
+      const popup = window.open(oauthUrl, 'GoogleSignIn', `width=${w},height=${h},top=${top},left=${left}`);
+      if (!popup || popup.closed) {
+        showNotificationToast('Ndapota bvumidzai mapopup ebrowser renyu kuti muone Google sign in.', 'warning');
       }
     }
+
+    async function handleGoogleAccessTokenSuccess(accessToken) {
+      try {
+        showNotificationToast('Kupinda neGoogle...', 'info');
+        // Fetch official profile from Google
+        const uResp = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${encodeURIComponent(accessToken)}`);
+        const uData = uResp.ok ? await uResp.json() : {};
+        const email = uData.email || '';
+        const name = uData.name || uData.given_name || email.split('@')[0] || 'Mudzidzi';
+
+        const resp = await fetch('/auth/oauth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: accessToken,
+            email: email,
+            name: name,
+            provider: 'google'
+          })
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.detail || 'Kukanganisa pakupinda neGoogle.');
+        }
+
+        localStorage.setItem('ruzivo_auth_token', data.access_token);
+        localStorage.setItem('ruzivo_username', data.username || name);
+        sessionStorage.removeItem('ruzivo_guest_mode');
+
+        currentUser = data.username || name;
+        if (typeof updateUserProfileUI === 'function') updateUserProfileUI(currentUser, email);
+        if (typeof closeLinearAuthModal === 'function') closeLinearAuthModal();
+        const authOv = document.getElementById('authOverlay');
+        if (authOv) authOv.style.display = 'none';
+        showNotificationToast('Makorokoto! Mapinda zvakanaka neGoogle.', 'info');
+      } catch (e) {
+        console.warn('OAuth error:', e);
+        showNotificationToast(e.message || 'Kukanganisa pakupinda neGoogle.', 'warning');
+      }
+    }
+    window.handleGoogleAccessTokenSuccess = handleGoogleAccessTokenSuccess;
 
     // Real-time email keystroke validator (Blocks SQL Injection, XSS, scripts, and format errors live)
     function handleLinearEmailRealtimeValidate(input) {
