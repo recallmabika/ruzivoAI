@@ -4311,7 +4311,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
 
-        if self.path in ("/", "/index.html"):
+        if self.path in ("/", "/index.html", "/sign-in", "/sign-up", "/login", "/register", "/signin", "/signup"):
 
             csrf_token = generate_csrf_token()
 

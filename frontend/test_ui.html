@@ -7697,7 +7697,7 @@ window.switchHeroSlide = function(target) {
         }
       };
 
-      window.openLinearAuthModal = function(mode) {
+      window.openLinearAuthModal = function(mode, pushUrl) {
         window.currentLinearMode = mode || 'login';
         if (typeof window.clearAuthFormFields === 'function') {
           window.clearAuthFormFields();
@@ -7711,8 +7711,14 @@ window.switchHeroSlide = function(target) {
         window.updateLinearModeUI();
         if (window.currentLinearMode === 'signup') {
           window.switchLinearStep('signup');
+          if (pushUrl !== false && window.location.pathname !== '/sign-up') {
+            try { history.pushState({ page: 'signup' }, 'Gadzira Akaundi - Ruzivo AI', '/sign-up'); } catch(e) {}
+          }
         } else {
           window.switchLinearStep('choice');
+          if (pushUrl !== false && window.location.pathname !== '/sign-in') {
+            try { history.pushState({ page: 'signin' }, 'Pinda muRuzivo - Ruzivo AI', '/sign-in'); } catch(e) {}
+          }
         }
       };
 
@@ -7724,6 +7730,9 @@ window.switchHeroSlide = function(target) {
         }
         if (typeof window.clearAuthFormFields === 'function') {
           window.clearAuthFormFields();
+        }
+        if (window.location.pathname === '/sign-in' || window.location.pathname === '/sign-up' || window.location.pathname === '/login' || window.location.pathname === '/register') {
+          try { history.pushState({}, 'Ruzivo AI', '/'); } catch(e) {}
         }
       };
 
@@ -10269,9 +10278,36 @@ window.switchHeroSlide = function(target) {
       setTimeout(initScrollRevealObserver, 10);
     }
 
+    // Dedicated URL route checker for /sign-in and /sign-up
+    function handleDedicatedAuthRoute() {
+      const path = (window.location.pathname || '').toLowerCase();
+      if (path === '/sign-up' || path === '/register' || path === '/signup') {
+        openLinearAuthModal('signup', false);
+      } else if (path === '/sign-in' || path === '/login' || path === '/signin') {
+        openLinearAuthModal('login', false);
+      }
+    }
+
+    window.addEventListener('popstate', function(e) {
+      const path = (window.location.pathname || '').toLowerCase();
+      if (path === '/sign-up' || path === '/register' || path === '/signup') {
+        openLinearAuthModal('signup', false);
+      } else if (path === '/sign-in' || path === '/login' || path === '/signin') {
+        openLinearAuthModal('login', false);
+      } else if (path === '/' || path === '/index.html') {
+        const overlay = document.getElementById('linearAuthOverlay');
+        if (overlay) {
+          overlay.classList.remove('is-open');
+          overlay.style.setProperty('display', 'none', 'important');
+          document.body.style.overflow = '';
+        }
+      }
+    });
+
     window.onload = function() {
       initSidebar();
       initWebAuth();
+      handleDedicatedAuthRoute();
       initGoogleAuthClient();
       renderRecaptchaWidgets();
       initCookieConsentBanner();
@@ -14818,7 +14854,7 @@ window.switchHeroSlide = function(target) {
     let currentLinearMode = 'login'; // 'login' or 'signup'
     let currentLinearEmail = '';
 
-    function openLinearAuthModal(mode) {
+    function openLinearAuthModal(mode, pushUrl) {
       currentLinearMode = mode || 'login';
       const overlay = document.getElementById('linearAuthOverlay');
       if (overlay) {
@@ -14827,7 +14863,17 @@ window.switchHeroSlide = function(target) {
         document.body.style.overflow = 'hidden';
       }
       updateLinearModeUI();
-      switchLinearStep('choice');
+      if (currentLinearMode === 'signup') {
+        switchLinearStep('signup');
+        if (pushUrl !== false && window.location.pathname !== '/sign-up') {
+          try { history.pushState({ page: 'signup' }, 'Gadzira Akaundi - Ruzivo AI', '/sign-up'); } catch(e) {}
+        }
+      } else {
+        switchLinearStep('choice');
+        if (pushUrl !== false && window.location.pathname !== '/sign-in') {
+          try { history.pushState({ page: 'signin' }, 'Pinda muRuzivo - Ruzivo AI', '/sign-in'); } catch(e) {}
+        }
+      }
     }
 
     function closeLinearAuthModal() {
@@ -14837,11 +14883,28 @@ window.switchHeroSlide = function(target) {
         overlay.style.setProperty('display', 'none', 'important');
         document.body.style.overflow = '';
       }
+      if (typeof clearAuthFormFields === 'function') {
+        clearAuthFormFields();
+      }
+      if (window.location.pathname === '/sign-in' || window.location.pathname === '/sign-up' || window.location.pathname === '/login' || window.location.pathname === '/register') {
+        try { history.pushState({}, 'Ruzivo AI', '/'); } catch(e) {}
+      }
     }
 
     function toggleLinearMode(targetMode) {
       currentLinearMode = targetMode;
       updateLinearModeUI();
+      if (targetMode === 'signup') {
+        switchLinearStep('signup');
+        if (window.location.pathname !== '/sign-up') {
+          try { history.pushState({ page: 'signup' }, 'Gadzira Akaundi - Ruzivo AI', '/sign-up'); } catch(e) {}
+        }
+      } else {
+        switchLinearStep('choice');
+        if (window.location.pathname !== '/sign-in') {
+          try { history.pushState({ page: 'signin' }, 'Pinda muRuzivo - Ruzivo AI', '/sign-in'); } catch(e) {}
+        }
+      }
     }
 
     function updateLinearModeUI() {
