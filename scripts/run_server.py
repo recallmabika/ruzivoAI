@@ -542,6 +542,148 @@ def authenticate_user(username: str, password: str):
     finally:
         conn.close()
 
+
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.titan.email")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
+SMTP_USER = os.environ.get("SMTP_USER", "support@ruzivo-ai.tech")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+
+def send_ruzivo_email(to_email: str, subject: str, content: str, html_content: str = None) -> bool:
+    """Dispatches real email via Titan SMTP (SSL port 465 or TLS port 587)."""
+    server_host = os.environ.get("SMTP_SERVER", SMTP_SERVER)
+    port = int(os.environ.get("SMTP_PORT", SMTP_PORT))
+    user = os.environ.get("SMTP_USER", SMTP_USER)
+    pwd = os.environ.get("SMTP_PASS", SMTP_PASS)
+
+    if not server_host or not user or not to_email:
+        print(f"[SMTP WARNING] Config missing or destination empty: server={server_host}, user={user}, to={to_email}")
+        return False
+
+    import smtplib
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = f"Ruzivo AI <{user}>"
+    msg['To'] = to_email
+    msg.set_content(content)
+    if html_content:
+        msg.add_alternative(html_content, subtype='html')
+
+    try:
+        if port == 465:
+            with smtplib.SMTP_SSL(server_host, port, timeout=12) as s:
+                if pwd:
+                    s.login(user, pwd)
+                s.send_message(msg)
+        else:
+            with smtplib.SMTP(server_host, port, timeout=12) as s:
+                s.starttls()
+                if pwd:
+                    s.login(user, pwd)
+                s.send_message(msg)
+        print(f"[SMTP SUCCESS] Email sent to {to_email} via {server_host}:{port}")
+        return True
+    except Exception as e:
+        print(f"[SMTP ERROR] Failed to send email to {to_email} via {server_host}:{port} - {e}")
+        return False
+
+def create_email_verification_code(email: str):
+    email = email.strip()
+    if not email or '@' not in email:
+        return False, "Email yakakwana inodiwa."
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(%s)", (email,))
+                row = cursor.fetchone()
+                if row:
+                    user_id = row[0]
+                else:
+                    base_username = re.sub(r'[^a-zA-Z0-9_]', '', email.split('@')[0].replace(' ', '_')) or "user"
+                    username = base_username
+                    idx = 1
+                    while True:
+                        cursor.execute("SELECT id FROM users WHERE LOWER(username) = LOWER(%s)", (username.lower(),))
+                        if not cursor.fetchone():
+                            break
+                        username = f"{base_username}_{idx}"
+                        idx += 1
+                    pw_h = hash_pw(secrets.token_hex(32))
+                    role = "student"
+                    cursor.execute(
+                        "INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s) RETURNING id",
+                        (username, email, pw_h, role)
+                    )
+                    user_id = cursor.fetchone()[0]
+
+                code = str(secrets.randbelow(900000) + 100000)
+                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s AND purpose = 'email_login'", (user_id,))
+                cursor.execute("""
+                    INSERT INTO verification_codes (user_id, code, purpose)
+                    VALUES (%s, %s, 'email_login')
+                """, (user_id, code))
+    finally:
+        conn.close()
+
+    subject = "Ruzivo AI - Kodhi Yenyu Yekupinda (Login Verification Code)"
+    body = f"Mhoro,\n\nKodhi yako yekupinda muRuzivo AI ndeiyi:\n\n  {code}\n\nKodhi iyi inoshanda kwemaminitsi gumi (10 minutes).\nKana usiriwe wakakumbira kodhi iyi, unogona kurega kuteerera email ino.\n\nMakorokoto,\nRuzivo AI Team"
+    html_body = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #0F172A; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;">Ruzivo AI - Kodhi Yekupinda</h2>
+        <p style="color: #475569; font-size: 15px; line-height: 1.6;">Mhoro, shandisai kodhi inotevera kupinda muakaundi yenyu paRuzivo AI:</p>
+        <div style="text-align: center; margin: 28px 0; padding: 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px;">
+            <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #15803D;">{code}</span>
+        </div>
+        <p style="color: #64748B; font-size: 13px; line-height: 1.5;">Kodhi iyi inopera mushure memaminitsi 10. Kana usiriwe wakakumbira kodhi iyi, unogona kurega zvakadaro.</p>
+        <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;" />
+        <p style="color: #94A3B8; font-size: 11px;">Ruzivo AI Core &bull; support@ruzivo-ai.tech &bull; Titan Mail SMTP:465 SSL</p>
+    </div>
+    """
+
+    email_sent = send_ruzivo_email(email, subject, body, html_body)
+
+    masked_email = email
+    if '@' in email:
+        parts = email.split('@')
+        masked_name = parts[0][0] + '***' + (parts[0][-1] if len(parts[0]) > 1 else '')
+        masked_email = f"{masked_name}@{parts[1]}"
+
+    return True, {
+        "email": masked_email,
+        "email_sent": email_sent,
+        "code": code
+    }
+
+def verify_email_login_code(email: str, code: str):
+    email = email.strip()
+    code = code.strip()
+    if not email or not code:
+        return False, "Email nekodhi zvinodiwa."
+    conn = get_pg_connection()
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT u.id, u.username, u.role, vc.id, vc.created_at
+                    FROM users u
+                    JOIN verification_codes vc ON u.id = vc.user_id
+                    WHERE LOWER(u.email) = LOWER(%s) AND vc.code = %s AND vc.purpose = 'email_login'
+                    ORDER BY vc.created_at DESC LIMIT 1
+                """, (email, code))
+                row = cursor.fetchone()
+                if not row:
+                    return False, "Kodhi yamaisa haina kururama kana kuti yapera nguva (Invalid or expired code)."
+                user_id, username, role, vc_id, created_at = row
+
+                cursor.execute("DELETE FROM verification_codes WHERE id = %s", (vc_id,))
+                token = secrets.token_hex(24)
+                cursor.execute("INSERT INTO sessions (token, user_id) VALUES (%s, %s)", (token, user_id))
+                return True, (token, username, role or "student")
+    finally:
+        conn.close()
+
 def authenticate_or_register_oauth(email: str, name: str, provider: str = "google"):
     email = email.strip()
     name = name.strip() or email.split("@")[0]
@@ -655,27 +797,19 @@ def create_2fa_delete_code(token: str):
     finally:
         conn.close()
 
-    smtp_server = os.environ.get("SMTP_SERVER", "")
-    smtp_user = os.environ.get("SMTP_USER", "")
-    smtp_pass = os.environ.get("SMTP_PASS", "")
-    smtp_port = int(os.environ.get("SMTP_PORT", 587))
-    email_sent = False
-    if smtp_server and smtp_user and smtp_pass and email:
-        try:
-            import smtplib
-            from email.message import EmailMessage
-            msg = EmailMessage()
-            msg.set_content(f"Mhoro,\n\nKodhi yako ye 2FA yekudzima akaundi paRuzivo AI ndeiyi:\n\n{code}\n\nKana usiriwe wakakumbira kudzima uku, chiramba usina kuisa kodhi iyi.")
-            msg['Subject'] = 'Ruzivo AI - Kodhi ye 2FA yeKudzima Akaundi'
-            msg['From'] = smtp_user
-            msg['To'] = email
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_pass)
-                server.send_message(msg)
-            email_sent = True
-        except Exception as e:
-            print(f"[SMTP ERROR] Kutadza kutumira email: {e}")
+    del_subject = "Ruzivo AI - Kodhi ye 2FA yeKudzima Akaundi"
+    del_body = f"Mhoro,\n\nKodhi yako ye 2FA yekudzima akaundi paRuzivo AI ndeiyi:\n\n{code}\n\nKana usiriwe wakakumbira kudzima uku, chiramba usina kuisa kodhi iyi."
+    del_html = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #fee2e2; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #991B1B; font-weight: 700; margin-bottom: 12px;">Ruzivo AI - Kudzima Akaundi</h2>
+        <p style="color: #374151; font-size: 15px;">Mhoro, kodhi yako ye 2FA yekudzima akaundi paRuzivo AI ndeiyi:</p>
+        <div style="text-align: center; margin: 24px 0; padding: 16px; background: #FEF2F2; border: 1px dashed #F87171; border-radius: 8px;">
+            <span style="font-family: monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #DC2626;">{code}</span>
+        </div>
+        <p style="color: #6B7280; font-size: 13px;">Kana usiriwe wakakumbira kudzima uku, musatevedzera kana kupa munhu kodhi iyi.</p>
+    </div>
+    """
+    email_sent = send_ruzivo_email(email, del_subject, del_body, del_html)
 
     masked_email = email
     if email and "@" in email:
@@ -1663,6 +1797,55 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # 3. OAuth (Google / Apple) endpoint
+        
+        # Request verification code for email login
+        if self.path in ("/auth/request-code", "/auth/request-code/"):
+            allowed, retry_sec = check_rate_limit(client_ip, "auth_request_code", max_requests=10, window_seconds=300)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Muri kukumbira kodhi kakawandisa. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+            data = parsed_json
+            email = str(data.get("email", "")).strip()
+            if not email or "@" not in email:
+                self.send_json_response(400, {"detail": "Email chaiyo inodiwa."})
+                return
+            success, res = create_email_verification_code(email)
+            if not success:
+                self.send_json_response(400, {"detail": res})
+                return
+            self.send_json_response(200, res)
+            return
+
+        # Verify email login code
+        if self.path in ("/auth/verify-code", "/auth/verify-code/"):
+            allowed, retry_sec = check_rate_limit(client_ip, "auth_verify_code", max_requests=15, window_seconds=300)
+            if not allowed:
+                self.send_json_response(
+                    429,
+                    {"detail": f"Muri kuedza kodhi kakawandisa. Imbomirai kwemasekondi {retry_sec}."},
+                    extra_headers={"Retry-After": retry_sec}
+                )
+                return
+            data = parsed_json
+            email = str(data.get("email", "")).strip()
+            code = str(data.get("code", "")).strip()
+            success, res = verify_email_login_code(email, code)
+            if not success:
+                self.send_json_response(400, {"detail": res})
+                return
+            token, actual_username, role = res
+            self.send_json_response(200, {
+                "access_token": token,
+                "token_type": "bearer",
+                "username": actual_username,
+                "role": role
+            })
+            return
+
         if self.path in ("/auth/oauth", "/auth/oauth/"):
             allowed, retry_sec = check_rate_limit(client_ip, "oauth", max_requests=15, window_seconds=300)
             if not allowed:

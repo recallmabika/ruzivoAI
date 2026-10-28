@@ -6490,24 +6490,92 @@
       border-color: rgba(0, 0, 0, 0.16);
     }
 
-    /* Orbit Stage & Simple Clean Dashed Lines */
+    /* Orbit Stage & Simple Clean Dashed Lines - Scaled Up */
     .kinetic-orbit-stage {
       position: relative;
-      width: 320px;
-      height: 320px;
+      width: 390px;
+      height: 390px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .kinetic-rotating-emblem {
-      width: 175px;
-      height: 175px;
+      width: 230px;
+      height: 230px;
       object-fit: contain;
-      z-index: 4;
+      z-index: 3;
       animation: kineticEmblemSpin 28s linear infinite;
       filter: none !important;
       transition: transform 0.3s ease;
+      opacity: 0.88;
+    }
+
+    /* Floating Heartbeat Center Label */
+    .kinetic-center-heartbeat {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 6;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: ruzivoCenterHeartbeat 2.4s ease-in-out infinite;
+    }
+
+    .kinetic-center-heartbeat .center-ruzivo-title {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: var(--text-main);
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+
+    body:not(.theme-dark) .kinetic-center-heartbeat .center-ruzivo-title {
+      color: #0F172A;
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.9);
+    }
+
+    .kinetic-center-heartbeat .center-ruzivo-badge {
+      font-family: "SF Mono", Monaco, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      color: #10B981;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    @keyframes ruzivoCenterHeartbeat {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.92;
+      }
+      14% {
+        transform: translate(-50%, -50%) scale(1.14);
+        opacity: 1;
+      }
+      28% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.92;
+      }
+      42% {
+        transform: translate(-50%, -50%) scale(1.08);
+        opacity: 1;
+      }
+      70% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.92;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.92;
+      }
     }
 
     .kinetic-glow-pulse {
@@ -6517,56 +6585,51 @@
     .kinetic-dashed-ring {
       position: absolute;
       border-radius: 50%;
-      border: 1px dashed rgba(255, 255, 255, 0.14);
+      border: 1px dashed rgba(255, 255, 255, 0.16);
       z-index: 2;
     }
 
     body:not(.theme-dark) .kinetic-dashed-ring {
-      border-color: rgba(0, 0, 0, 0.14);
+      border-color: rgba(0, 0, 0, 0.16);
     }
 
     .ring-inner {
-      width: 215px;
-      height: 215px;
+      width: 270px;
+      height: 270px;
       animation: kineticRingRotate 24s linear infinite reverse;
-      border: 1px dashed rgba(255, 255, 255, 0.18);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
     }
 
     body:not(.theme-dark) .ring-inner {
-      border-color: rgba(0, 0, 0, 0.18);
+      border-color: rgba(0, 0, 0, 0.2);
     }
 
     .ring-middle {
-      width: 265px;
-      height: 265px;
+      width: 330px;
+      height: 330px;
       animation: kineticRingRotate 38s linear infinite;
-      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border: 1px dashed rgba(255, 255, 255, 0.14);
     }
 
     body:not(.theme-dark) .ring-middle {
-      border-color: rgba(0, 0, 0, 0.12);
+      border-color: rgba(0, 0, 0, 0.14);
     }
 
     .ring-outer {
-      width: 305px;
-      height: 305px;
+      width: 380px;
+      height: 380px;
       animation: kineticRingRotate 52s linear infinite reverse;
-      border: 1px dashed rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(255, 255, 255, 0.09);
     }
 
     body:not(.theme-dark) .ring-outer {
-      border-color: rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.09);
     }
 
     @keyframes kineticEmblemSpin {
       0% { transform: rotate(0deg) scale(1); }
-      50% { transform: rotate(180deg) scale(1.03); }
+      50% { transform: rotate(180deg) scale(1.02); }
       100% { transform: rotate(360deg) scale(1); }
-    }
-
-    @keyframes kineticGlowPulse {
-      0% { transform: scale(0.85); opacity: 0.55; }
-      100% { transform: scale(1.15); opacity: 0.95; }
     }
 
     @keyframes kineticRingRotate {
@@ -6585,86 +6648,83 @@
     }
 
     .kinetic-emblem-title {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 24px;
-      font-weight: 600;
-      letter-spacing: 0.22em;
-      color: var(--text-main);
-      text-transform: uppercase;
+      display: none !important; /* Centered inside logo now */
     }
 
     .kinetic-emblem-badge {
       font-family: "SF Mono", Monaco, Consolas, monospace;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 600;
-      color: #10B981;
-      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      letter-spacing: 0.18em;
     }
 
-    /* Bottom Slider Tabs / Indicator Controls */
+    /* Minimal Faint Dash Slide Indicators (Pure Clean Architecture) */
     .hero-slide-nav-bar {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      margin-top: 4px;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 4px 0;
     }
 
-    .hero-slide-tab {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 9999px;
-      padding: 6px 16px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .hero-slide-dash {
+      width: 32px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.18);
+      border: none;
+      padding: 0;
+      margin: 0;
       cursor: pointer;
-      color: var(--text-muted, #8A8F98);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body:not(.theme-dark) .hero-slide-dash {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .hero-slide-dash:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    body:not(.theme-dark) .hero-slide-dash:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    .hero-slide-dash.active {
+      width: 52px;
+      background: #2E7D32;
+    }
+
+    /* Backwards compatibility for tab class */
+    .hero-slide-tab {
+      width: 32px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.18);
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     body:not(.theme-dark) .hero-slide-tab {
-      border-color: rgba(0, 0, 0, 0.08);
-      color: #64748B;
-    }
-
-    .hero-slide-tab:hover {
-      color: var(--text-main);
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    body:not(.theme-dark) .hero-slide-tab:hover {
-      border-color: rgba(0, 0, 0, 0.2);
-      background: rgba(0, 0, 0, 0.03);
+      background: rgba(0, 0, 0, 0.15);
     }
 
     .hero-slide-tab.active {
-      color: #FFFFFF;
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.25);
+      width: 52px;
+      background: #2E7D32;
     }
 
-    body:not(.theme-dark) .hero-slide-tab.active {
-      color: #0F172A;
-      background: rgba(0, 0, 0, 0.06);
-      border-color: rgba(0, 0, 0, 0.2);
-    }
-
-    .hero-slide-tab .tab-indicator-bar {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #71717A;
-      transition: all 0.2s ease;
-    }
-
-    .hero-slide-tab.active .tab-indicator-bar {
-      background: #10B981;
-      box-shadow: 0 0 6px #10B981;
+    .hero-slide-tab .tab-indicator-bar,
+    .hero-slide-tab .tab-label {
+      display: none !important;
     }
 
     /* ==========================================================================
@@ -7304,24 +7364,27 @@
         box-sizing: border-box !important;
       }
       .kinetic-orbit-stage {
-        width: 260px !important;
-        height: 260px !important;
+        width: 300px !important;
+        height: 300px !important;
       }
       .ring-inner {
-        width: 170px !important;
-        height: 170px !important;
+        width: 200px !important;
+        height: 200px !important;
       }
       .ring-middle {
-        width: 215px !important;
-        height: 215px !important;
+        width: 250px !important;
+        height: 250px !important;
       }
       .ring-outer {
-        width: 255px !important;
-        height: 255px !important;
+        width: 295px !important;
+        height: 295px !important;
       }
       .kinetic-rotating-emblem {
-        width: 140px !important;
-        height: 140px !important;
+        width: 175px !important;
+        height: 175px !important;
+      }
+      .kinetic-center-heartbeat .center-ruzivo-title {
+        font-size: 24px !important;
       }
       .landing-marquee-section {
         clear: both !important;
@@ -7829,11 +7892,15 @@ window.switchHeroSlide = function(target) {
                   <div class="kinetic-dashed-ring ring-middle"></div>
                   <div class="kinetic-dashed-ring ring-inner"></div>
                   <img src="assets/logo.png" alt="Ruzivo AI Kinetic Emblem" class="kinetic-rotating-emblem">
+                  <!-- Floating Heartbeat Centerpiece -->
+                  <div class="kinetic-center-heartbeat">
+                    <span class="center-ruzivo-title">RUZIVO</span>
+                    <span class="center-ruzivo-badge">AI CORE</span>
+                  </div>
                 </div>
 
-                <!-- Emblem Center Typography Badge -->
+                <!-- Emblem Footer Typography Badge -->
                 <div class="kinetic-emblem-footer">
-                  <div class="kinetic-emblem-title">RUZIVO</div>
                   <div class="kinetic-emblem-badge">CHISHONA NLP &bull; ARTIFICIAL INTELLIGENCE CORE</div>
                 </div>
               </div>
@@ -7841,16 +7908,10 @@ window.switchHeroSlide = function(target) {
 
           </div>
 
-          <!-- Bottom Slide Navigation Controls (Tabs & Indicators) -->
-          <div class="hero-slide-nav-bar">
-            <button type="button" class="hero-slide-tab active" id="heroTabDialogue" onclick="switchHeroSlide('dialogue')" aria-label="Show Live Dialogue">
-              <span class="tab-indicator-bar"></span>
-              <span class="tab-label">1. Zvidzidzo Live AI</span>
-            </button>
-            <button type="button" class="hero-slide-tab" id="heroTabLogo" onclick="switchHeroSlide('logo')" aria-label="Show Animated Logo">
-              <span class="tab-indicator-bar"></span>
-              <span class="tab-label">2. Ruzivo Core Kinetic</span>
-            </button>
+          <!-- Bottom Slide Navigation Controls (Faint Simple Architectural Dashes) -->
+          <div class="hero-slide-nav-bar" role="tablist" aria-label="Hero Slide Switcher">
+            <button type="button" class="hero-slide-dash active" id="heroTabDialogue" onclick="switchHeroSlide('dialogue')" aria-label="Zvidzidzo Live AI Slide" title="1. Zvidzidzo Live AI"></button>
+            <button type="button" class="hero-slide-dash" id="heroTabLogo" onclick="switchHeroSlide('logo')" aria-label="Ruzivo Core Kinetic Slide" title="2. Ruzivo Core Kinetic"></button>
           </div>
         </div>
       </section>
@@ -14691,6 +14752,7 @@ window.switchHeroSlide = function(target) {
     async function handleLinearEmailSubmit(e) {
       if (e) e.preventDefault();
       const emailInput = document.getElementById('linearEmailInput');
+      const submitBtn = document.getElementById('linearEmailSubmitBtn');
       if (!emailInput) return;
       const emailVal = emailInput.value.trim();
       if (!emailVal || !emailVal.includes('@')) {
@@ -14702,58 +14764,65 @@ window.switchHeroSlide = function(target) {
       const displayElem = document.getElementById('linearSentEmailDisplay');
       if (displayElem) displayElem.innerText = currentLinearEmail;
 
-      // Authenticate directly or request confirmation code via backend OAuth endpoint
-      try {
-        const username = currentLinearEmail.split('@')[0];
-        const resp = await fetch('/auth/oauth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: currentLinearEmail,
-            name: username,
-            provider: 'email'
-          })
-        });
-        const data = await resp.json();
-        if (resp.ok && data.access_token) {
-          localStorage.setItem('ruzivo_auth_token', data.access_token);
-          localStorage.setItem('ruzivo_username', data.username || username);
-          sessionStorage.removeItem('ruzivo_guest_mode');
-          closeLinearAuthModal();
-          const authOv = document.getElementById('authOverlay');
-          if (authOv) authOv.style.display = 'none';
-          if (typeof updateUserProfileUI === 'function') updateUserProfileUI(data.username || username, currentLinearEmail);
-          showNotificationToast('Mapinda zvakanaka neEmail: ' + currentLinearEmail, 'info');
-          return;
-        }
-      } catch (err) {
-        console.warn("Direct email login attempt:", err);
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Kutumira...';
       }
 
-      // Proceed to code verification step if requested
-      showNotificationToast('Code yekupinda yatumirwa pa ' + currentLinearEmail, 'info');
-      switchLinearStep('code');
+      try {
+        const resp = await fetch('/auth/request-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentLinearEmail })
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+          if (data.email_sent) {
+            showNotificationToast('Kodhi yekupinda yatumirwa ku email yenyu pa ' + currentLinearEmail, 'info');
+          } else {
+            showNotificationToast('Kodhi yagadzirwa. Tarisai email yenyu kana kupinza kodhi.', 'info');
+          }
+          switchLinearStep('code');
+          return;
+        } else {
+          showNotificationToast(data.detail || 'Kutadza kutumira kodhi. Edzai zvakare.', 'warning');
+        }
+      } catch (err) {
+        console.warn("Request code error:", err);
+        showNotificationToast('Kodhi yatumirwa pa ' + currentLinearEmail, 'info');
+        switchLinearStep('code');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Enderera mberi';
+        }
+      }
     }
 
     async function handleLinearCodeSubmit(e) {
       if (e) e.preventDefault();
       const codeInput = document.getElementById('linearCodeInput');
+      const submitBtn = document.getElementById('linearCodeSubmitBtn');
       if (!codeInput) return;
       const codeVal = codeInput.value.trim();
-      if (!codeVal || codeVal.length < 3) {
-        showNotificationToast('Ndapota nyorai code yakakwana.', 'warning');
+      if (!codeVal || codeVal.length < 4) {
+        showNotificationToast('Ndapota nyorai kodhi yakakwana ye 6-digits.', 'warning');
         return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Kupinda...';
       }
 
       const username = currentLinearEmail.split('@')[0];
       try {
-        const resp = await fetch('/auth/oauth', {
+        const resp = await fetch('/auth/verify-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: currentLinearEmail,
-            name: username,
-            provider: 'email'
+            code: codeVal
           })
         });
         const data = await resp.json();
@@ -14765,20 +14834,20 @@ window.switchHeroSlide = function(target) {
           const authOv = document.getElementById('authOverlay');
           if (authOv) authOv.style.display = 'none';
           if (typeof updateUserProfileUI === 'function') updateUserProfileUI(data.username || username, currentLinearEmail);
-          showNotificationToast('Mapinda zvakanaka muRuzivo!', 'info');
+          showNotificationToast('Makorokoto! Mapinda zvakanaka muRuzivo AI.', 'info');
           return;
+        } else {
+          showNotificationToast(data.detail || 'Kodhi yamaisa haina kururama kana kuti yapera nguva.', 'warning');
         }
-      } catch (err) {}
-
-      // Resilient fallback session
-      localStorage.setItem('ruzivo_auth_token', 'linear_email_session_' + Date.now());
-      localStorage.setItem('ruzivo_username', username);
-      sessionStorage.removeItem('ruzivo_guest_mode');
-      closeLinearAuthModal();
-      const authOv = document.getElementById('authOverlay');
-      if (authOv) authOv.style.display = 'none';
-      if (typeof updateUserProfileUI === 'function') updateUserProfileUI(username, currentLinearEmail);
-      showNotificationToast('Mapinda zvakanaka muRuzivo!', 'info');
+      } catch (err) {
+        console.warn("Verify code error:", err);
+        showNotificationToast('Kukanganisa pakupinda. Ndapota edzai zvakare.', 'warning');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Pinda muRuzivo';
+        }
+      }
     }
 
     // Connect existing scrollToAuthSection triggers to openLinearAuthModal
