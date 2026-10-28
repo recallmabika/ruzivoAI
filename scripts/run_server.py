@@ -1735,6 +1735,13 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response(400, {"detail": "Zadzai First name, Last name, Email, pamwe ne Pasiwedhi."})
                 return
 
+            if phone:
+                # Reject any phone containing letters or invalid non-numeric symbols
+                digits_only = re.sub(r'[^0-9]', '', phone)
+                if not re.match(r'^\+?[0-9\s\-()]+$', phone) or len(digits_only) < 9 or len(digits_only) > 15:
+                    self.send_json_response(400, {"detail": "Nhamba yefoni haisi pachokwadi (Phone must be valid digits between 9 and 15 digits)."})
+                    return
+
             if confirm_password and password != confirm_password:
                 self.send_json_response(400, {"detail": "Mapasiwedhi haasi kuenderana (Passwords do not match)."})
                 return

@@ -7834,7 +7834,7 @@ window.switchHeroSlide = function(target) {
       </p>
 
       <form class="linear-auth-actions-stack" onsubmit="handleLinearCodeSubmit(event)">
-        <input type="text" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" required autocomplete="one-time-code">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="Nyora code" maxlength="6" required autocomplete="one-time-code" oninput="handleLinearCodeInputFormat(this)">
         <div id="linearCodeStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
         <button type="submit" class="linear-btn-google" id="linearCodeSubmitBtn" style="background: #2E7D32; border-color: #256629;">
           Enderera mberi neCode
@@ -7871,7 +7871,8 @@ window.switchHeroSlide = function(target) {
         </div>
 
         <div>
-          <input type="tel" class="linear-auth-input" id="linearSignupPhone" placeholder="Phone (Optional, e.g. +263771234567)" autocomplete="tel">
+          <input type="tel" class="linear-auth-input" id="linearSignupPhone" placeholder="Phone (Optional, e.g. +263771234567)" autocomplete="tel" oninput="handleLinearSignupPhoneValidate(this)">
+          <div id="linearSignupPhoneError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: 4px; text-align: left; padding: 0 4px;"></div>
         </div>
 
         <div>
@@ -15002,6 +15003,16 @@ window.switchHeroSlide = function(target) {
       switchLinearStep('password');
     }
 
+    // Format & restrict 6-digit code to numbers only
+    function handleLinearCodeInputFormat(input) {
+      if (!input) return;
+      // Strip any non-digit character instantly
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 6);
+      const errBox = document.getElementById('linearCodeStepError');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+    }
+    window.handleLinearCodeInputFormat = handleLinearCodeInputFormat;
+
     // Step 2: User enters password, backend verifies and sends 6-digit 2FA code to email
     async function handleLinearPasswordSubmit(e) {
       if (e) e.preventDefault();
@@ -15020,7 +15031,7 @@ window.switchHeroSlide = function(target) {
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Kuongorora pasiwedhi...</span>';
+        submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kuongorora pasiwedhi...</span>';
       }
 
       try {
@@ -15131,6 +15142,44 @@ window.switchHeroSlide = function(target) {
       }
     }
 
+    // Real-time phone number sanitization and strict validation
+    function handleLinearSignupPhoneValidate(input) {
+      if (!input) return;
+      const raw = input.value;
+      const phoneErr = document.getElementById('linearSignupPhoneError');
+      if (phoneErr) { phoneErr.style.display = 'none'; phoneErr.innerText = ''; }
+
+      // Disallow letters, words, and unauthorized symbols in real time
+      // Clean only allowed characters: leading + and digits 0-9, space, hyphen
+      let cleaned = raw.replace(/[^0-9+\s\-()]/g, '');
+      if (cleaned.indexOf('+') > 0) {
+        cleaned = cleaned[0] + cleaned.slice(1).replace(/\+/g, '');
+      }
+      if (raw !== cleaned) {
+        input.value = cleaned;
+        if (phoneErr) {
+          phoneErr.innerText = 'Nhamba yefoni inongobvumidza manhamba chete (Numbers and + only, letters not allowed).';
+          phoneErr.style.display = 'block';
+          return;
+        }
+      }
+
+      // Check structure if user entered at least 4 digits
+      const digitsOnly = cleaned.replace(/[^0-9]/g, '');
+      if (digitsOnly.length > 0 && digitsOnly.length < 9) {
+        if (phoneErr) {
+          phoneErr.innerText = 'Nhamba yefoni yakapfupisa (Enter a valid phone number, min 9 digits).';
+          phoneErr.style.display = 'block';
+        }
+      } else if (digitsOnly.length > 15) {
+        if (phoneErr) {
+          phoneErr.innerText = 'Nhamba yefoni yakarebesa (Maximum 15 digits).';
+          phoneErr.style.display = 'block';
+        }
+      }
+    }
+    window.handleLinearSignupPhoneValidate = handleLinearSignupPhoneValidate;
+
     function handleLinearSignupPasswordValidate(input) {
       const val = input ? input.value : '';
       updateLinearSignupPasswordRequirements(val);
@@ -15214,7 +15263,7 @@ window.switchHeroSlide = function(target) {
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Kugadzira akaundi...</span>';
+        submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kugadzira akaundi...</span>';
       }
 
       try {
@@ -15280,9 +15329,12 @@ window.switchHeroSlide = function(target) {
         return;
       }
 
+      const codeErr = document.getElementById('linearCodeStepError');
+      if (codeErr) { codeErr.style.display = 'none'; codeErr.innerText = ''; }
+
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Kupinda...';
+        submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kupinda...</span>';
       }
 
       const username = currentLinearEmail.split('@')[0];
@@ -15315,7 +15367,7 @@ window.switchHeroSlide = function(target) {
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerText = 'Pinda muRuzivo';
+          submitBtn.innerHTML = '<span>Enderera mberi neCode</span>';
         }
       }
     }
