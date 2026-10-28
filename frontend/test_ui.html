@@ -6421,27 +6421,40 @@
       position: relative;
     }
 
+    .hero-showcase-slider-wrapper {
+      width: 100%;
+      max-width: 620px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
     .hero-showcase-slider-track {
       position: relative;
-      width: 100%;
+      width: 200%;
       min-height: 440px;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: stretch;
+      transform: translateX(0%);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+
+    .hero-showcase-slider-track.slide-to-logo {
+      transform: translateX(-50%);
     }
 
     .hero-slide-item {
-      width: 100%;
-      display: none;
+      width: 50%;
+      flex-shrink: 0;
+      display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-
-    .hero-slide-item.active {
-      display: flex !important;
-      opacity: 1 !important;
+      padding: 0 4px;
+      box-sizing: border-box;
     }
 
     /* Kinetic Logo Emblem Card */
@@ -7338,21 +7351,18 @@
 
 window.switchHeroSlide = function(target) {
         window.currentHeroSlide = target;
-        var slideD = document.getElementById('heroSlideDialogue');
-        var slideL = document.getElementById('heroSlideLogo');
+        var track = document.getElementById('heroShowcaseTrack');
         var tabD = document.getElementById('heroTabDialogue');
         var tabL = document.getElementById('heroTabLogo');
 
-        if (target === 'dialogue') {
-          if (slideD) slideD.classList.add('active');
-          if (slideL) slideL.classList.remove('active');
-          if (tabD) tabD.classList.add('active');
-          if (tabL) tabL.classList.remove('active');
-        } else {
-          if (slideD) slideD.classList.remove('active');
-          if (slideL) slideL.classList.add('active');
+        if (target === 'logo') {
+          if (track) track.classList.add('slide-to-logo');
           if (tabD) tabD.classList.remove('active');
           if (tabL) tabL.classList.add('active');
+        } else {
+          if (track) track.classList.remove('slide-to-logo');
+          if (tabD) tabD.classList.add('active');
+          if (tabL) tabL.classList.remove('active');
         }
       };
 
@@ -7365,6 +7375,54 @@ window.switchHeroSlide = function(target) {
       };
 
       window.currentLinearMode = 'login';
+
+      window.updateLinearModeUI = function() {
+        var heading = document.getElementById('linearAuthHeading');
+        var footerToggle = document.getElementById('linearAuthFooterToggle');
+        var termsAgreement = document.getElementById('linearTermsAgreement');
+
+        if (window.currentLinearMode === 'signup') {
+          if (heading) heading.innerText = 'Gadzira Akaundi Yako';
+          if (termsAgreement) termsAgreement.style.display = 'block';
+          if (footerToggle) footerToggle.innerHTML = 'Wakatonyoresa kare? <a onclick="toggleLinearMode(\'login\')">Pinda</a>';
+        } else {
+          if (heading) heading.innerText = 'Pinda muRuzivo';
+          if (termsAgreement) termsAgreement.style.display = 'none';
+          if (footerToggle) footerToggle.innerHTML = 'Hausati wava neakaundi? <a onclick="toggleLinearMode(\'signup\')">Gadzira Akaundi</a> kana <a onclick="window.open(\'/terms\', \'_blank\')">tsvaga zvimwe</a>';
+        }
+      };
+
+      window.switchLinearStep = function(step) {
+        var stepChoice = document.getElementById('linearStepChoice');
+        var stepEmail = document.getElementById('linearStepEmail');
+        var stepCode = document.getElementById('linearStepCode');
+
+        if (stepChoice) stepChoice.style.display = (step === 'choice') ? 'flex' : 'none';
+        if (stepEmail) {
+          stepEmail.style.display = (step === 'email') ? 'flex' : 'none';
+          if (step === 'email') {
+            setTimeout(function() {
+              var inp = document.getElementById('linearEmailInput');
+              if (inp) inp.focus();
+            }, 100);
+          }
+        }
+        if (stepCode) {
+          stepCode.style.display = (step === 'code') ? 'flex' : 'none';
+          if (step === 'code') {
+            setTimeout(function() {
+              var inp = document.getElementById('linearCodeInput');
+              if (inp) inp.focus();
+            }, 100);
+          }
+        }
+      };
+
+      window.toggleLinearMode = function(targetMode) {
+        window.currentLinearMode = targetMode;
+        window.updateLinearModeUI();
+      };
+
       window.openLinearAuthModal = function(mode) {
         window.currentLinearMode = mode || 'login';
         var overlay = document.getElementById('linearAuthOverlay');
@@ -7373,12 +7431,8 @@ window.switchHeroSlide = function(target) {
           overlay.style.setProperty('display', 'flex', 'important');
           overlay.style.setProperty('z-index', '100010', 'important');
         }
-        if (typeof window.updateLinearModeUI === 'function') {
-          window.updateLinearModeUI();
-        }
-        if (typeof window.switchLinearStep === 'function') {
-          window.switchLinearStep('choice');
-        }
+        window.updateLinearModeUI();
+        window.switchLinearStep('choice');
       };
 
       window.closeLinearAuthModal = function() {
@@ -14339,23 +14393,7 @@ window.switchHeroSlide = function(target) {
     let heroSlideInterval = null;
 
     function switchHeroSlide(target) {
-      currentHeroSlide = target;
-      const slideDialogue = document.getElementById('heroSlideDialogue');
-      const slideLogo = document.getElementById('heroSlideLogo');
-      const tabDialogue = document.getElementById('heroTabDialogue');
-      const tabLogo = document.getElementById('heroTabLogo');
-
-      if (target === 'dialogue') {
-        if (slideDialogue) slideDialogue.classList.add('active');
-        if (slideLogo) slideLogo.classList.remove('active');
-        if (tabDialogue) tabDialogue.classList.add('active');
-        if (tabLogo) tabLogo.classList.remove('active');
-      } else {
-        if (slideDialogue) slideDialogue.classList.remove('active');
-        if (slideLogo) slideLogo.classList.add('active');
-        if (tabDialogue) tabDialogue.classList.remove('active');
-        if (tabLogo) tabLogo.classList.add('active');
-      }
+      window.switchHeroSlide(target);
     }
 
     function startHeroSlideAutoCycle() {
