@@ -557,6 +557,45 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
 SMTP_USER = os.environ.get("SMTP_USER", "support@ruzivo-ai.tech")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 
+# Africa's Talking SMS Credentials
+AT_USERNAME = os.environ.get("AT_USERNAME", "sandbox")
+AT_API_KEY = os.environ.get("AT_API_KEY", "")
+AT_SENDER_ID = os.environ.get("AT_SENDER_ID", "")
+
+def send_ruzivo_sms(to_phone: str, message: str) -> tuple[bool, str]:
+    """Dispatches SMS verification code via Africa's Talking SMS service."""
+    username = os.environ.get("AT_USERNAME", AT_USERNAME)
+    api_key = os.environ.get("AT_API_KEY", AT_API_KEY)
+    sender_id = os.environ.get("AT_SENDER_ID", AT_SENDER_ID)
+
+    if not to_phone:
+        return False, "Nhamba yefoni haipo (No phone number associated with account)."
+    if not api_key:
+        print("[SMS WARNING] Africa's Talking AT_API_KEY is not configured in .env.")
+        return False, "SMS service is not fully configured yet."
+
+    # Normalize phone: ensure international format with + (e.g., +263...)
+    formatted_phone = to_phone.strip()
+    if formatted_phone.startswith('0') and len(formatted_phone) >= 10:
+        formatted_phone = '+263' + formatted_phone[1:]
+    elif not formatted_phone.startswith('+'):
+        formatted_phone = '+' + formatted_phone
+
+    try:
+        import africastalking
+        africastalking.initialize(username, api_key)
+        sms = africastalking.SMS
+        if sender_id:
+            response = sms.send(message, [formatted_phone], sender_id)
+        else:
+            response = sms.send(message, [formatted_phone])
+        
+        print(f"[SMS SUCCESS] Africa's Talking dispatch to {formatted_phone}: {response}")
+        return True, "SMS yatumirwa zvakanaka."
+    except Exception as e:
+        print(f"[SMS ERROR] Failed to send SMS via Africa's Talking to {formatted_phone}: {e}")
+        return False, str(e)
+
 def send_ruzivo_email(to_email: str, subject: str, content: str, html_content: str = None) -> bool:
     """Dispatches real email via Titan SMTP (SSL port 465 or TLS port 587)."""
     server_host = os.environ.get("SMTP_SERVER", SMTP_SERVER)
@@ -678,7 +717,7 @@ def verify_email_login_code(email: str, code: str):
                     SELECT u.id, u.username, u.role, vc.id, vc.created_at
                     FROM users u
                     JOIN verification_codes vc ON u.id = vc.user_id
-                    WHERE LOWER(u.email) = LOWER(%s) AND vc.code = %s AND vc.purpose = 'email_login'
+                    WHERE LOWER(u.email) = LOWER(%s) AND vc.code = %s AND vc.purpose IN ('email_login', 'sms_login')
                     ORDER BY vc.created_at DESC LIMIT 1
                 """, (email, code))
                 row = cursor.fetchone()
@@ -693,25 +732,26 @@ def verify_email_login_code(email: str, code: str):
     finally:
         conn.close()
 
-def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str) -> tuple[bool, any]:
-    """Verifies user password and dispatches a 6-digit confirmation code to their email."""
+def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str, channel: str = "email") -> tuple[bool, any]:
+    """Verifies user password and dispatches a 6-digit confirmation code via Email or Africa's Talking SMS."""
     email = email.strip()
     password = password.strip()
     if not email or not password:
         return False, "Email pamwe ne pasiwedhi zvinodiwa."
     
     conn = get_pg_connection()
+    user_phone = ""
     try:
         with conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "SELECT id, password_hash, username, role FROM users WHERE LOWER(email) = LOWER(%s)",
+                    "SELECT id, password_hash, username, role, phone FROM users WHERE LOWER(email) = LOWER(%s)",
                     (email,)
                 )
                 row = cursor.fetchone()
                 if not row:
                     return False, "Email kana pasiwedhi haina kururama."
-                user_id, pw_h, actual_username, role = row
+                user_id, pw_h, actual_username, role, user_phone = row
                 is_valid, needs_rehash = verify_pw(password, pw_h)
                 if not is_valid:
                     return False, "Pasiwedhi yamaisa haina kururama."
@@ -719,29 +759,41 @@ def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str) 
                     cursor.execute("UPDATE users SET password_hash = %s WHERE id = %s", (hash_pw(password), user_id))
 
                 code = str(secrets.randbelow(900000) + 100000)
-                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s AND purpose = 'email_login'", (user_id,))
+                cursor.execute("DELETE FROM verification_codes WHERE user_id = %s AND purpose IN ('email_login', 'sms_login')", (user_id,))
                 cursor.execute("""
                     INSERT INTO verification_codes (user_id, code, purpose)
-                    VALUES (%s, %s, 'email_login')
-                """, (user_id, code))
+                    VALUES (%s, %s, %s)
+                """, (user_id, code, f"{channel}_login"))
     finally:
         conn.close()
 
-    subject = "Ruzivo AI - Kodhi Yenyu Yekusimbisa Kupinda (Sign-in Verification Code)"
-    body = f"Mhoro,\n\nKodhi yako yekusimbisa kupinda muRuzivo AI ndeiyi:\n\n  {code}\n\nKodhi iyi inoshanda kwemaminitsi gumi (10 minutes).\nKana usiriwe wakakumbira kodhi iyi, unogona kurega zvakadaro.\n\nMakorokoto,\nRuzivo AI Team"
-    html_body = f"""
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-        <h2 style="color: #0F172A; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;">Ruzivo AI - Kodhi Yekusimbisa Kupinda</h2>
-        <p style="color: #475569; font-size: 15px; line-height: 1.6;">Mhoro, pasiwedhi yenyu yatambirwa zvakanaka. Shandisai kodhi inotevera kupedzisa kupinda muakaundi yenyu:</p>
-        <div style="text-align: center; margin: 28px 0; padding: 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px;">
-            <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #15803D;">{code}</span>
+    sms_sent = False
+    email_sent = False
+    dispatch_msg = ""
+
+    if channel == "sms":
+        if not user_phone:
+            return False, "Akaundi ino haina nhamba yefoni yakanyoreswa. Sarudzai Email (No phone registered for account)."
+        sms_text = f"Ruzivo AI: Kodhi yako yekupinda ndeiyi: {code}. Inopera mumaminitsi gumi."
+        sms_sent, res_msg = send_ruzivo_sms(user_phone, sms_text)
+        dispatch_msg = f"Kodhi ye 6-digits yatumirwa panhamba yefoni {user_phone[:4]}***{user_phone[-3:] if len(user_phone)>3 else ''}."
+    else:
+        subject = "Ruzivo AI - Kodhi Yenyu Yekusimbisa Kupinda (Sign-in Verification Code)"
+        body = f"Mhoro,\n\nKodhi yako yekusimbisa kupinda muRuzivo AI ndeiyi:\n\n  {code}\n\nKodhi iyi inoshanda kwemaminitsi gumi (10 minutes).\nKana usiriwe wakakumbira kodhi iyi, unogona kurega zvakadaro.\n\nMakorokoto,\nRuzivo AI Team"
+        html_body = f"""
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+            <h2 style="color: #0F172A; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;">Ruzivo AI - Kodhi Yekusimbisa Kupinda</h2>
+            <p style="color: #475569; font-size: 15px; line-height: 1.6;">Mhoro, pasiwedhi yenyu yatambirwa zvakanaka. Shandisai kodhi inotevera kupedzisa kupinda muakaundi yenyu:</p>
+            <div style="text-align: center; margin: 28px 0; padding: 18px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px;">
+                <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #15803D;">{code}</span>
+            </div>
+            <p style="color: #64748B; font-size: 13px; line-height: 1.5;">Kodhi iyi inopera mushure memaminitsi 10.</p>
+            <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;" />
+            <p style="color: #94A3B8; font-size: 11px;">Ruzivo AI Security Core &bull; support@ruzivo-ai.tech &bull; Titan Mail SMTP:465 SSL</p>
         </div>
-        <p style="color: #64748B; font-size: 13px; line-height: 1.5;">Kodhi iyi inopera mushure memaminitsi 10.</p>
-        <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;" />
-        <p style="color: #94A3B8; font-size: 11px;">Ruzivo AI Security Core &bull; support@ruzivo-ai.tech &bull; Titan Mail SMTP:465 SSL</p>
-    </div>
-    """
-    email_sent = send_ruzivo_email(email, subject, body, html_body)
+        """
+        email_sent = send_ruzivo_email(email, subject, body, html_body)
+        dispatch_msg = "Kodhi ye 6-digits yatumirwa ku email yenyu."
 
     masked_email = email
     if '@' in email:
@@ -749,11 +801,20 @@ def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str) 
         masked_name = parts[0][0] + '***' + (parts[0][-1] if len(parts[0]) > 1 else '')
         masked_email = f"{masked_name}@{parts[1]}"
 
+    masked_phone = ""
+    if user_phone:
+        clean_p = user_phone.strip()
+        masked_phone = f"{clean_p[:4]}***{clean_p[-3:] if len(clean_p)>3 else ''}"
+
     return True, {
         "email": masked_email,
+        "phone": masked_phone,
+        "has_phone": bool(user_phone),
+        "channel": channel,
         "email_sent": email_sent,
+        "sms_sent": sms_sent,
         "require_code": True,
-        "message": "Pasiwedhi yakarurama. Kodhi ye 6-digits yatumirwa ku email yenyu."
+        "message": dispatch_msg
     }
 
 def authenticate_or_register_oauth(email: str, name: str, provider: str = "google"):
@@ -1926,7 +1987,10 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json_response(400, {"detail": "Google reCAPTCHA verification failed."})
                     return
 
-            success, res = verify_password_and_dispatch_2fa(email, password, client_ip)
+            channel = str(data.get("channel", "email")).lower().strip()
+            if channel not in ("email", "sms"):
+                channel = "email"
+            success, res = verify_password_and_dispatch_2fa(email, password, client_ip, channel=channel)
             if not success:
                 rem, locked_for = record_failed_login(client_ip, email)
                 if locked_for > 0:

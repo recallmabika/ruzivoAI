@@ -7809,7 +7809,25 @@ window.switchHeroSlide = function(target) {
       <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearPasswordSubmit(event)">
         <input type="text" name="website_url" class="linear-honeypot" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
         <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Nyorai pasiwedhi" autocomplete="current-password" oncopy="return false;" onpaste="return false;" oncut="return false;" oninput="document.getElementById('linearPasswordStepError').style.display='none';">
-        <div id="linearPasswordStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
+        
+        <!-- Dual 2FA Channel Picker: Email or SMS -->
+        <div style="text-align: left; margin: 4px 0 8px 0;">
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">
+            Sarudzai nzira yekutambira kodhi (2FA Channel):
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <label id="linearChannelEmailLabel" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid #2E7D32; border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 600; background: rgba(46, 125, 50, 0.08); transition: all 0.15s ease;">
+              <input type="radio" name="linear2faChannel" value="email" checked onchange="handleLinear2faChannelChange(this.value)" style="accent-color: #2E7D32;">
+              <span>Email</span>
+            </label>
+            <label id="linearChannelSmsLabel" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 9999px; cursor: pointer; font-size: 12px; font-weight: 500; background: transparent; transition: all 0.15s ease;">
+              <input type="radio" name="linear2faChannel" value="sms" onchange="handleLinear2faChannelChange(this.value)" style="accent-color: #2E7D32;">
+              <span>SMS (Phone)</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="linearPasswordStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -4px; text-align: left; padding: 0 4px;"></div>
         
         <button type="submit" class="linear-btn-google" id="linearPasswordSubmitBtn" style="background: #2E7D32; border-color: #256629;">
           <span>Simbisa Pasiwedhi</span>
@@ -7827,10 +7845,10 @@ window.switchHeroSlide = function(target) {
     <!-- STEP 4: Check Your Email / Enter 6-digit Code Step -->
     <div class="linear-auth-box" id="linearStepCode" style="display: none;">
       <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading" style="margin-bottom: 10px;">Tarisa email yako</h2>
-      <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 24px 0; line-height: 1.5;">
+      <h2 class="linear-auth-heading" id="linearCodeHeading" style="margin-bottom: 10px;">Tarisa email yako</h2>
+      <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 24px 0; line-height: 1.5;" id="linearCodePromptText">
         Takutumira kodhi ye 6-digits yekusimbisa.<br>
-        Ndapota tarisa email pa <span id="linearSentEmailDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
+        Ndapota tarisa pa <span id="linearSentDestinationDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
       </p>
 
       <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearCodeSubmit(event)">
@@ -15013,6 +15031,35 @@ window.switchHeroSlide = function(target) {
     }
     window.handleLinearCodeInputFormat = handleLinearCodeInputFormat;
 
+    function handleLinear2faChannelChange(val) {
+      const emailLabel = document.getElementById('linearChannelEmailLabel');
+      const smsLabel = document.getElementById('linearChannelSmsLabel');
+      if (val === 'sms') {
+        if (smsLabel) {
+          smsLabel.style.borderColor = '#2E7D32';
+          smsLabel.style.background = 'rgba(46, 125, 50, 0.08)';
+          smsLabel.style.fontWeight = '600';
+        }
+        if (emailLabel) {
+          emailLabel.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+          emailLabel.style.background = 'transparent';
+          emailLabel.style.fontWeight = '500';
+        }
+      } else {
+        if (emailLabel) {
+          emailLabel.style.borderColor = '#2E7D32';
+          emailLabel.style.background = 'rgba(46, 125, 50, 0.08)';
+          emailLabel.style.fontWeight = '600';
+        }
+        if (smsLabel) {
+          smsLabel.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+          smsLabel.style.background = 'transparent';
+          smsLabel.style.fontWeight = '500';
+        }
+      }
+    }
+    window.handleLinear2faChannelChange = handleLinear2faChannelChange;
+
     // Step 2: User enters password, backend verifies and sends 6-digit 2FA code to email
     async function handleLinearPasswordSubmit(e) {
       if (e) e.preventDefault();
@@ -15034,6 +15081,10 @@ window.switchHeroSlide = function(target) {
         submitBtn.innerHTML = '<span class="auth-btn-spinner" style="margin-right: 8px;"></span><span>Kuongorora pasiwedhi...</span>';
       }
 
+      // Selected 2FA channel: 'email' or 'sms'
+      const channelEl = document.querySelector('input[name="linear2faChannel"]:checked');
+      const selectedChannel = channelEl ? channelEl.value : 'email';
+
       try {
         const csrfToken = await ensureCsrfToken();
         const recaptchaToken = (typeof getRecaptchaToken === 'function') ? await getRecaptchaToken('LOGIN') : '';
@@ -15046,6 +15097,7 @@ window.switchHeroSlide = function(target) {
           body: JSON.stringify({
             email: currentLinearEmail,
             password: passVal,
+            channel: selectedChannel,
             csrf_token: csrfToken,
             recaptcha_token: recaptchaToken
           })
@@ -15053,9 +15105,17 @@ window.switchHeroSlide = function(target) {
         const data = await resp.json();
 
         if (resp.ok) {
-          const displayElem = document.getElementById('linearSentEmailDisplay');
-          if (displayElem) displayElem.innerText = currentLinearEmail;
-          showNotificationToast('Pasiwedhi yasimbiswa. Kodhi ye 6-digits yatumirwa pa ' + currentLinearEmail, 'info');
+          const headingEl = document.getElementById('linearCodeHeading');
+          const destDisplay = document.getElementById('linearSentDestinationDisplay');
+          if (selectedChannel === 'sms') {
+            if (headingEl) headingEl.innerText = 'Tarisa foni yako (SMS)';
+            if (destDisplay) destDisplay.innerText = data.phone || 'foni yako';
+            showNotificationToast(data.message || 'Kodhi ye 6-digits yatumirwa neSMS pa ' + (data.phone || 'foni yenyu'), 'info');
+          } else {
+            if (headingEl) headingEl.innerText = 'Tarisa email yako';
+            if (destDisplay) destDisplay.innerText = data.email || currentLinearEmail;
+            showNotificationToast(data.message || 'Kodhi ye 6-digits yatumirwa pa ' + currentLinearEmail, 'info');
+          }
           // Clear password input immediately for security
           passInput.value = '';
           switchLinearStep('code');
