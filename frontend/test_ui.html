@@ -10705,8 +10705,8 @@ window.switchHeroSlide = function(target) {
       if (/([a-zA-Z])\1\1/i.test(name)) {
         return { isValid: false, message: 'Zita harigoni kuve nemavara akafanana akatevedzana katatu (No name has 3 consecutive same letters).' };
       }
-      if (trimmed.length < 2) {
-        return { isValid: false, message: 'Zita rinofanira kuve nemavara 2 kana kudarika.' };
+      if (trimmed.length < 3) {
+        return { isValid: false, message: 'Zita rinofanira kuve nemavara anodarika 2 (Minimum 3 letters, 2 letters not allowed).' };
       }
       if (trimmed.length > 40) {
         return { isValid: false, message: 'Zita rakarebesa (Mavara asingapfuuri 40).' };

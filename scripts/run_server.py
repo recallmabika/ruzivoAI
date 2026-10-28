@@ -3693,6 +3693,12 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
                 return
 
+            if len(first_name.strip()) < 3 or len(last_name.strip()) < 3:
+
+                self.send_json_response(400, {"detail": "First name ne Last name zvinofanira kuve nemavara anodarika 2 (Minimum 3 letters, 2 letters not allowed)."})
+
+                return
+
 
 
             if phone:
@@ -3741,9 +3747,9 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
 
-            if len(username.strip()) < 2 or len(username.strip()) > 40:
+            if len(username.strip()) < 3 or len(username.strip()) > 40:
 
-                self.send_json_response(400, {"detail": "Zita rinofanira kuve nemavara ari pakati pe 2 ne 40."})
+                self.send_json_response(400, {"detail": "Zita rinofanira kuve nemavara anodarika 2 (ari pakati pe 3 ne 40)."})
 
                 return
 
