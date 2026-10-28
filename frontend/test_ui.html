@@ -10186,8 +10186,7 @@ window.switchHeroSlide = function(target) {
       const overlay = document.getElementById('authOverlay');
 
       if (!token && !sessionStorage.getItem('ruzivo_guest_mode')) {
-        overlay.style.display = 'flex';
-        toggleAuthMode('login');
+        if (overlay) overlay.style.display = 'flex';
       } else {
         overlay.style.display = 'none';
         currentUser = savedUser || (sessionStorage.getItem('ruzivo_guest_mode') ? 'Muenzi' : 'Mudzidzi');
@@ -10404,12 +10403,14 @@ window.switchHeroSlide = function(target) {
       dismissAuthBanner('loginError');
       dismissAuthBanner('registerError');
 
-      if (mode === 'register') {
-        loginCard.style.display = 'none';
-        regCard.style.display = 'flex';
-      } else {
-        regCard.style.display = 'none';
-        loginCard.style.display = 'flex';
+      if (loginCard && regCard) {
+        if (mode === 'register') {
+          loginCard.style.display = 'none';
+          regCard.style.display = 'flex';
+        } else {
+          regCard.style.display = 'none';
+          loginCard.style.display = 'flex';
+        }
       }
 
       setTimeout(renderRecaptchaWidgets, 50);
@@ -14481,119 +14482,9 @@ window.switchHeroSlide = function(target) {
     }
 
     
-    // Dual-Slide Hero Showcase Controller (Live Terminal Dialogue & Kinetic Logo Emblem)
-    let currentHeroSlide = 'dialogue';
-    let heroSlideInterval = null;
+    // Dual-Slide Hero Showcase Controller
+    // Maintained by window.switchHeroSlide and window.startHeroSlideAutoCycle established in head script.
 
-    function switchHeroSlide(target) {
-      window.switchHeroSlide(target);
-    }
-
-    function startHeroSlideAutoCycle() {
-      if (heroSlideInterval) clearInterval(heroSlideInterval);
-      heroSlideInterval = setInterval(() => {
-        const nextSlide = (currentHeroSlide === 'dialogue') ? 'logo' : 'dialogue';
-        switchHeroSlide(nextSlide);
-      }, 7000);
-    }
-
-    // Attach to window so inline onclick always resolves
-    window.switchHeroSlide = switchHeroSlide;
-    window.startHeroSlideAutoCycle = startHeroSlideAutoCycle;
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', startHeroSlideAutoCycle);
-    } else {
-      setTimeout(startHeroSlideAutoCycle, 200);
-    }
-
-    // Dynamic Sentence Typewriter for Landing Page
-    (function initLandingTypewriter() {
-      const phrases1 = [
-        '"Kugona Chishona (Grade 7 - Form 4), Tsika dzaVaShona, nemazwi anokosha akachengetedzwa zvakakwana."',
-        '"Ruzivo rweChiShona rwakadzama rwezvidzidzo, mabhuku, netsika dzechinyakare."',
-        '"Zvidzidzo zveGiredhi rechinomwe kusvika Fomu 4 zvakarongeka nenzira yakajeka."'
-      ];
-
-      const phrases2 = [
-        '"Chara chimwe hachitswanyi inda — Hurukuro dzose dzine humbowo."',
-        '"Kandiro kanoenda kunobva kamwe — Kudzidza pamwe chete kupa ruzivo."',
-        '"Ateya mariva kuteerera nhetemwa — Tsumo dzose dzinodudzirwa zvine unyanzvi."'
-      ];
-
-      let idx1 = 0;
-      let idx2 = 0;
-
-      function typeText(targetId, cursorId, text, speed, onComplete) {
-        const el = document.getElementById(targetId);
-        const cur = document.getElementById(cursorId);
-        if (!el) return;
-        el.innerText = '';
-        if (cur) cur.style.display = 'inline-block';
-        let i = 0;
-        const interval = setInterval(() => {
-          if (i < text.length) {
-            el.innerText += text.charAt(i);
-            i++;
-          } else {
-            clearInterval(interval);
-            if (onComplete) setTimeout(onComplete, 3800);
-          }
-        }, speed);
-      }
-
-      function eraseText(targetId, speed, onComplete) {
-        const el = document.getElementById(targetId);
-        if (!el) return;
-        const interval = setInterval(() => {
-          if (el.innerText.length > 0) {
-            el.innerText = el.innerText.substring(0, el.innerText.length - 1);
-          } else {
-            clearInterval(interval);
-            if (onComplete) setTimeout(onComplete, 400);
-          }
-        }, speed);
-      }
-
-      function loopCard1() {
-        const text = phrases1[idx1 % phrases1.length];
-        typeText('typewriterText1', 'typewriterCursor1', text, 38, () => {
-          eraseText('typewriterText1', 18, () => {
-            idx1++;
-            loopCard1();
-          });
-        });
-      }
-
-      function loopCard2() {
-        const text = phrases2[idx2 % phrases2.length];
-        setTimeout(() => {
-          typeText('typewriterText2', 'typewriterCursor2', text, 42, () => {
-            eraseText('typewriterText2', 18, () => {
-              idx2++;
-              loopCard2();
-            });
-          });
-        }, 1200);
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          if (window.lucide) {
-            lucide.createIcons();
-          }
-          loopCard1();
-          loopCard2();
-        });
-      } else {
-        if (window.lucide) {
-          lucide.createIcons();
-        }
-        loopCard1();
-        loopCard2();
-      }
-    })();
-  
 
     /* ==========================================================================
        LINEAR AUTH MODAL CONTROLLER
