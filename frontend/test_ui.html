@@ -7317,10 +7317,67 @@
     }
 
     .linear-code-input {
-      font-family: "SF Mono", Monaco, Consolas, monospace !important;
-      letter-spacing: 0.3em;
-      font-size: 18px !important;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      letter-spacing: 0.38em;
+      font-size: 26px !important;
+      font-weight: 700 !important;
+      height: 54px !important;
+      padding: 0 16px !important;
+      border-radius: 12px !important;
+      border: 1.5px solid rgba(0, 0, 0, 0.16) !important;
+      background: #FFFFFF !important;
+      color: #111827 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    body.theme-dark .linear-code-input {
+      background: rgba(255, 255, 255, 0.04) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      color: #F9FAFB !important;
+    }
+
+    .linear-code-input:focus {
+      border-color: #2E7D32 !important;
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.18) !important;
+    }
+
+    .linear-code-input::placeholder {
+      letter-spacing: 0.38em;
+      font-weight: 500;
+      opacity: 0.28;
+      color: #6B7280;
+    }
+
+    /* Modern Styled 2FA Channel Switcher Card */
+    .channel-switcher-card {
+      margin: 0 0 20px 0;
+      padding: 14px 16px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    body.theme-dark .channel-switcher-card {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .channel-pill-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 12px;
+      font-size: 13px;
       font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1.5px solid transparent;
+      outline: none;
     }
 
 
@@ -7853,28 +7910,31 @@ window.switchHeroSlide = function(target) {
       </p>
 
       <!-- Option to switch delivery channel if not received or preferred -->
-      <div style="margin: 0 0 16px 0; padding: 10px 12px; background: rgba(0, 0, 0, 0.03); border: 1px solid var(--border-subtle, rgba(0,0,0,0.08)); border-radius: 8px; text-align: left;">
-        <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500;">
-          Haina kusvika? Sarudza imwe nzira yekutambira kodhi:
+      <div class="channel-switcher-card">
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; display: flex; align-items: center; justify-content: space-between;">
+          <span>Nzira yekutambira kodhi:</span>
+          <span style="font-size: 11px; opacity: 0.75;">(Baya kuti uchinje)</span>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" id="btnResendSms" onclick="resendLinearCodeToChannel('sms')" style="flex: 1; padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 6px; border: 1px solid #2E7D32; background: rgba(46,125,50,0.08); color: #2E7D32; cursor: pointer; transition: all 0.15s ease;">
-            SMS (Phone)
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="btnResendSms" class="channel-pill-btn" onclick="resendLinearCodeToChannel('sms')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <span>SMS (Foni)</span>
           </button>
-          <button type="button" id="btnResendEmail" onclick="resendLinearCodeToChannel('email')" style="flex: 1; padding: 6px 10px; font-size: 11.5px; font-weight: 500; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); background: transparent; color: inherit; cursor: pointer; transition: all 0.15s ease;">
-            Email
+          <button type="button" id="btnResendEmail" class="channel-pill-btn" onclick="resendLinearCodeToChannel('email')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+            <span>Email</span>
           </button>
         </div>
       </div>
 
-      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearCodeSubmit(event)">
+      <form class="linear-auth-actions-stack" novalidate onsubmit="handleLinearCodeSubmit(event)" style="gap: 12px;">
         <input type="text" inputmode="numeric" class="linear-auth-input linear-code-input" id="linearCodeInput" placeholder="000000" maxlength="6" autocomplete="one-time-code" oninput="handleLinearCodeInputFormat(this)">
         
         <!-- Google reCAPTCHA Challenge Widget Container -->
-        <div id="linear2faRecaptcha" style="margin: 8px 0; display: flex; justify-content: center; min-height: 78px;"></div>
+        <div id="linear2faRecaptcha" style="margin: 6px 0; display: flex; justify-content: center; min-height: 78px; width: 100%;"></div>
         
-        <div id="linearCodeStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -6px; text-align: left; padding: 0 4px;"></div>
-        <button type="submit" class="linear-btn-google" id="linearCodeSubmitBtn" style="background: #2E7D32; border-color: #256629;">
+        <div id="linearCodeStepError" class="linear-field-error-msg" style="display: none; color: #DC2626; font-size: 12px; margin-top: -4px; text-align: left; padding: 0 4px;"></div>
+        <button type="submit" class="linear-btn-google" id="linearCodeSubmitBtn" style="background: #2E7D32; border-color: #256629; height: 46px; font-size: 14.5px; font-weight: 600;">
           <span>Simbisa Kodhi</span>
         </button>
       </form>
@@ -11482,6 +11542,42 @@ window.switchHeroSlide = function(target) {
     const RECAPTCHA_SITE_KEY = "6LeQQwMuAAAAACyZi2_yKpfyG11ZFv6YDPALMn9X";
     let loginWidgetId = null;
     let registerWidgetId = null;
+
+        let linear2faWidgetId = null;
+
+    function renderLinear2faRecaptcha() {
+      const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
+      if (!g || typeof g.render !== 'function') {
+        // If recaptcha script is still loading, try again in 200ms
+        setTimeout(renderLinear2faRecaptcha, 200);
+        return;
+      }
+      try {
+        const container = document.getElementById('linear2faRecaptcha');
+        if (container && linear2faWidgetId === null && container.children.length === 0) {
+          linear2faWidgetId = g.render('linear2faRecaptcha', {
+            'sitekey': RECAPTCHA_SITE_KEY,
+            'theme': document.body.classList.contains('theme-dark') ? 'dark' : 'light'
+          });
+        }
+      } catch (e) {
+        console.warn('linear2faRecaptcha render warning:', e);
+      }
+    }
+    window.renderLinear2faRecaptcha = renderLinear2faRecaptcha;
+
+    function handleLinearCodeInputFormat(input) {
+      if (!input) return;
+      // Strip any non-digit characters smoothly
+      const digits = input.value.replace(/\D/g, '').slice(0, 6);
+      input.value = digits;
+      if (digits.length === 6) {
+        // Auto-focus submit button or auto-validate
+        const btn = document.getElementById('linearCodeSubmitBtn');
+        if (btn) btn.focus();
+      }
+    }
+    window.handleLinearCodeInputFormat = handleLinearCodeInputFormat;
 
     function renderRecaptchaWidgets() {
       const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
@@ -15280,31 +15376,41 @@ window.switchHeroSlide = function(target) {
     function update2faChannelButtonStyles(activeChannel) {
       const btnSms = document.getElementById('btnResendSms');
       const btnEmail = document.getElementById('btnResendEmail');
+      const isDark = document.body.classList.contains('theme-dark');
+
+      const activeBg = isDark ? 'rgba(46, 125, 50, 0.22)' : '#E8F5E9';
+      const activeBorder = '#2E7D32';
+      const activeColor = isDark ? '#4ADE80' : '#1B5E20';
+
+      const inactiveBg = isDark ? 'rgba(255, 255, 255, 0.04)' : '#FFFFFF';
+      const inactiveBorder = isDark ? 'rgba(255, 255, 255, 0.12)' : '#CBD5E1';
+      const inactiveColor = isDark ? '#9CA3AF' : '#475569';
+
       if (activeChannel === 'sms') {
         if (btnSms) {
-          btnSms.style.border = '1.5px solid #2E7D32';
-          btnSms.style.background = 'rgba(46, 125, 50, 0.12)';
-          btnSms.style.color = '#2E7D32';
-          btnSms.style.fontWeight = '700';
+          btnSms.style.background = activeBg;
+          btnSms.style.border = `1.5px solid ${activeBorder}`;
+          btnSms.style.color = activeColor;
+          btnSms.style.boxShadow = '0 1px 3px rgba(46, 125, 50, 0.15)';
         }
         if (btnEmail) {
-          btnEmail.style.border = '1px solid rgba(0,0,0,0.15)';
-          btnEmail.style.background = 'transparent';
-          btnEmail.style.color = 'inherit';
-          btnEmail.style.fontWeight = '500';
+          btnEmail.style.background = inactiveBg;
+          btnEmail.style.border = `1px solid ${inactiveBorder}`;
+          btnEmail.style.color = inactiveColor;
+          btnEmail.style.boxShadow = 'none';
         }
       } else {
         if (btnEmail) {
-          btnEmail.style.border = '1.5px solid #2E7D32';
-          btnEmail.style.background = 'rgba(46, 125, 50, 0.12)';
-          btnEmail.style.color = '#2E7D32';
-          btnEmail.style.fontWeight = '700';
+          btnEmail.style.background = activeBg;
+          btnEmail.style.border = `1.5px solid ${activeBorder}`;
+          btnEmail.style.color = activeColor;
+          btnEmail.style.boxShadow = '0 1px 3px rgba(46, 125, 50, 0.15)';
         }
         if (btnSms) {
-          btnSms.style.border = '1px solid rgba(0,0,0,0.15)';
-          btnSms.style.background = 'transparent';
-          btnSms.style.color = 'inherit';
-          btnSms.style.fontWeight = '500';
+          btnSms.style.background = inactiveBg;
+          btnSms.style.border = `1px solid ${inactiveBorder}`;
+          btnSms.style.color = inactiveColor;
+          btnSms.style.boxShadow = 'none';
         }
       }
     }
