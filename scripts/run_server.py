@@ -1637,18 +1637,13 @@ def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str, 
 
 
 
+    if channel == "sms" and not user_phone:
+        channel = "email"
+
     if channel == "sms":
-
-        if not user_phone:
-
-            return False, "Akaundi ino haina nhamba yefoni yakanyoreswa. Sarudzai Email (No phone registered for account)."
-
         sms_text = f"Ruzivo AI: Kodhi yako yekupinda ndeiyi: {code}. Inopera mumaminitsi gumi."
-
         sms_sent, res_msg = send_ruzivo_sms(user_phone, sms_text)
-
         dispatch_msg = f"Kodhi ye 6-digits yatumirwa panhamba yefoni {user_phone[:4]}***{user_phone[-3:] if len(user_phone)>3 else ''}."
-
     else:
 
         subject = f"Sign in to Ruzivo: {code}"

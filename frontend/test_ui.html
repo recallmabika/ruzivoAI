@@ -15218,7 +15218,7 @@ window.switchHeroSlide = function(target) {
 
       try {
         const csrfToken = await ensureCsrfToken();
-        const recaptchaToken = (typeof getRecaptchaToken === 'function') ? await getRecaptToken('LOGIN') : '';
+        const recaptchaToken = (typeof getRecaptchaToken === 'function') ? await getRecaptchaToken('LOGIN') : '';
         const resp = await fetch('/auth/verify-password-and-send-code', {
           method: 'POST',
           headers: {
