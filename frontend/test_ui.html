@@ -15818,81 +15818,174 @@ window.switchHeroSlide = function(target) {
         <img src="assets/logo.png" alt="Ruzivo AI" style="width: 34px; height: 34px; object-fit: contain;">
       </div>
 
-      <h3 style="font-size: 19px; font-weight: 700; color: #0F172A; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+      <h3 id="mobileModalTitle" style="font-size: 19px; font-weight: 700; color: #0F172A; margin: 0 0 6px 0; letter-spacing: -0.02em;">
         Dhawunirodha Ruzivo App
       </h3>
-      <p style="font-size: 13px; color: #64748B; margin: 0 0 20px 0; line-height: 1.5; padding: 0 10px;">
+      <p id="mobileModalSubtitle" style="font-size: 13px; color: #64748B; margin: 0 0 18px 0; line-height: 1.5; padding: 0 10px;">
         Shandisai Ruzivo AI chero nguva pamafoni enyu. Skenai QR code pazasi ne kamera:
       </p>
 
-      <!-- Live Interactive QR Code Container -->
-      <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 16px; padding: 14px; display: inline-block; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);">
-        <img id="mobileQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=https%3A%2F%2Fruzivo-ai.tech%2Fdownload%2Fandroid&format=svg" alt="Scan QR Code to Download Ruzivo App" style="width: 160px; height: 160px; display: block; border-radius: 6px;">
-      </div>
-
-      <!-- Action Buttons with Authentic Brand Icons -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
-        <!-- Android APK Direct Button -->
-        <a href="/download/android" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; background: #0F172A; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 10px; text-decoration: none; border: 1px solid #0F172A; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);" onmouseover="this.style.background='#1E293B'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0F172A'; this.style.transform='none';">
-          <img src="/assets/android_icon.png" alt="Android" style="width: 20px; height: 20px; object-fit: contain; filter: brightness(1.2);">
+      <!-- Tab Switcher (Android APK vs iOS iPhone) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; padding: 4px; background: #F1F5F9; border-radius: 12px;">
+        <button type="button" id="tabBtnAndroid" onclick="switchMobileModalTab('android')" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; background: #0F172A; color: #FFFFFF; font-size: 13px; font-weight: 600; border-radius: 9px; border: none; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <img src="/assets/android_icon.png" alt="Android" style="width: 18px; height: 18px; object-fit: contain; filter: brightness(1.2);">
           <span>Android APK</span>
-        </a>
+        </button>
 
-        <!-- iOS (iPhone) Button -->
-        <button type="button" onclick="showIosInstallGuide()" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; background: #F8FAFC; color: #0F172A; border: 1.5px solid #E2E8F0; font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.background='#F1F5F9'; this.style.borderColor='#CBD5E1'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#F8FAFC'; this.style.borderColor='#E2E8F0'; this.style.transform='none';">
-          <img src="/assets/apple_icon.png" alt="Apple" style="width: 18px; height: 18px; object-fit: contain;">
+        <button type="button" id="tabBtnIos" onclick="switchMobileModalTab('ios')" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; background: transparent; color: #64748B; font-size: 13px; font-weight: 600; border-radius: 9px; border: none; cursor: pointer; transition: all 0.15s ease;">
+          <img src="/assets/apple_icon.png" alt="Apple" style="width: 17px; height: 17px; object-fit: contain;">
           <span>iOS (iPhone)</span>
         </button>
       </div>
 
-      <!-- Clean iOS Step-by-Step Callout -->
-      <div id="iosInstallStepBox" style="display: none; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; text-align: left; margin-bottom: 14px; animation: modalFadeIn 0.15s ease;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-          <img src="/assets/apple_icon.png" alt="Apple" style="width: 15px; height: 15px; object-fit: contain;">
-          <span style="font-size: 12.5px; font-weight: 700; color: #0F172A;">Maitirwo pa iPhone / iPad:</span>
+      <!-- VIEW 1: Android Section (Shows Live Scannable QR Code & Download Button) -->
+      <div id="androidModalSection">
+        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 16px; padding: 14px; display: inline-block; margin-bottom: 18px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);">
+          <img id="mobileQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=https%3A%2F%2Fruzivo-ai.tech%2Fdownload%2Fandroid&format=svg" alt="Scan QR Code to Download Ruzivo Android APK" style="width: 160px; height: 160px; display: block; border-radius: 6px;">
         </div>
-        <ol style="margin: 0; padding-left: 20px; font-size: 12px; color: #475569; line-height: 1.6;">
-          <li>Vhurai <strong>ruzivo-ai.tech</strong> muSafari.</li>
-          <li>Dzvanyai bhatani re <strong>Share</strong> (bhokisi rine arrow riri pasi).</li>
-          <li>Sarudzai <strong>"Add to Home Screen"</strong> kuti iise icon reApp.</li>
-        </ol>
+
+        <div style="margin-bottom: 14px;">
+          <a href="/download/android" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 12px 16px; background: #2E7D32; color: #FFFFFF; font-size: 13.5px; font-weight: 600; border-radius: 10px; text-decoration: none; border: 1px solid #256629; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(46, 125, 50, 0.2);" onmouseover="this.style.background='#256629'" onmouseout="this.style.background='#2E7D32'">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Dhawunirodha ruzivo.apk</span>
+          </a>
+        </div>
+
+        <div style="font-size: 11.5px; color: #94A3B8; display: flex; align-items: center; justify-content: center; gap: 5px;">
+          <span>URL:</span>
+          <a href="https://ruzivo-ai.tech/download/android" style="font-family: 'SF Mono', Consolas, monospace; color: #475569; text-decoration: underline; font-weight: 500;">
+            ruzivo-ai.tech/download/android
+          </a>
+        </div>
       </div>
 
-      <div style="font-size: 11.5px; color: #94A3B8; display: flex; align-items: center; justify-content: center; gap: 5px;">
-        <span>Direct URL:</span>
-        <a href="https://ruzivo-ai.tech/download/android" style="font-family: 'SF Mono', Consolas, monospace; color: #475569; text-decoration: underline; font-weight: 500;">
-          ruzivo-ai.tech/download/android
-        </a>
+      <!-- VIEW 2: iOS Section (Hides QR, Displays Clean Visual Step-by-Step Instructions) -->
+      <div id="iosModalSection" style="display: none; text-align: left;">
+        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 12px;">
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: #0F172A; display: flex; align-items: center; justify-content: center;">
+              <img src="/assets/apple_icon.png" alt="Apple" style="width: 15px; height: 15px; filter: brightness(10);">
+            </div>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 700; color: #0F172A;">Kuisa pa iPhone kana iPad</div>
+              <div style="font-size: 11.5px; color: #64748B;">Hapana App Store inodiwa &bull; Inoshanda senative app</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: #334155; line-height: 1.5;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #E2E8F0; color: #0F172A; font-weight: 700; font-size: 11.5px; flex-shrink: 0; margin-top: 1px;">1</span>
+              <div>Vhurai Safari pa iPhone yenyu moenda pa <strong style="color: #0F172A; font-family: monospace;">ruzivo-ai.tech</strong></div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #E2E8F0; color: #0F172A; font-weight: 700; font-size: 11.5px; flex-shrink: 0; margin-top: 1px;">2</span>
+              <div>
+                Dzvanyai bhatani re <strong>Share</strong> 
+                <span style="display: inline-flex; vertical-align: middle; margin: 0 2px; padding: 2px 5px; background: #E2E8F0; border-radius: 4px; font-size: 11px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                </span> 
+                (bhokisi rine museve riri pasi muSafari).
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #E2E8F0; color: #0F172A; font-weight: 700; font-size: 11.5px; flex-shrink: 0; margin-top: 1px;">3</span>
+              <div>Skororai pasi musarudze <strong>"Add to Home Screen"</strong> (Isa paChiratidzo cheKumba).</div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #E2E8F0; color: #0F172A; font-weight: 700; font-size: 11.5px; flex-shrink: 0; margin-top: 1px;">4</span>
+              <div>Dzvanyai <strong>Add</strong> riri pamusoro kurudyi. App icon yaRuzivo inobva yaoneka pa screen re iPhone yako!</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" onclick="switchMobileModalTab('android')" style="width: 100%; padding: 9px; background: transparent; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 12.5px; color: #475569; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.15s ease;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='transparent'">
+          &larr; Dzokera pa Android QR Download
+        </button>
       </div>
     </div>
   </div>
 
   <script>
-    function openMobileAppModal() {
+    function openMobileAppModal(initialTab) {
       var m = document.getElementById('mobileAppModal');
       if (m) {
         m.style.display = 'flex';
         document.body.style.overflow = 'hidden';
       }
+      switchMobileModalTab(initialTab || 'android');
     }
+
     function closeMobileAppModal() {
       var m = document.getElementById('mobileAppModal');
       if (m) {
         m.style.display = 'none';
         document.body.style.overflow = '';
       }
-      var iosBox = document.getElementById('iosInstallStepBox');
-      if (iosBox) iosBox.style.display = 'none';
     }
-    function showIosInstallGuide() {
-      var iosBox = document.getElementById('iosInstallStepBox');
-      if (iosBox) {
-        iosBox.style.display = (iosBox.style.display === 'none') ? 'block' : 'none';
+
+    function switchMobileModalTab(tab) {
+      var androidSection = document.getElementById('androidModalSection');
+      var iosSection = document.getElementById('iosModalSection');
+      var tabBtnAndroid = document.getElementById('tabBtnAndroid');
+      var tabBtnIos = document.getElementById('tabBtnIos');
+      var title = document.getElementById('mobileModalTitle');
+      var subtitle = document.getElementById('mobileModalSubtitle');
+
+      if (tab === 'ios') {
+        if (androidSection) androidSection.style.display = 'none';
+        if (iosSection) iosSection.style.display = 'block';
+
+        if (title) title.innerText = 'Isa Ruzivo pa iOS (iPhone / iPad)';
+        if (subtitle) subtitle.innerText = 'Apple haibvumidzi kudhawunirodha ma-APK zvakananga. Tevedzai matanho ari pasi:';
+
+        if (tabBtnIos) {
+          tabBtnIos.style.background = '#0F172A';
+          tabBtnIos.style.color = '#FFFFFF';
+          tabBtnIos.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+          var img = tabBtnIos.querySelector('img');
+          if (img) img.style.filter = 'brightness(10)';
+        }
+        if (tabBtnAndroid) {
+          tabBtnAndroid.style.background = 'transparent';
+          tabBtnAndroid.style.color = '#64748B';
+          tabBtnAndroid.style.boxShadow = 'none';
+          var imgA = tabBtnAndroid.querySelector('img');
+          if (imgA) imgA.style.filter = 'none';
+        }
+      } else {
+        if (iosSection) iosSection.style.display = 'none';
+        if (androidSection) androidSection.style.display = 'block';
+
+        if (title) title.innerText = 'Dhawunirodha Ruzivo App';
+        if (subtitle) subtitle.innerText = 'Shandisai Ruzivo AI chero nguva pamafoni enyu. Skenai QR code pazasi ne kamera:';
+
+        if (tabBtnAndroid) {
+          tabBtnAndroid.style.background = '#0F172A';
+          tabBtnAndroid.style.color = '#FFFFFF';
+          tabBtnAndroid.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+          var imgA = tabBtnAndroid.querySelector('img');
+          if (imgA) imgA.style.filter = 'brightness(1.2)';
+        }
+        if (tabBtnIos) {
+          tabBtnIos.style.background = 'transparent';
+          tabBtnIos.style.color = '#64748B';
+          tabBtnIos.style.boxShadow = 'none';
+          var img = tabBtnIos.querySelector('img');
+          if (img) img.style.filter = 'none';
+        }
       }
     }
+
     window.openMobileAppModal = openMobileAppModal;
     window.closeMobileAppModal = closeMobileAppModal;
-    window.showIosInstallGuide = showIosInstallGuide;
+    window.switchMobileModalTab = switchMobileModalTab;
 
     // Automatically hide the App download button if the user is already on a mobile phone, tablet, or standalone home screen app
     function checkAndHideAppBtnOnMobile() {
