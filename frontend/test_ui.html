@@ -7904,7 +7904,7 @@ window.switchHeroSlide = function(target) {
     <!-- STEP 4: Enter 6-digit Code Step (With Channel Switching & reCAPTCHA Challenge) -->
     <div class="linear-auth-box" id="linearStepCode" style="display: none; max-width: 380px;">
       <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading" id="linearCodeHeading" style="margin-bottom: 8px;">Simbisa Kodhi (2FA)</h2>
+      <h2 class="linear-auth-heading" id="linearCodeHeading" style="margin-bottom: 8px;">Isa OTP Kodhi</h2>
       <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 16px 0; line-height: 1.5;" id="linearCodePromptText">
         Takutumira kodhi ye 6-digits yekusimbisa pa <span id="linearSentDestinationDisplay" style="color: inherit; font-weight: 600;">you@example.com</span>.
       </p>
@@ -15335,7 +15335,7 @@ window.switchHeroSlide = function(target) {
           const headingEl = document.getElementById('linearCodeHeading');
           const destDisplay = document.getElementById('linearSentDestinationDisplay');
           const promptText = document.getElementById('linearCodePromptText');
-          if (headingEl) headingEl.innerText = 'Simbisa Kodhi (2FA)';
+          if (headingEl) headingEl.innerText = 'Isa OTP Kodhi';
           if (destDisplay) destDisplay.innerText = data.phone || data.email || 'foni yenyu';
           if (promptText) {
             promptText.innerHTML = `Takutumira kodhi ye 6-digits pa <span id="linearSentDestinationDisplay" style="color: inherit; font-weight: 600;">${data.phone || data.email || 'foni yenyu'}</span>.`;
