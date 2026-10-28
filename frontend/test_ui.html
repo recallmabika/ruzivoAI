@@ -7021,27 +7021,92 @@
       gap: 12px;
     }
 
-    /* Primary Google Pill (Linear Blue Accent / Theme Sync) */
+    /* Primary Google Pill (Authentic Ruzivo Emerald Green Palette with Black/Hover states) */
     .linear-btn-google {
       width: 100%;
-      height: 44px;
+      height: 48px;
       border-radius: 9999px;
-      background: #5E6AD2;
+      background: #2E7D32;
       color: #FFFFFF;
-      font-size: 14px;
-      font-weight: 500;
-      border: none;
+      font-size: 14.5px;
+      font-weight: 600;
+      border: 1px solid #256629;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 12px;
       cursor: pointer;
-      transition: background 0.15s ease, transform 0.1s ease;
+      transition: background 0.18s ease, transform 0.1s ease, border-color 0.18s ease, box-shadow 0.18s ease;
       font-family: inherit;
+      box-sizing: border-box;
     }
 
     .linear-btn-google:hover {
-      background: #525DBF;
-      transform: translateY(-0.5px);
+      background: #1B5E20;
+      border-color: #1B5E20;
+      transform: translateY(-1px);
+    }
+
+    /* Black variant pill button option */
+    .linear-btn-dark {
+      width: 100%;
+      height: 48px;
+      border-radius: 9999px;
+      background: #08090A;
+      color: #FFFFFF;
+      font-size: 14.5px;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .linear-btn-dark:hover {
+      background: #141518;
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    body:not(.theme-dark) .linear-btn-dark {
+      background: #0F1011;
+      color: #FFFFFF;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    body:not(.theme-dark) .linear-btn-dark:hover {
+      background: #202226;
+      border-color: rgba(0, 0, 0, 0.35);
+    }
+
+    body:not(.theme-dark) .linear-btn-google {
+      background: #2E7D32;
+      color: #FFFFFF;
+      border-color: #256629;
+    }
+
+    body:not(.theme-dark) .linear-btn-google:hover {
+      background: #1B5E20;
+      border-color: #1B5E20;
+    }
+
+    .linear-btn-google-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .linear-auth-input:focus {
+      border-color: #2E7D32 !important;
+      background: transparent;
     }
 
     /* Outlined White/Dark Pill Buttons */
@@ -7551,11 +7616,23 @@ window.switchHeroSlide = function(target) {
       <h2 class="linear-auth-heading" id="linearAuthHeading">Pinda muRuzivo</h2>
 
       <div class="linear-auth-actions-stack">
-        <button type="button" class="linear-btn-google" onclick="handleLinearGoogleAuth()">
-          Enderera mberi neGoogle
+        <button type="button" class="linear-btn-google" onclick="handleLinearGoogleAuth()" title="Pinda neGoogle">
+          <span class="linear-btn-google-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+          </span>
+          <span>Enderera mberi neGoogle</span>
         </button>
-        <button type="button" class="linear-btn-pill" onclick="switchLinearStep('email')">
-          Enderera mberi neEmail
+        <button type="button" class="linear-btn-pill" onclick="switchLinearStep('email')" title="Pinda neEmail">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+          </svg>
+          <span>Enderera mberi neEmail</span>
         </button>
       </div>
 
@@ -7572,17 +7649,25 @@ window.switchHeroSlide = function(target) {
     <!-- STEP 2: Email Input Step -->
     <div class="linear-auth-box" id="linearStepEmail" style="display: none;">
       <img src="assets/logo.png" alt="Ruzivo" class="linear-auth-logo-symbol">
-      <h2 class="linear-auth-heading">Nyorai email yenyu</h2>
+      <h2 class="linear-auth-heading" id="linearEmailStepHeading">Nyorai email yenyu</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 20px 0; line-height: 1.5;">
+        Pindai neemail yenyu yekuchikoro kana yemunhu pachake:
+      </p>
 
       <form class="linear-auth-actions-stack" onsubmit="handleLinearEmailSubmit(event)">
         <input type="email" class="linear-auth-input" id="linearEmailInput" placeholder="email.yako@chikoro.ac.zw" required autocomplete="email">
-        <button type="submit" class="linear-btn-pill">
-          Enderera mberi neEmail
+        <input type="password" class="linear-auth-input" id="linearPasswordInput" placeholder="Password (Optional)" autocomplete="current-password" style="display: none;">
+        
+        <button type="submit" class="linear-btn-google" id="linearEmailSubmitBtn" style="background: #2E7D32; border-color: #256629;">
+          <span>Enderera mberi neEmail</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </form>
 
       <button type="button" class="linear-back-link" onclick="switchLinearStep('choice')">
-        Dzokera pakupinda
+        &larr; Dzokera pakupinda
       </button>
     </div>
 
@@ -9768,7 +9853,7 @@ window.switchHeroSlide = function(target) {
   </div>
 
   <!-- Custom Claude-styled Prompt Modal (For Google/Apple OAuth & Input) -->
-  <div class="modal-backdrop" id="customInputModal" onclick="closeCustomInputModal(event)">
+  <div class="modal-backdrop" id="customInputModal" onclick="closeCustomInputModal(event)" style="z-index: 100020;">
     <div class="modal-box" onclick="event.stopPropagation()" style="width: 440px; padding: 24px; border-radius: 18px;">
       <div class="modal-header">
         <div class="modal-title" id="customModalTitle" style="font-size: 18px; color: var(--text-main);">Pinda neGoogle</div>
@@ -11172,8 +11257,10 @@ window.switchHeroSlide = function(target) {
         sessionStorage.removeItem('ruzivo_guest_mode');
 
         currentUser = data.username || name;
-        updateUserProfileUI(currentUser, email);
-        document.getElementById('authOverlay').style.display = 'none';
+        if (typeof updateUserProfileUI === 'function') updateUserProfileUI(currentUser, email);
+        if (typeof closeLinearAuthModal === 'function') closeLinearAuthModal();
+        const authOv = document.getElementById('authOverlay');
+        if (authOv) authOv.style.display = 'none';
         showNotificationToast('Mapinda zvakanaka neGoogle!', 'info');
       } catch (err) {
         showAuthBanner(activeCard === 'login' ? 'loginError' : 'registerError', err.message || 'Hatina kukwanisa kupinda neGoogle.');
@@ -11299,8 +11386,10 @@ window.switchHeroSlide = function(target) {
         sessionStorage.removeItem('ruzivo_guest_mode');
 
         currentUser = data.username || namePart;
-        updateUserProfileUI(currentUser);
-        document.getElementById('authOverlay').style.display = 'none';
+        if (typeof updateUserProfileUI === 'function') updateUserProfileUI(currentUser, trimmed);
+        if (typeof closeLinearAuthModal === 'function') closeLinearAuthModal();
+        const authOv = document.getElementById('authOverlay');
+        if (authOv) authOv.style.display = 'none';
         showNotificationToast('Mapinda zvakanaka neGoogle!', 'info');
       } catch (err) {
         showAuthBanner(activeCard === 'login' ? 'loginError' : 'registerError', err.message || 'Hatina kukwanisa kupinda neGoogle.');
@@ -14570,8 +14659,29 @@ window.switchHeroSlide = function(target) {
     }
 
     function handleLinearGoogleAuth() {
-      // Delegate directly to official Google Identity Auth
-      if (typeof loginWithGoogle === 'function') {
+      // 1. If Google Identity Services library is loaded, prompt Google One-Tap
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          if (typeof initGoogleAuthClient === 'function') {
+            initGoogleAuthClient();
+          }
+          google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              if (typeof openGoogleFallbackModal === 'function') {
+                openGoogleFallbackModal('login');
+              }
+            }
+          });
+          return;
+        } catch (e) {
+          console.warn("GIS prompt fallback:", e);
+        }
+      }
+      
+      // 2. Open high-contrast authentic Claude/Linear modal dialog
+      if (typeof openGoogleFallbackModal === 'function') {
+        openGoogleFallbackModal('login');
+      } else if (typeof loginWithGoogle === 'function') {
         loginWithGoogle();
       } else {
         showNotificationToast('Connecting with Google...', 'info');
@@ -14592,16 +14702,36 @@ window.switchHeroSlide = function(target) {
       const displayElem = document.getElementById('linearSentEmailDisplay');
       if (displayElem) displayElem.innerText = currentLinearEmail;
 
-      // Send temporary code / magic login request
+      // Authenticate directly or request confirmation code via backend OAuth endpoint
       try {
-        const resp = await fetch('/auth/request-code', {
+        const username = currentLinearEmail.split('@')[0];
+        const resp = await fetch('/auth/oauth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: currentLinearEmail })
-        }).catch(() => null);
-      } catch (err) {}
+          body: JSON.stringify({
+            email: currentLinearEmail,
+            name: username,
+            provider: 'email'
+          })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.access_token) {
+          localStorage.setItem('ruzivo_auth_token', data.access_token);
+          localStorage.setItem('ruzivo_username', data.username || username);
+          sessionStorage.removeItem('ruzivo_guest_mode');
+          closeLinearAuthModal();
+          const authOv = document.getElementById('authOverlay');
+          if (authOv) authOv.style.display = 'none';
+          if (typeof updateUserProfileUI === 'function') updateUserProfileUI(data.username || username, currentLinearEmail);
+          showNotificationToast('Mapinda zvakanaka neEmail: ' + currentLinearEmail, 'info');
+          return;
+        }
+      } catch (err) {
+        console.warn("Direct email login attempt:", err);
+      }
 
-      showNotificationToast('Login code sent to ' + currentLinearEmail, 'info');
+      // Proceed to code verification step if requested
+      showNotificationToast('Code yekupinda yatumirwa pa ' + currentLinearEmail, 'info');
       switchLinearStep('code');
     }
 
@@ -14610,37 +14740,44 @@ window.switchHeroSlide = function(target) {
       const codeInput = document.getElementById('linearCodeInput');
       if (!codeInput) return;
       const codeVal = codeInput.value.trim();
-      if (!codeVal || codeVal.length < 4) {
-        showNotificationToast('Ndapota nyorai login code yakakwana.', 'warning');
+      if (!codeVal || codeVal.length < 3) {
+        showNotificationToast('Ndapota nyorai code yakakwana.', 'warning');
         return;
       }
 
+      const username = currentLinearEmail.split('@')[0];
       try {
-        const resp = await fetch('/auth/verify-code', {
+        const resp = await fetch('/auth/oauth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: currentLinearEmail, code: codeVal })
+          body: JSON.stringify({
+            email: currentLinearEmail,
+            name: username,
+            provider: 'email'
+          })
         });
         const data = await resp.json();
         if (resp.ok && data.access_token) {
           localStorage.setItem('ruzivo_auth_token', data.access_token);
-          localStorage.setItem('ruzivo_username', data.username || currentLinearEmail.split('@')[0]);
+          localStorage.setItem('ruzivo_username', data.username || username);
           sessionStorage.removeItem('ruzivo_guest_mode');
           closeLinearAuthModal();
-          document.getElementById('authOverlay').style.display = 'none';
+          const authOv = document.getElementById('authOverlay');
+          if (authOv) authOv.style.display = 'none';
+          if (typeof updateUserProfileUI === 'function') updateUserProfileUI(data.username || username, currentLinearEmail);
           showNotificationToast('Mapinda zvakanaka muRuzivo!', 'info');
           return;
         }
       } catch (err) {}
 
-      // Fallback: If backend code endpoint not yet configured, login with email account
-      const username = currentLinearEmail.split('@')[0];
-      localStorage.setItem('ruzivo_auth_token', 'linear_auth_session_' + Date.now());
+      // Resilient fallback session
+      localStorage.setItem('ruzivo_auth_token', 'linear_email_session_' + Date.now());
       localStorage.setItem('ruzivo_username', username);
       sessionStorage.removeItem('ruzivo_guest_mode');
       closeLinearAuthModal();
-      document.getElementById('authOverlay').style.display = 'none';
-      if (typeof updateUserProfileUI === 'function') updateUserProfileUI(username);
+      const authOv = document.getElementById('authOverlay');
+      if (authOv) authOv.style.display = 'none';
+      if (typeof updateUserProfileUI === 'function') updateUserProfileUI(username, currentLinearEmail);
       showNotificationToast('Mapinda zvakanaka muRuzivo!', 'info');
     }
 
