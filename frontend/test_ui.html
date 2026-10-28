@@ -7759,6 +7759,9 @@ window.switchHeroSlide = function(target) {
             setTimeout(function() {
               var inp = document.getElementById('linearCodeInput');
               if (inp) inp.focus();
+              if (typeof window.renderLinear2faRecaptcha === 'function') {
+                window.renderLinear2faRecaptcha();
+              }
             }, 100);
           }
         }
@@ -9105,6 +9108,13 @@ window.switchHeroSlide = function(target) {
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
               <span>Maitiro eChitarisiko</span>
+            </div>
+
+            <div class="profile-flyout-item" id="flyoutSuperadminItem" onclick="closeUserProfileMenu(); window.location.href='/admin';" style="display: none; color: #DC2626;">
+              <svg class="icon" viewBox="0 0 24 24" style="stroke: #DC2626;">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span style="color: #DC2626; font-weight: 600;">Superadmin Portal</span>
             </div>
 
             <div class="history-menu-divider" style="margin: 4px 6px;"></div>
@@ -11617,6 +11627,9 @@ window.switchHeroSlide = function(target) {
 
     window.onRecaptchaApiLoaded = function() {
       renderRecaptchaWidgets();
+      if (typeof renderLinear2faRecaptcha === 'function') {
+        renderLinear2faRecaptcha();
+      }
     };
 
     function getRecaptchaToken(action = 'LOGIN') {
@@ -14266,10 +14279,17 @@ window.switchHeroSlide = function(target) {
           currentUserRole = data.role || 'student';
           localStorage.setItem('ruzivo_role', currentUserRole);
 
+          const claudeBox = document.getElementById('claudeSuperadminBox');
+          const flyoutAdmin = document.getElementById('flyoutSuperadminItem');
+
           if (currentUserRole === 'superadmin' || currentUserRole === 'admin') {
             if (superadminBox) superadminBox.style.display = 'block';
+            if (claudeBox) claudeBox.style.display = 'block';
+            if (flyoutAdmin) flyoutAdmin.style.display = 'flex';
           } else {
             if (superadminBox) superadminBox.style.display = 'none';
+            if (claudeBox) claudeBox.style.display = 'none';
+            if (flyoutAdmin) flyoutAdmin.style.display = 'none';
           }
         }
       } catch (e) {
@@ -15869,12 +15889,19 @@ window.switchHeroSlide = function(target) {
       // Check reCAPTCHA challenge widget response if rendered
       let recaptchaToken = '';
       const g = (window.grecaptcha && window.grecaptcha.enterprise) ? window.grecaptcha.enterprise : window.grecaptcha;
+      const recaptchaContainer = document.getElementById('linear2faRecaptcha');
+      const isWidgetRendered = recaptchaContainer && recaptchaContainer.children.length > 0;
+
       if (g && linear2faWidgetId !== null && typeof g.getResponse === 'function') {
         recaptchaToken = g.getResponse(linear2faWidgetId);
-        if (!recaptchaToken) {
+        if (!recaptchaToken && isWidgetRendered) {
           if (codeErr) {
             codeErr.innerText = 'Ndapota tenderai / tambai reCAPTCHA challenge musati mapedzisa.';
             codeErr.style.display = 'block';
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Simbisa Kodhi</span>';
           }
           return;
         }
@@ -15907,6 +15934,7 @@ window.switchHeroSlide = function(target) {
           const authOv = document.getElementById('authOverlay');
           if (authOv) authOv.style.display = 'none';
           if (typeof updateUserProfileUI === 'function') updateUserProfileUI(data.username || username, currentLinearEmail);
+          if (typeof fetchAccountDetails === 'function') fetchAccountDetails();
           showNotificationToast('Makorokoto! Mapinda zvakanaka muRuzivo AI.', 'info');
           return;
         } else {
