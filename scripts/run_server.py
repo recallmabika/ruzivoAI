@@ -3863,7 +3863,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
             else:
 
-                username = str(parsed_json.get("username", "")).strip()
+                username = str(parsed_json.get("username", "") or parsed_json.get("email", "")).strip()
 
                 password = str(parsed_json.get("password", "")).strip()
 
