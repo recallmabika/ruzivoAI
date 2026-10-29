@@ -7822,6 +7822,19 @@ window.switchHeroSlide = function(target) {
       };
 
       setTimeout(window.startHeroSlideAutoCycle, 500);
+
+      // Execute dedicated auth route immediately once modal DOM is defined
+      window.handleDedicatedAuthRoute = function() {
+        var path = (window.location.pathname || '').toLowerCase();
+        if (path === '/sign-up' || path === '/register' || path === '/signup') {
+          window.openLinearAuthModal('signup', false);
+        } else if (path === '/sign-in' || path === '/login' || path === '/signin') {
+          window.openLinearAuthModal('login', false);
+        }
+      };
+      try {
+        window.handleDedicatedAuthRoute();
+      } catch(e) {}
     </script>
 
   <!-- Linear Minimalist Authentication Modal Overlay -->
@@ -8026,9 +8039,14 @@ window.switchHeroSlide = function(target) {
         try {
           var t = localStorage.getItem('ruzivo_auth_token');
           var g = sessionStorage.getItem('ruzivo_guest_mode');
+          var p = (window.location.pathname || '').toLowerCase();
+          var isAuthRoute = (p === '/sign-in' || pathIsAuth(p));
+          function pathIsAuth(path) {
+            return path === '/sign-up' || path === '/register' || path === '/signup' || path === '/login' || path === '/signin';
+          }
           var overlay = document.getElementById('authOverlay');
           if (overlay) {
-            if (t || g) {
+            if (t || g || isAuthRoute) {
               overlay.style.display = 'none';
             } else {
               overlay.style.display = 'flex';
@@ -10378,12 +10396,22 @@ window.switchHeroSlide = function(target) {
 
     // Dedicated URL route checker for /sign-in and /sign-up
     function handleDedicatedAuthRoute() {
+      if (typeof window.handleDedicatedAuthRoute === 'function') {
+        window.handleDedicatedAuthRoute();
+        return;
+      }
       const path = (window.location.pathname || '').toLowerCase();
       if (path === '/sign-up' || path === '/register' || path === '/signup') {
         openLinearAuthModal('signup', false);
       } else if (path === '/sign-in' || path === '/login' || path === '/signin') {
         openLinearAuthModal('login', false);
       }
+    }
+    // Also trigger on DOMContentLoaded so there is no waiting for full media window.onload
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', handleDedicatedAuthRoute);
+    } else {
+      handleDedicatedAuthRoute();
     }
 
     window.addEventListener('popstate', function(e) {
@@ -10637,9 +10665,11 @@ window.switchHeroSlide = function(target) {
       const token = localStorage.getItem('ruzivo_auth_token');
       const savedUser = localStorage.getItem('ruzivo_username');
       const overlay = document.getElementById('authOverlay');
+      const p = (window.location.pathname || '').toLowerCase();
+      const isAuthRoute = (p === '/sign-in' || p === '/sign-up' || p === '/register' || p === '/signup' || p === '/login' || p === '/signin');
 
       if (!token && !sessionStorage.getItem('ruzivo_guest_mode')) {
-        if (overlay) overlay.style.display = 'flex';
+        if (overlay && !isAuthRoute) overlay.style.display = 'flex';
       } else {
         overlay.style.display = 'none';
         currentUser = savedUser || (sessionStorage.getItem('ruzivo_guest_mode') ? 'Muenzi' : 'Mudzidzi');
