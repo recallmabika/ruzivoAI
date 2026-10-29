@@ -2678,7 +2678,7 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
             "default-src 'self' https: data: blob:; "
 
-            "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://appleid.cdn-apple.com; "
+            "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://appleid.cdn-apple.com https://unpkg.com; "
 
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; "
 

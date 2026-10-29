@@ -12,7 +12,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
       --bg-cream: #FFFFFF;
@@ -10479,10 +10478,6 @@ window.switchHeroSlide = function(target) {
 
     // Dedicated URL route checker for /sign-in and /sign-up
     function handleDedicatedAuthRoute() {
-      if (typeof window.handleDedicatedAuthRoute === 'function') {
-        window.handleDedicatedAuthRoute();
-        return;
-      }
       const path = (window.location.pathname || '').toLowerCase();
       if (path === '/sign-up' || path === '/register' || path === '/signup') {
         openLinearAuthModal('signup', false);
