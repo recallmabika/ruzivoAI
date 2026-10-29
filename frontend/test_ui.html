@@ -7663,8 +7663,10 @@
       .landing-marquee-section {
         clear: both !important;
         position: relative !important;
-        margin: 36px 0 16px !important;
+        margin: 36px 0 24px !important;
+        padding: 20px 0 28px !important;
         width: 100% !important;
+        overflow-y: visible !important;
       }
       .landing-content-section {
         clear: both !important;
@@ -7790,11 +7792,13 @@
 
     @media (max-width: 768px) {
       .landing-marquee-section {
-        margin: 28px 0 12px;
-        padding: 12px 0;
+        margin: 28px 0 20px;
+        padding: 18px 0 26px !important;
+        overflow-y: visible !important;
       }
       .marquee-track {
         gap: 36px;
+        padding: 8px 0 !important;
         animation-duration: 26s;
       }
       .linear-marquee-item {
@@ -8222,7 +8226,7 @@ window.switchHeroSlide = function(target) {
     <!-- Top Landing Navbar -->
     <header class="landing-navbar">
       <div class="landing-navbar-inner">
-        <div class="landing-nav-brand" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="landing-nav-brand" onclick="ruzivoScrollToTop()">
           <img src="assets/logo.png" alt="Ruzivo Logo" style="width: 34px; height: 34px; object-fit: contain;">
           <span class="landing-nav-brand-text">Ruzivo</span>
         </div>
@@ -9079,7 +9083,7 @@ window.switchHeroSlide = function(target) {
 
           <!-- Middle Monumental Section: RUZIV<O> + Authentic Subtitle -->
           <div class="zitrac-monumental-section">
-            <h2 class="zitrac-monumental-title" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'})" title="Dzokera Pamusoro">
+            <h2 class="zitrac-monumental-title" onclick="ruzivoScrollToTop()" title="Dzokera Pamusoro">
               <span>RUZIV</span><img src="/assets/logo.png" alt="O" class="zitrac-monumental-logo">
             </h2>
             <div class="zitrac-monumental-sub">
@@ -9161,7 +9165,7 @@ window.switchHeroSlide = function(target) {
       </footer>
 
       <!-- Floating Scroll to Top Button -->
-      <button type="button" class="ruzivo-float-scroll-top" onclick="document.getElementById('authOverlay').scrollTo({top: 0, behavior: 'smooth'}); window.scrollTo({top: 0, behavior: 'smooth'});" title="Dzokera Pamusoro" aria-label="Dzokera Pamusoro">
+      <button type="button" class="ruzivo-float-scroll-top" onclick="ruzivoScrollToTop();" title="Dzokera Pamusoro" aria-label="Dzokera Pamusoro">
         <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -16390,7 +16394,32 @@ window.switchHeroSlide = function(target) {
       checkAndHideAppBtnOnMobile();
     }
     window.addEventListener('resize', checkAndHideAppBtnOnMobile);
-  </script>
+  
+    function ruzivoScrollToTop() {
+      try {
+        const overlay = document.getElementById('authOverlay');
+        if (overlay) {
+          overlay.scrollTo({ top: 0, behavior: 'smooth' });
+          overlay.scrollTop = 0;
+        }
+      } catch (e) {}
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {}
+      try {
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } catch (e) {}
+      try {
+        const msgScroll = document.getElementById('messagesScroll');
+        if (msgScroll && getComputedStyle(msgScroll).display !== 'none') {
+          msgScroll.scrollTo({ top: 0, behavior: 'smooth' });
+          msgScroll.scrollTop = 0;
+        }
+      } catch (e) {}
+    }
+    window.ruzivoScrollToTop = ruzivoScrollToTop;
+</script>
 
 </body>
 </html>
