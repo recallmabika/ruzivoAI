@@ -2947,6 +2947,28 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
 
+        if self.path == "/robots.txt":
+            robots_file = PROJECT_ROOT / "frontend" / "robots.txt"
+            if robots_file.exists():
+                self.send_response(200)
+                self.send_security_headers()
+                self.send_header("Content-type", "text/plain; charset=utf-8")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                self.wfile.write(robots_file.read_bytes())
+                return
+
+        if self.path == "/sitemap.xml":
+            sitemap_file = PROJECT_ROOT / "frontend" / "sitemap.xml"
+            if sitemap_file.exists():
+                self.send_response(200)
+                self.send_security_headers()
+                self.send_header("Content-type", "application/xml; charset=utf-8")
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                self.wfile.write(sitemap_file.read_bytes())
+                return
+
         if self.path in ("/favicon.ico", "/favicon.png"):
 
             fname = "favicon.ico" if self.path == "/favicon.ico" else "favicon.png"

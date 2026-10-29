@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage / Core Landing -->
+  <url>
+    <loc>https://ruzivo-ai.tech/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="sn" href="https://ruzivo-ai.tech/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ruzivo-ai.tech/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ruzivo-ai.tech/" />
+    <image:image>
+      <image:loc>https://ruzivo-ai.tech/assets/logo.png</image:loc>
+      <image:title>Ruzivo AI - Chitubu cheRuzivo rweChiShona neAI</image:title>
+      <image:caption>ChiShona Large Language Model &amp; Cultural Knowledge Assistant for Zimbabwean Education</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Sign In Route -->
+  <url>
+    <loc>https://ruzivo-ai.tech/sign-in</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Sign Up Route -->
+  <url>
+    <loc>https://ruzivo-ai.tech/sign-up</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>

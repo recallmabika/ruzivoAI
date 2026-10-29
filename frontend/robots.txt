@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /sign-in
+Allow: /sign-up
+
+# Disallow authenticated application state & administrative interfaces from being crawled
+Disallow: /api/
+Disallow: /admin
+Disallow: /superadmin
+Disallow: /chat
+Disallow: /settings
+
+# Sitemap definition
+Sitemap: https://ruzivo-ai.tech/sitemap.xml
