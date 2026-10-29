@@ -8952,12 +8952,13 @@ window.switchHeroSlide = function(target) {
                 Nyorera matsamba nezveDzidzo yeChiShona
               </div>
 
-              <form class="zitrac-subscribe-form" onsubmit="event.preventDefault(); alert('Maita basa nekutumira! Tichakubatai munguva pfupi.'); this.reset();">
+              <form class="zitrac-subscribe-form" onsubmit="handleNewsletterSubscribe(event, this);">
                 <div class="zitrac-input-wrapper">
-                  <input type="email" class="zitrac-sub-input" placeholder="email@chikoro.ac.zw" required autocomplete="email" aria-label="Email address">
+                  <input type="email" id="zitracSubEmail" class="zitrac-sub-input" placeholder="email@chikoro.ac.zw" required autocomplete="email" aria-label="Email address">
                 </div>
-                <button type="submit" class="zitrac-sub-btn">TUMIRA</button>
+                <button type="submit" id="zitracSubBtn" class="zitrac-sub-btn">TUMIRA</button>
               </form>
+              <div id="zitracSubFeedback" style="display:none; font-size:12.5px; margin-top:8px; line-height:1.4;"></div>
 
               <div class="zitrac-disclaimer">
                 Dzidzo yeChiShona, tsumo dzemazuva ose, pamwe nezvishandiso zvevadzidzisi &bull; Hapana spam.

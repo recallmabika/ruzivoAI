@@ -421,6 +421,15 @@ def init_auth_db():
                 """)
 
                 cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+                        id SERIAL PRIMARY KEY,
+                        email VARCHAR(255) UNIQUE NOT NULL,
+                        source VARCHAR(100) DEFAULT 'landing_footer',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+
+                cursor.execute("""
 
                     CREATE TABLE IF NOT EXISTS feedback (
 
@@ -4341,6 +4350,41 @@ class RuzivoServerHandler(http.server.SimpleHTTPRequestHandler):
             return
 
 
+
+        # 3c. Newsletter / Updates Subscription Endpoint
+        if self.path in ('/api/subscribe', '/api/subscribe/'):
+            allowed, retry_sec = check_rate_limit(client_ip, 'subscribe', max_requests=5, window_seconds=60)
+            if not allowed:
+                self.send_json_response(429, {'detail': f'Muchiri kuedza kakawandisa. Imbomirai kwemasekondi {retry_sec}.'}, extra_headers={'Retry-After': retry_sec})
+                return
+
+            email = str(parsed_json.get('email', '')).strip().lower()
+            if not email or '@' not in email or '.' not in email.split('@')[-1]:
+                self.send_json_response(400, {'detail': 'Ndapota isa email inoshanda zvakanaka.'})
+                return
+
+            try:
+                conn = get_pg_connection()
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute("""
+                            INSERT INTO newsletter_subscribers (email, source)
+                            VALUES (%s, 'landing_footer')
+                            ON CONFLICT (email) DO NOTHING
+                        """, (email,))
+                    conn.commit()
+                finally:
+                    conn.close()
+
+                welcome_subject = 'Wagamuchirwa kuRuzivo AI Newsletter'
+                welcome_body = 'Mhoro,\n\nMaita basa nekunyoresa matsamba nezveDzidzo yeChiShona, tsumo dzemazuva ose nezvishandiso kubva kuRuzivo AI.\n\nChikwata cheRuzivo AI'
+                send_ruzivo_email(email, welcome_subject, welcome_body)
+
+                self.send_json_response(200, {'ok': True, 'message': 'Maita basa nekunyoresa! Tsamba yekutanga ichatumirwa ku email yako.'})
+            except Exception as e:
+                print(f'[NEWSLETTER ERROR] {e}')
+                self.send_json_response(500, {'detail': 'Kwaita dambudziko rekuchengetedza email. Edza zvakare mberi.'})
+            return
 
         # 3b. Feedback / Rating Endpoint (Good/Bad rating for continuous learning)
 
