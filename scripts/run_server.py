@@ -553,25 +553,15 @@ def init_auth_db():
 
 
 
-                # Create default superadmin if not exists
-
-                cursor.execute("SELECT id FROM users WHERE LOWER(username) = 'admin' OR LOWER(email) = 'admin@ruzivo.org'")
-
+                # Configure authorized superadmins: recallmabika@gmail.com and admin@ruzivo-ai.tech
+                cursor.execute("UPDATE users SET role = 'superadmin' WHERE LOWER(email) IN ('recallmabika@gmail.com', 'admin@ruzivo-ai.tech')")
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'admin@ruzivo-ai.tech'")
                 if not cursor.fetchone():
-
-                    admin_pw_h = hashlib.sha256("Admin@Ruzivo2026".encode("utf-8")).hexdigest()
-
+                    admin_pw_h = hashlib.sha256("Admin@Ruzivo2026!".encode("utf-8")).hexdigest()
                     cursor.execute("""
-
                         INSERT INTO users (username, email, password_hash, role)
-
-                        VALUES ('admin', 'admin@ruzivo.org', %s, 'superadmin')
-
+                        VALUES ('Admin', 'admin@ruzivo-ai.tech', %s, 'superadmin')
                     """, (admin_pw_h,))
-
-                else:
-
-                    cursor.execute("UPDATE users SET role = 'superadmin' WHERE LOWER(username) = 'admin' OR LOWER(email) = 'admin@ruzivo.org'")
 
         print("Connected to PostgreSQL (ruzivo_db on port 5432) successfully!")
 
