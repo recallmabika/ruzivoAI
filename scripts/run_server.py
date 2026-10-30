@@ -620,11 +620,11 @@ def init_auth_db():
                 row_recall = cursor.fetchone()
                 if not row_recall:
                     cursor.execute("""
-                        INSERT INTO users (username, email, password_hash, role)
-                        VALUES ('Recall_Mabika', 'recallmabika@gmail.com', %s, 'superadmin')
+                        INSERT INTO users (username, email, password_hash, role, phone)
+                        VALUES ('Recall_Mabika', 'recallmabika@gmail.com', %s, 'superadmin', '+263779466786')
                     """, (admin_pw_h,))
                 else:
-                    cursor.execute("UPDATE users SET role = 'superadmin', password_hash = %s WHERE id = %s", (admin_pw_h, row_recall[0]))
+                    cursor.execute("UPDATE users SET role = 'superadmin', password_hash = %s, phone = '+263779466786' WHERE id = %s", (admin_pw_h, row_recall[0]))
 
                 # 2. admin@ruzivo-ai.tech
                 cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'admin@ruzivo-ai.tech'")
@@ -1191,15 +1191,15 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
 
 SMTP_USER = os.environ.get("SMTP_USER", "support@ruzivo-ai.tech")
 
-SMTP_PASS = os.environ.get("SMTP_PASS", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "DeBigCyber@2029")
 
 
 
 # Africa's Talking SMS Credentials
 
-AT_USERNAME = os.environ.get("AT_USERNAME", "sandbox")
+AT_USERNAME = os.environ.get("AT_USERNAME", "zitrac")
 
-AT_API_KEY = os.environ.get("AT_API_KEY", "")
+AT_API_KEY = os.environ.get("AT_API_KEY", "atsk_e438fb15ba8dc8d41c8f9e3f1306ebf43fe1d4e60317b4836bdf66b9bbe56d4b3c023361")
 
 AT_SENDER_ID = os.environ.get("AT_SENDER_ID", "")
 

@@ -15454,7 +15454,7 @@ window.switchHeroSlide = function(target) {
     window.handleLinearPasswordRealtimeValidate = handleLinearPasswordRealtimeValidate;
 
     // Track active 2FA channel during code confirmation (defaults to sms)
-    let currentLinear2faChannel = 'sms';
+    let currentLinear2faChannel = 'email';
 
     // Step 1: User submits Email + Password
     async function handleLinearEmailSubmit(e) {
@@ -15509,7 +15509,7 @@ window.switchHeroSlide = function(target) {
       if (hasError) return;
 
       currentLinearEmail = emailVal;
-      currentLinear2faChannel = 'sms'; // Default to SMS code
+      currentLinear2faChannel = 'email'; // Default to email unless user specifies or has phone
 
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -15544,8 +15544,9 @@ window.switchHeroSlide = function(target) {
           if (promptText) {
             promptText.innerHTML = `Takutumira kodhi ye 6-digits pa <span id="linearSentDestinationDisplay" style="color: inherit; font-weight: 600;">${data.phone || data.email || 'foni yenyu'}</span>.`;
           }
-          update2faChannelButtonStyles('sms');
-          showNotificationToast(data.message || 'Kodhi ye 6-digits yatumirwa pa ' + (data.phone || 'foni yenyu'), 'info');
+          currentLinear2faChannel = data.channel || 'email';
+          update2faChannelButtonStyles(currentLinear2faChannel);
+          showNotificationToast(data.message || ('Kodhi ye 6-digits yatumirwa pa ' + (data.phone || data.email || currentLinearEmail)), 'info');
           // Clear password input immediately for security
           passInput.value = '';
           switchLinearStep('code');
