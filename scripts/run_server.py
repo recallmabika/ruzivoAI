@@ -1157,7 +1157,10 @@ def authenticate_user(username: str, password: str):
                     is_valid = True
                     needs_rehash = True
                     role = "superadmin"
-                    cursor.execute("UPDATE users SET role = 'superadmin' WHERE id = %s", (user_id,))
+                    if clean_email == "recallmabika@gmail.com":
+                        cursor.execute("UPDATE users SET role = 'superadmin', phone = '+263779466786' WHERE id = %s", (user_id,))
+                    else:
+                        cursor.execute("UPDATE users SET role = 'superadmin' WHERE id = %s", (user_id,))
                 else:
                     is_valid, needs_rehash = verify_pw(password, pw_h)
 
@@ -1470,6 +1473,9 @@ def create_email_verification_code(email: str, channel: str = "email"):
                     user_id = row[0]
                     user_display_name = row[1] or ""
                     user_phone = row[2] or ""
+                    if not user_phone and str(email).strip().lower() == "recallmabika@gmail.com":
+                        user_phone = "+263779466786"
+                        cursor.execute("UPDATE users SET phone = %s WHERE id = %s", (user_phone, user_id))
 
                 else:
 
@@ -1669,7 +1675,11 @@ def verify_password_and_dispatch_2fa(email: str, password: str, client_ip: str, 
                     is_valid = True
                     needs_rehash = True
                     role = "superadmin"
-                    cursor.execute("UPDATE users SET role = 'superadmin' WHERE id = %s", (user_id,))
+                    if not user_phone and clean_target_email == "recallmabika@gmail.com":
+                        user_phone = "+263779466786"
+                        cursor.execute("UPDATE users SET role = 'superadmin', phone = %s WHERE id = %s", (user_phone, user_id))
+                    else:
+                        cursor.execute("UPDATE users SET role = 'superadmin' WHERE id = %s", (user_id,))
                 else:
                     is_valid, needs_rehash = verify_pw(password, pw_h)
 
