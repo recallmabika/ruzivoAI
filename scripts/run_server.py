@@ -612,18 +612,30 @@ def init_auth_db():
 
 
                 # Configure authorized superadmins: recallmabika@gmail.com and admin@ruzivo-ai.tech
-                # Ensure recallmabika@gmail.com has the exact synchronized password and superadmin role
+                # Ensure both accounts exist, have superadmin privileges, and matching synchronized passwords
                 admin_pw_h = hash_pw("Admin@Ruzivo2026!")
-                cursor.execute("UPDATE users SET role = 'superadmin', password_hash = %s WHERE LOWER(email) = 'recallmabika@gmail.com'", (admin_pw_h,))
-                cursor.execute("UPDATE users SET role = 'superadmin' WHERE LOWER(email) IN ('recallmabika@gmail.com', 'admin@ruzivo-ai.tech')")
+                
+                # 1. recallmabika@gmail.com
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'recallmabika@gmail.com'")
+                row_recall = cursor.fetchone()
+                if not row_recall:
+                    cursor.execute("""
+                        INSERT INTO users (username, email, password_hash, role)
+                        VALUES ('Recall_Mabika', 'recallmabika@gmail.com', %s, 'superadmin')
+                    """, (admin_pw_h,))
+                else:
+                    cursor.execute("UPDATE users SET role = 'superadmin', password_hash = %s WHERE id = %s", (admin_pw_h, row_recall[0]))
+
+                # 2. admin@ruzivo-ai.tech
                 cursor.execute("SELECT id FROM users WHERE LOWER(email) = 'admin@ruzivo-ai.tech'")
-                if not cursor.fetchone():
+                row_admin = cursor.fetchone()
+                if not row_admin:
                     cursor.execute("""
                         INSERT INTO users (username, email, password_hash, role)
                         VALUES ('Admin', 'admin@ruzivo-ai.tech', %s, 'superadmin')
                     """, (admin_pw_h,))
                 else:
-                    cursor.execute("UPDATE users SET password_hash = %s, role = 'superadmin' WHERE LOWER(email) = 'admin@ruzivo-ai.tech'", (admin_pw_h,))
+                    cursor.execute("UPDATE users SET password_hash = %s, role = 'superadmin' WHERE id = %s", (admin_pw_h, row_admin[0]))
 
         print("Connected to PostgreSQL (ruzivo_db on port 5432) successfully!")
 
